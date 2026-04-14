@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TruongShop{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .header-icon {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .header-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .icon {
+            font-size: 24px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Cart Dropdown */
+        .cart-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+            color: #333;
+            /* Remove gap so mouse doesn't leave the area */
+            border-top: 15px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .header-icon:hover .cart-dropdown {
+            display: block;
+        }
+
+        .cart-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+
+        .cart-dropdown-header {
+            font-weight: bold;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-small {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .cart-item-img-small {
+            width: 50px;
+            height: 50px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .cart-item-info-small {
+            flex: 1;
+        }
+
+        .cart-item-title-small {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .cart-item-price-small {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .cart-empty-msg {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+        }
+
+        .cart-dropdown-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-qty {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .btn-qty:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-remove-small {
+            color: #ff4757;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .cart-items-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .cart-items-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .cart-items-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 10px;
+            display: none;
+            z-index: 1000;
+            color: #333;
+        }
+
+        .header-icon:hover .user-dropdown {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f0f0f0;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #f1f2f6;
+            color: #2f3542;
+            border: 1px solid #ced4da;
+        }
+
+        .btn-secondary:hover {
+            background: #dfe4ea;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        .btn-dark {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+        }
+
+        .btn-dark:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 40px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab:hover {
+            background: #f0f0f0;
+        }
+
+        .tab.active {
+            color: #667eea;
+            background: #f0f0ff;
+        }
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo" onclick="window.location.href='/'">
+                🛍️ TruongShop
+            </div>
+            <div class="header-right">
+                <div class="header-icon" id="cartIcon" onclick="window.location.href='/cart/'">
+                    <span class="icon">🛒</span>
+                    <span class="cart-badge" id="cartBadge">0</span>
+                    <!-- Cart Dropdown -->
+                    <div class="cart-dropdown" id="cartDropdown">
+                        <div class="cart-dropdown-header">Your Cart</div>
+                        <div id="cartDropdownItems" class="cart-items-list">
+                            <div class="cart-empty-msg">No items in cart</div>
+                        </div>
+                        <div class="cart-dropdown-footer">
+                            <a href="/cart/" class="btn btn-primary" style="width: 100%; text-align: center;">View All</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-menu" id="userMenu">
+                    <a href="/login/" class="btn btn-secondary">Login</a>
+                    <a href="/register/" class="btn btn-primary">Register</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="alertContainer"></div>
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2024 TruongShop. All rights reserved. | Ecommerce Microservices Architecture</p>
+    </div>
+
+    <script>
+        // Global utilities
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.textContent = message;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
+
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function setToken(token) {
+            localStorage.setItem('access_token', token);
+        }
+
+        function clearToken() {
+            localStorage.removeItem('access_token');
+        }
+
+        function isLoggedIn() {
+            return !!getToken();
+        }
+
+        function logout() {
+            clearToken();
+            localStorage.removeItem('user_role'); // Clear role on logout
+            window.location.href = '/login/';
+        }
+
+        // Update user menu based on login status
+        function updateUserMenu() {
+            const userMenu = document.getElementById('userMenu');
+            const cartIcon = document.getElementById('cartIcon');
+            const isStaff = localStorage.getItem('user_role') === 'staff';
+            const isCustomer = localStorage.getItem('user_role') === 'customer';
+
+            if (isLoggedIn()) {
+                if (isStaff) {
+                    // Staff Header: Simplified
+                    if (cartIcon) cartIcon.style.display = 'none';
+                    userMenu.innerHTML = `
+                        <div class="header-icon" id="userIcon">
+                            <span class="icon">👤</span>
+                            <div class="user-dropdown" id="userDropdown">
+                                 <div class="user-dropdown-item" style="font-weight: 800; color: #667eea; border-bottom: 1px solid #eee; margin-bottom: 5px; cursor: default;">STAFF MODE</div>
+                                 <a href="/staff/dashboard/" class="user-dropdown-item">📊 Dashboard</a>
+                                 <a href="/staff/orders/" class="user-dropdown-item">📦 Manage Orders</a>
+                                 <a href="/staff/products/" class="user-dropdown-item">🛍️ Manage Products</a>
+                                 <a href="/staff/suppliers/" class="user-dropdown-item">🏭 Manage Suppliers</a>
+                                 <hr style="margin: 5px 0; border: none; border-top: 1px solid #eee;">
+                                 <a href="#" onclick="logout(); return false;" class="user-dropdown-item" style="color: #ff4757;">🚪 Logout</a>
+                            </div>
+                        </div>
+                    `;
+                    checkPageAccess('staff');
+                } else if (isCustomer) {
+                    // Customer Header
+                    if (cartIcon) cartIcon.style.display = 'block';
+                    userMenu.innerHTML = `
+                        <div class="header-icon" id="userIcon">
+                            <span class="icon">👤</span>
+                            <div class="user-dropdown" id="userDropdown">
+                                 <a href="/profile/" class="user-dropdown-item">👤 My Profile</a>
+                                 <a href="/cart/" class="user-dropdown-item">🛒 My Cart</a>
+                                 <a href="/orders/" class="user-dropdown-item">📦 My Orders</a>
+                                 <hr style="margin: 5px 0; border: none; border-top: 1px solid #eee;">
+                                 <a href="#" onclick="logout(); return false;" class="user-dropdown-item" style="color: #ff4757;">🚪 Logout</a>
+                            </div>
+                        </div>
+                    `;
+                    checkPageAccess('customer');
+                } else {
+                    // Role is missing, but token exists - Force logout for safety
+                    logout();
+                }
+            } else {
+                if (cartIcon) cartIcon.style.display = 'block'; // Show for guests
+                userMenu.innerHTML = `
+                    <div class="header-icon" id="userIcon">
+                        <span class="icon">👤</span>
+                        <div class="user-dropdown" id="userDropdown">
+                             <a href="/login/" class="user-dropdown-item">🔐 Login</a>
+                             <a href="/register/" class="user-dropdown-item">📝 Register</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Prevent cross-access to pages
+        function checkPageAccess(role) {
+            const path = window.location.pathname;
+            if (role === 'staff') {
+                const customerPaths = ['/cart/', '/profile/', '/orders/', '/checkout/'];
+                // Staff should only see staff pages. If they go to home or customer pages, redirect to dashboard.
+                if (customerPaths.some(p => path.startsWith(p)) || path === '/' || path === '') {
+                    window.location.href = '/staff/dashboard/';
+                }
+            } else if (role === 'customer') {
+                if (path.startsWith('/staff/')) {
+                    window.location.href = '/';
+                }
+            }
+        }
+
+        // Update cart badge
+        async function updateCartBadge() {
+            if (!isLoggedIn()) return;
+            
+            try {
+                const response = await fetch('/api/cart/', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const res = await response.json();
+                    if (res.success) {
+                        const items = res.data.items;
+                        document.getElementById('cartBadge').textContent = items.length;
+                        
+                        const itemsContainer = document.getElementById('cartDropdownItems');
+                        if (items.length === 0) {
+                            itemsContainer.innerHTML = '<div class="cart-empty-msg">No items in cart</div>';
+                        } else {
+                            itemsContainer.innerHTML = items.map(item => `
+                                <div class="cart-item-small" onclick="event.stopPropagation()">
+                                    <div class="cart-item-img-small">${item.product_type === 'book' ? '📚' : '👕'}</div>
+                                    <div class="cart-item-info-small">
+                                        <div class="cart-item-title-small">${item.product_type === 'book' ? 'Book' : 'Clothes'} #${item.product_id}</div>
+                                        <div class="cart-item-price-small">$${item.price}</div>
+                                        <div class="cart-item-actions">
+                                            <button class="btn-qty" onclick="changeQty('${item.product_type}', ${item.product_id}, ${item.quantity - 1})">-</button>
+                                            <span style="font-size: 13px;">${item.quantity}</span>
+                                            <button class="btn-qty" onclick="changeQty('${item.product_type}', ${item.product_id}, ${item.quantity + 1})">+</button>
+                                            <span class="btn-remove-small" onclick="removeFromCartSmall('${item.product_type}', ${item.product_id})">🗑️</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating cart badge:', error);
+            }
+        }
+
+        async function changeQty(type, id, newQty) {
+            if (newQty < 1) {
+                removeFromCartSmall(type, id);
+                return;
+            }
+            try {
+                const response = await fetch('/api/cart/update/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({
+                        product_type: type,
+                        product_id: id,
+                        quantity: newQty
+                    })
+                });
+                if (response.ok) {
+                    updateCartBadge();
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+            }
+        }
+
+        async function removeFromCartSmall(type, id) {
+            try {
+                const response = await fetch(`/api/cart/remove/${type}/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                if (response.ok) {
+                    updateCartBadge();
+                    showAlert('Item removed from cart');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserMenu();
+            updateCartBadge();
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

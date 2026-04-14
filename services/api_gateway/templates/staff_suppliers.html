@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Suppliers - TruongShop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .supplier-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .supplier-table th, .supplier-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    .supplier-table th {
+        color: #666;
+        font-weight: 600;
+    }
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-active { background: #d4edda; color: #155724; }
+    .status-inactive { background: #f8d7da; color: #721c24; }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+    <div class="page-header">
+        <h1>🏭 Manage Suppliers</h1>
+        <button class="btn btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+    </div>
+
+    <table class="supplier-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Supplier Name</th>
+                <th>Contact</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="supplierList">
+            <!-- Suppliers will be loaded here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="supplierModal" class="modal">
+    <div class="modal-content" style="position: relative;">
+        <button type="button" onclick="closeSupplierModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+        <h2 id="modalTitle">Add New Supplier</h2>
+        <form id="supplierForm" onsubmit="saveSupplier(event)">
+            <input type="hidden" id="supplierId">
+            <div class="form-group">
+                <label>Supplier Name</label>
+                <input type="text" id="supName" required>
+            </div>
+            <div class="form-group">
+                <label>Contact Person</label>
+                <input type="text" id="supContact">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="supEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" id="supPhone" required>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="supAddress" rows="3" required></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Save Supplier</button>
+                <button type="button" class="btn btn-secondary" onclick="closeSupplierModal()" style="flex: 1;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadSuppliers() {
+        try {
+            const resp = await fetch('/api/suppliers/', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (res.success) {
+                const container = document.getElementById('supplierList');
+                container.innerHTML = res.data.map(sup => `
+                    <tr>
+                        <td>#${sup.id}</td>
+                        <td style="font-weight: 600;">${sup.name}</td>
+                        <td>${sup.contact_name || 'N/A'}</td>
+                        <td>${sup.phone}</td>
+                        <td>
+                            <span class="status-badge ${sup.is_active ? 'status-active' : 'status-inactive'}">
+                                ${sup.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm" onclick="openSupplierModal(${JSON.stringify(sup).replace(/"/g, '&quot;')})">✏️</button>
+                            <button class="btn btn-sm" style="color: #ff4757;" onclick="deleteSupplier(${sup.id})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('Failed to load suppliers', 'error');
+        }
+    }
+
+    function openSupplierModal(sup = null) {
+        const modal = document.getElementById('supplierModal');
+        const form = document.getElementById('supplierForm');
+        const title = document.getElementById('modalTitle');
+        
+        form.reset();
+        if (sup) {
+            title.innerText = 'Edit Supplier';
+            document.getElementById('supplierId').value = sup.id;
+            document.getElementById('supName').value = sup.name;
+            document.getElementById('supContact').value = sup.contact_name;
+            document.getElementById('supEmail').value = sup.email;
+            document.getElementById('supPhone').value = sup.phone;
+            document.getElementById('supAddress').value = sup.address;
+        } else {
+            title.innerText = 'Add New Supplier';
+            document.getElementById('supplierId').value = '';
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeSupplierModal() {
+        document.getElementById('supplierModal').style.display = 'none';
+    }
+
+    async function saveSupplier(e) {
+        e.preventDefault();
+        const id = document.getElementById('supplierId').value;
+        const data = {
+            name: document.getElementById('supName').value,
+            contact_name: document.getElementById('supContact').value,
+            email: document.getElementById('supEmail').value,
+            phone: document.getElementById('supPhone').value,
+            address: document.getElementById('supAddress').value
+        };
+
+        const url = id ? `/api/suppliers/update/${id}/` : '/api/suppliers/create/';
+        const method = id ? 'PUT' : 'POST';
+
+        try {
+            const resp = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify(data)
+            });
+            const res = await resp.json();
+            if (res.success) {
+                showAlert(id ? 'Supplier updated' : 'Supplier created');
+                closeSupplierModal();
+                loadSuppliers();
+            } else {
+                showAlert(res.error || 'Operation failed', 'error');
+            }
+        } catch (e) {
+            showAlert('Communication error', 'error');
+        }
+    }
+
+    async function deleteSupplier(id) {
+        if (!confirm('Are you sure you want to deactivate this supplier?')) return;
+        try {
+            const resp = await fetch(`/api/suppliers/delete/${id}/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (res.success) {
+                showAlert('Supplier deactivated');
+                loadSuppliers();
+            }
+        } catch (e) {
+            showAlert('Error deleting supplier', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSuppliers);
+</script>
+{% endblock %}

@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Products - TruongShop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-card {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .product-filters {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .filter-group select {
+        padding: 8px 15px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .product-table th, .product-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .product-table th {
+        background: #f8f9fa;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #666;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 40px;
+        border-radius: 25px;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+    .modal-close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 20px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #444;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+        border-color: #667eea;
+        outline: none;
+    }
+    
+    .variant-row {
+        background: #f8faff;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 10px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+        gap: 10px;
+        align-items: center;
+    }
+    .attribute-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr 40px;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+    <div class="page-header">
+        <h1>📦 Inventory Management</h1>
+        <button class="btn btn-dark" onclick="openModal()">+ Create New Product</button>
+    </div>
+
+    <div class="product-filters">
+        <div class="filter-group">
+            <label>Type:</label>
+            <select id="filterType" onchange="loadProducts()">
+                <option value="">All Types</option>
+                <option value="book">Books</option>
+                <option value="clothes">Clothes</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Category:</label>
+            <select id="filterCategory" onchange="loadProducts()">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="filter-group" style="margin-left: auto;">
+            <input type="text" id="productSearch" placeholder="Search product name..." style="padding: 10px; border-radius: 10px; border: 1px solid #ddd;" onkeyup="searchProducts()">
+        </div>
+    </div>
+
+    <div class="product-list-container">
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Product Details</th>
+                    <th>Category</th>
+                    <th>Base Price</th>
+                    <th>Options</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="productsList">
+                <!-- Data loaded via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Add New Product</h2>
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="pid">
+            
+            <div class="section-title">Common Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Product Type</label>
+                    <select id="ptype" required onchange="adjustUIByType()">
+                        <option value="book">Book</option>
+                        <option value="clothes">Clothes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="pcategory" required></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Product Name</label>
+                    <input type="text" id="pname" required placeholder="Full name of product">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Description</label>
+                    <textarea id="pdesc" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Base Price ($)</label>
+                    <input type="number" step="0.01" id="pprice" required>
+                </div>
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <select id="psupplier" required></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Image URL</label>
+                    <input type="text" id="pimage">
+                </div>
+            </div>
+
+            <div class="section-title">
+                Dynamic Attributes
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addAttributeRow()">+ Add Field</button>
+            </div>
+            <div id="attributesContainer">
+                <!-- Attribute rows -->
+            </div>
+
+            <div class="section-title">
+                Product Variations (Combos/Options)
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addVariantRow()">+ Add Manual Variant</button>
+                    <button type="button" class="btn btn-sm btn-info" onclick="toggleGenerator()" style="background: #e1f5fe; color: #01579b;">⚙️ Variant Generator</button>
+                </div>
+            </div>
+
+            <!-- Variant Generator UI -->
+            <div id="variantGenerator" style="display: none; background: #f9f9f9; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed #ccc;">
+                <h4 style="margin-top: 0; font-size: 14px; color: #555;">Option Generator</h4>
+                <p style="font-size: 11px; color: #888; margin-bottom: 10px;">Enter types (e.g. Color) and values separated by commas (e.g. Red, Blue).</p>
+                <div id="optionTypesContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Option types here -->
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-sm" onclick="addOptionTypeRow()" style="font-size: 11px;">+ Add Option Type</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="generateVariantsFromOptions()" style="font-size: 11px; background: #667eea;">Generate Combinations</button>
+                </div>
+            </div>
+
+            <div id="variantsContainer">
+                <!-- Variant rows -->
+            </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 15px;">
+                <button type="submit" class="btn btn-dark" style="flex: 1; padding: 15px;">🚀 Save Product & Inventory</button>
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let allProducts = [];
+    let categories = [];
+    let suppliers = [];
+
+    async function init() {
+        await Promise.all([
+            loadCategories(),
+            loadSuppliers()
+        ]);
+        await loadProducts();
+    }
+
+    async function loadCategories() {
+        try {
+            const resp = await fetch('/api/products/categories/');
+            categories = await resp.json();
+            const selects = [document.getElementById('filterCategory'), document.getElementById('pcategory')];
+            selects.forEach(s => {
+                const isFilter = s.id === 'filterCategory';
+                s.innerHTML = isFilter ? '<option value="">All Categories</option>' : '';
+                categories.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = c.name;
+                    s.appendChild(opt);
+                });
+            });
+        } catch (e) {
+            console.error('Error loading categories:', e);
+        }
+    }
+
+    async function loadSuppliers() {
+        try {
+            const resp = await fetch('/api/suppliers/');
+            const res = await resp.json();
+            if (res.success) {
+                suppliers = res.data;
+                const select = document.getElementById('psupplier');
+                select.innerHTML = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            }
+        } catch (e) {
+            console.error('Error loading suppliers:', e);
+        }
+    }
+
+    async function loadProducts() {
+        const type = document.getElementById('filterType').value;
+        const catId = document.getElementById('filterCategory').value;
+        
+        let url = '/api/products/';
+        const params = new URLSearchParams();
+        if (type) params.append('type', type);
+        if (catId) params.append('category_id', catId);
+        if (params.toString()) url += '?' + params.toString();
+
+        try {
+            const resp = await fetch(url);
+            allProducts = await resp.json();
+            renderTable(allProducts);
+        } catch (e) {
+            showAlert('Failed to load products', 'error');
+        }
+    }
+
+    function renderTable(products) {
+        const list = document.getElementById('productsList');
+        list.innerHTML = products.map(p => `
+            <tr>
+                <td><span style="background: ${p.product_type === 'book' ? '#1a1a1a' : '#667eea'}; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase;">${p.product_type}</span></td>
+                <td>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            ${p.image_url ? `<img src="${p.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="font-size: 20px;">${p.product_type === 'book' ? '📚' : '👕'}</span>`}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: #333;">${p.name}</div>
+                            <div style="font-size: 12px; color: #888;">${Object.entries(p.attributes).map(([k, v]) => `${k}:${v}`).join(' | ')}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span style="color: #666; font-size: 14px;">${p.category || 'Uncategorized'}</span></td>
+                <td><span style="font-weight: 800; color: #1a1a1a;">$${p.price}</span></td>
+                <td><span style="background: #f0f0f0; padding: 2px 8px; border-radius: 5px; font-size: 13px;">${p.variants.length} options</span></td>
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm" onclick="editProduct(${p.id})">✏️</button>
+                        <button class="btn btn-sm" style="color: #ff4757;" onclick="deleteProduct(${p.id})">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function searchProducts() {
+        const q = document.getElementById('productSearch').value.toLowerCase();
+        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+        renderTable(filtered);
+    }
+
+    function rotateIcon() { /* Cool visual effect placeholder */ }
+
+    function adjustUIByType() {
+        const type = document.getElementById('ptype').value;
+        const container = document.getElementById('attributesContainer');
+        
+        // If container is empty, add default fields for the type
+        if (container.children.length === 0) {
+            if (type === 'book') {
+                addAttributeRow('author', '');
+                addAttributeRow('isbn', '');
+            } else if (type === 'clothes') {
+                addAttributeRow('material', '');
+                addAttributeRow('gender', 'Unisex');
+            }
+        }
+    }
+
+    function addAttributeRow(key = '', val = '') {
+        const container = document.getElementById('attributesContainer');
+        const div = document.createElement('div');
+        div.className = 'attribute-row';
+        div.innerHTML = `
+            <input type="text" class="attr-key" placeholder="Field name" value="${key}">
+            <input type="text" class="attr-val" placeholder="Value" value="${val}">
+            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()" style="color: red;">&times;</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addVariantRow(data = null) {
+        const container = document.getElementById('variantsContainer');
+        const div = document.createElement('div');
+        div.className = 'variant-row';
+        div.innerHTML = `
+            <input type="text" class="var-name" placeholder="Name (e.g. Red, Size M)" value="${data ? data.name : ''}" required style="flex: 2">
+            <input type="number" step="0.01" class="var-price" placeholder="Price" value="${data ? data.price || data.price_override || '' : ''}" style="flex: 1">
+            <input type="number" class="var-stock" placeholder="Stock" value="${data ? data.stock : '10'}" required style="flex: 1">
+            <input type="text" class="var-sku" placeholder="SKU" value="${data ? data.sku : ''}" style="flex: 1">
+            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()" style="color: red;">&times;</button>
+        `;
+        container.appendChild(div);
+    }
+
+    // --- Variant Generator Logic ---
+    function toggleGenerator() {
+        const gen = document.getElementById('variantGenerator');
+        gen.style.display = gen.style.display === 'none' ? 'block' : 'none';
+        if (gen.style.display === 'block' && document.getElementById('optionTypesContainer').children.length === 0) {
+            addOptionTypeRow();
+        }
+    }
+
+    function addOptionTypeRow() {
+        const container = document.getElementById('optionTypesContainer');
+        const div = document.createElement('div');
+        div.style = "display: flex; gap: 10px;";
+        div.innerHTML = `
+            <input type="text" class="opt-type" placeholder="Type (e.g. Color)" style="flex: 1">
+            <input type="text" class="opt-values" placeholder="Values (Red, Blue, Green)" style="flex: 3">
+            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()">🗑️</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function generateVariantsFromOptions() {
+        const optionTypes = [];
+        document.querySelectorAll('#optionTypesContainer > div').forEach(row => {
+            const type = row.querySelector('.opt-type').value.trim();
+            const values = row.querySelector('.opt-values').value.split(',').map(v => v.trim()).filter(v => v);
+            if (type && values.length > 0) {
+                optionTypes.push({ type, values });
+            }
+        });
+
+        if (optionTypes.length === 0) return;
+
+        // Cartesian product
+        const cartesian = (arrays) => {
+            return arrays.reduce((a, b) => a.flatMap(d => b.values.map(e => ({ ...d, [b.type]: e }))), [{}]);
+        };
+
+        const combinations = cartesian(optionTypes);
+        const basePrice = document.getElementById('pprice').value;
+
+        combinations.forEach(combo => {
+            const name = Object.values(combo).join(', ');
+            addVariantRow({
+                name: name,
+                price: basePrice,
+                stock: 10,
+                sku: ''
+            });
+        });
+
+        toggleGenerator(); // Close generator
+    }
+
+    function openModal() {
+        document.getElementById('productForm').reset();
+        document.getElementById('pid').value = '';
+        document.getElementById('attributesContainer').innerHTML = '';
+        document.getElementById('variantsContainer').innerHTML = '';
+        document.getElementById('modalTitle').innerText = 'Add New Product';
+        document.getElementById('productModal').style.display = 'flex';
+        adjustUIByType();
+    }
+
+    function closeModal() {
+        document.getElementById('productModal').style.display = 'none';
+    }
+
+    function editProduct(id) {
+        const p = allProducts.find(x => x.id === id);
+        if (!p) return;
+
+        openModal();
+        document.getElementById('modalTitle').innerText = 'Edit Product';
+        document.getElementById('pid').value = p.id;
+        document.getElementById('ptype').value = p.product_type;
+        document.getElementById('pcategory').value = p.category_id || '';
+        document.getElementById('pname').value = p.name;
+        document.getElementById('pdesc').value = p.description;
+        document.getElementById('pprice').value = p.price;
+        document.getElementById('psupplier').value = p.supplier_id || '';
+        document.getElementById('pimage').value = p.image_url;
+
+        // Load attributes
+        document.getElementById('attributesContainer').innerHTML = '';
+        Object.entries(p.attributes).forEach(([k, v]) => addAttributeRow(k, v));
+
+        // Load variants
+        document.getElementById('variantsContainer').innerHTML = '';
+        p.variants.forEach(v => addVariantRow(v));
+    }
+
+    async function saveProduct(e) {
+        e.preventDefault();
+        const id = document.getElementById('pid').value;
+        const type = document.getElementById('ptype').value;
+        
+        // Collect attributes
+        const attributes = {};
+        document.querySelectorAll('.attribute-row').forEach(row => {
+            const k = row.querySelector('.attr-key').value.trim();
+            const v = row.querySelector('.attr-val').value.trim();
+            if (k) attributes[k] = v;
+        });
+
+        // Collect variants
+        const variants = [];
+        document.querySelectorAll('.variant-row').forEach(row => {
+            variants.push({
+                name: row.querySelector('.var-name').value,
+                price_override: row.querySelector('.var-price').value || null,
+                stock: row.querySelector('.var-stock').value,
+                sku: row.querySelector('.var-sku').value || null
+            });
+        });
+
+        const data = {
+            name: document.getElementById('pname').value,
+            description: document.getElementById('pdesc').value,
+            price: document.getElementById('pprice').value,
+            product_type: type,
+            category_id: document.getElementById('pcategory').value,
+            supplier_id: document.getElementById('psupplier').value,
+            image_url: document.getElementById('pimage').value,
+            attributes: attributes,
+            variants: variants
+        };
+
+        const token = getToken();
+        // We probably need a POST/PUT endpoint in product-service that handles the whole product+variants package.
+        // Let's assume we use /api/products/manage/ (I will create this)
+        try {
+            const resp = await fetch('/api/products/manage/', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ id, ...data })
+            });
+            const res = await resp.json();
+            if (res.success) {
+                showAlert('Product saved successfully');
+                closeModal();
+                loadProducts();
+            } else {
+                showAlert(res.error || 'Failed to save product', 'error');
+            }
+        } catch (e) {
+            showAlert('Communication error', 'error');
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Permanently remove this product and all its variants?')) return;
+        try {
+            const resp = await fetch(`/api/products/manage/delete/${id}/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (res.success) {
+                showAlert('Product removed');
+                loadProducts();
+            }
+        } catch (e) {
+            showAlert('Error deleting product', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+{% endblock %}

@@ -1,0 +1,587 @@
+
+services:
+  # PostgreSQL for Auth Service
+  auth_db:
+    image: postgres:15-alpine
+    container_name: auth_db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Customer Service
+  customer_db:
+    image: postgres:15-alpine
+    container_name: customer_db
+    environment:
+      POSTGRES_DB: customer_db
+      POSTGRES_USER: customer_user
+      POSTGRES_PASSWORD: customer_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - customer_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Staff Service
+  staff_db:
+    image: postgres:15-alpine
+    container_name: staff_db
+    environment:
+      POSTGRES_DB: staff_db
+      POSTGRES_USER: staff_user
+      POSTGRES_PASSWORD: staff_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - staff_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Product Service
+  product_db:
+    image: postgres:15-alpine
+    container_name: product_db
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_pass
+    ports:
+      - "5437:5432"
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Tracking Service
+  tracking_db:
+    image: postgres:15-alpine
+    container_name: tracking_db
+    environment:
+      POSTGRES_DB: tracking_db
+      POSTGRES_USER: tracking_user
+      POSTGRES_PASSWORD: tracking_pass
+    ports:
+      - "5443:5432"
+    volumes:
+      - tracking_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Cart Service
+  cart_db:
+    image: postgres:15-alpine
+    container_name: cart_db
+    environment:
+      POSTGRES_DB: cart_db
+      POSTGRES_USER: cart_user
+      POSTGRES_PASSWORD: cart_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - cart_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Order Service
+  order_db:
+    image: postgres:15-alpine
+    container_name: order_db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+    ports:
+      - "5438:5432"
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Payment Service
+  payment_db:
+    image: postgres:15-alpine
+    container_name: payment_db
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment_user
+      POSTGRES_PASSWORD: payment_pass
+    ports:
+      - "5439:5432"
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Voucher Service
+  voucher_db:
+    image: postgres:15-alpine
+    container_name: voucher_db
+    environment:
+      POSTGRES_DB: voucher_db
+      POSTGRES_USER: voucher_user
+      POSTGRES_PASSWORD: voucher_pass
+    ports:
+      - "5440:5432"
+    volumes:
+      - voucher_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Rating Service
+  rating_db:
+    image: postgres:15-alpine
+    container_name: rating_db
+    environment:
+      POSTGRES_DB: rating_db
+      POSTGRES_USER: rating_user
+      POSTGRES_PASSWORD: rating_pass
+    ports:
+      - "5441:5432"
+    volumes:
+      - rating_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  # PostgreSQL for Supplier Service
+  supplier_db:
+    image: postgres:15-alpine
+    container_name: supplier_db
+    environment:
+      POSTGRES_DB: supplier_db
+      POSTGRES_USER: supplier_user
+      POSTGRES_PASSWORD: supplier_pass
+    ports:
+      - "5442:5432"
+    volumes:
+      - supplier_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+
+  # RabbitMQ for message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservices_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Tracking Service
+  tracking-service:
+    build:
+      context: .
+      dockerfile: services/tracking_service/Dockerfile
+    container_name: tracking-service
+    environment:
+      - DATABASE_URL=postgresql://tracking_user:tracking_pass@tracking_db:5432/tracking_db
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8010:8000"
+    depends_on:
+      - tracking_db
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/tracking_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Product Service
+  product-service:
+    build:
+      context: .
+      dockerfile: services/product_service/Dockerfile
+    container_name: product-service
+    environment:
+      - DATABASE_URL=postgresql://product_user:product_pass@product_db:5432/product_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8004:8000"
+    depends_on:
+      - product_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/product_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth_service/Dockerfile
+    container_name: auth-service
+    environment:
+      - DATABASE_URL=postgresql://auth_user:auth_pass@auth_db:5432/auth_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8001:8000"
+    depends_on:
+      - auth_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/auth_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Customer Service
+  customer-service:
+    build:
+      context: .
+      dockerfile: services/customer_service/Dockerfile
+    container_name: customer-service
+    environment:
+      - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DEBUG=True
+    ports:
+      - "8002:8000"
+    depends_on:
+      - customer_db
+      - rabbitmq
+      - auth-service
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/customer_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Staff Service
+  staff-service:
+    build:
+      context: .
+      dockerfile: services/staff_service/Dockerfile
+    container_name: staff-service
+    environment:
+      - DATABASE_URL=postgresql://staff_user:staff_pass@staff_db:5432/staff_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - DEBUG=True
+    ports:
+      - "8003:8000"
+    depends_on:
+      - staff_db
+      - rabbitmq
+      - auth-service
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/staff_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api_gateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - CUSTOMER_SERVICE_URL=http://customer-service:8000
+      - STAFF_SERVICE_URL=http://staff-service:8000
+      - ORDER_SERVICE_URL=http://order-service:8000
+      - PAYMENT_SERVICE_URL=http://payment-service:8000
+      - VOUCHER_SERVICE_URL=http://voucher-service:8000
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-service
+      - customer-service
+      - staff-service
+      - product-service
+      - tracking-service
+      - cart-service
+      - order-service
+      - payment-service
+      - voucher-service
+      - rating-service
+      - supplier-service
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/api_gateway:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Cart Service
+  cart-service:
+    build:
+      context: .
+      dockerfile: services/cart_service/Dockerfile
+    container_name: cart-service
+    environment:
+      - DATABASE_URL=postgresql://cart_user:cart_pass@cart_db:5432/cart_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8006:8000"
+    depends_on:
+      - cart_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/cart_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Order Service
+  order-service:
+    build:
+      context: .
+      dockerfile: services/order_service/Dockerfile
+    container_name: order-service
+    environment:
+      - DATABASE_URL=postgresql://order_user:order_pass@order_db:5432/order_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8007:8000"
+    depends_on:
+      - order_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/order_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Payment Service
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment_service/Dockerfile
+    container_name: payment-service
+    environment:
+      - DATABASE_URL=postgresql://payment_user:payment_pass@payment_db:5432/payment_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8008:8000"
+    depends_on:
+      - payment_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/payment_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Voucher Service
+  voucher-service:
+    build:
+      context: .
+      dockerfile: services/voucher_service/Dockerfile
+    container_name: voucher-service
+    environment:
+      - DATABASE_URL=postgresql://voucher_user:voucher_pass@voucher_db:5432/voucher_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8009:8000"
+    depends_on:
+      - voucher_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/voucher_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Rating Service
+  rating-service:
+    build:
+      context: .
+      dockerfile: services/rating_service/Dockerfile
+    container_name: rating-service
+    environment:
+      - DATABASE_URL=postgresql://rating_user:rating_pass@rating_db:5432/rating_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8005:8000"
+    depends_on:
+      - rating_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/rating_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Supplier Service
+  supplier-service:
+    build:
+      context: .
+      dockerfile: services/supplier_service/Dockerfile
+    container_name: supplier-service
+    environment:
+      - DATABASE_URL=postgresql://supplier_user:supplier_pass@supplier_db:5432/supplier_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8011:8000"
+    depends_on:
+      - supplier_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/supplier_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+
+  # Background Workers
+  auth-publisher:
+    build:
+      context: .
+      dockerfile: services/auth_service/Dockerfile
+    container_name: auth-publisher
+    volumes:
+      - ./services/auth_service:/app
+      - ./shared:/shared
+    environment:
+      - PYTHONPATH=/app:/shared
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - DATABASE_URL=postgresql://auth_user:auth_pass@auth_db:5432/auth_db
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    networks:
+      - microservices_network
+    command: python publisher.py
+
+  customer-consumer:
+    build:
+      context: .
+      dockerfile: services/customer_service/Dockerfile
+    container_name: customer-consumer
+    volumes:
+      - ./services/customer_service:/app
+      - ./shared:/shared
+    environment:
+      - PYTHONPATH=/app:/shared
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      customer-service:
+        condition: service_started
+    networks:
+      - microservices_network
+    command: python consumer.py
+  
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - microservices_network
+
+  # Recommendation Service (AI)
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: services/recommendation_service/Dockerfile
+    container_name: recommendation-service
+    environment:
+      - TRACKING_SERVICE_URL=http://api-gateway:8000/api/tracking/
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    ports:
+      - "8101:8001"
+    depends_on:
+      - qdrant
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/recommendation_service:/app
+
+  # Vector Service (Manual Sync)
+  vector-service:
+    profiles: ["manual"]
+    build:
+      context: .
+      dockerfile: services/vector_service/Dockerfile
+    container_name: vector-service
+    environment:
+      - PRODUCT_SERVICE_URL=http://api-gateway:8000/api/products/
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      - qdrant
+    networks:
+      - microservices_network
+
+networks:
+  microservices_network:
+    driver: bridge
+
+volumes:
+  auth_db_data:
+  customer_db_data:
+  staff_db_data:
+  product_db_data:
+  tracking_db_data:
+  cart_db_data:
+  order_db_data:
+  payment_db_data:
+  voucher_db_data:
+  rating_db_data:
+  supplier_db_data:
+  rabbitmq_data:
+  qdrant_data:

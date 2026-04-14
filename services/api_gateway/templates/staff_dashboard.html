@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - TruongShop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        background: white;
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .welcome-text {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1a1a1a;
+        letter-spacing: -1px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 35px;
+        border-radius: 28px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        border-color: #f0f0f0;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 42px;
+        font-weight: 900;
+        color: #1a1a1a;
+        letter-spacing: -1px;
+    }
+
+    .stat-icon {
+        font-size: 32px;
+        background: #f8f9fa;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        margin-bottom: 15px;
+    }
+
+    /* Colors for stats */
+    .stat-card.total { border-bottom: 6px solid #6c5ce7; }
+    .stat-card.pending { border-bottom: 6px solid #fdcb6e; }
+    .stat-card.delivered { border-bottom: 6px solid #00b894; }
+    .stat-card.users { border-bottom: 6px solid #0984e3; }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+    }
+
+    .action-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .action-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        background: linear-gradient(135deg, #333 0%, #444 100%);
+    }
+
+    .action-card.card-orders {
+        background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+    }
+
+    .action-card.card-products {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .action-card.card-suppliers {
+        background: linear-gradient(135deg, #0fbcf9 0%, #3498db 100%);
+    }
+
+    .action-info h3 {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .action-info p {
+        font-size: 15px;
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    .action-icon {
+        font-size: 40px;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="welcome-text">👋 Welcome, <span style="color: #6c5ce7;">Staff Member</span></div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="/" class="btn btn-secondary" style="border-radius: 12px; font-weight: 600;">🛍️ Shop Front</a>
+            <a href="/staff/login/" onclick="logout(); return false;" class="btn btn-secondary" style="color: #ff4757; border-color: #ff4757; border-radius: 12px;">🚪 Logout</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <div class="stat-icon">📦</div>
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-value" id="statTotalOrders">0</span>
+        </div>
+        <div class="stat-card pending">
+            <div class="stat-icon">⏳</div>
+            <span class="stat-label">Wait for Approval</span>
+            <span class="stat-value" id="statPendingOrders">0</span>
+        </div>
+        <div class="stat-card delivered">
+            <div class="stat-icon">✅</div>
+            <span class="stat-label">Delivered Orders</span>
+            <span class="stat-value" id="statDeliveredOrders">0</span>
+        </div>
+        <div class="stat-card users">
+            <div class="stat-icon">👥</div>
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value" id="statTotalUsers">0</span>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a href="/staff/orders/" class="action-card card-orders">
+            <div class="action-info">
+                <h3>Manage Orders</h3>
+                <p>View, approve and track all customer orders</p>
+            </div>
+            <div class="action-icon">📊</div>
+        </a>
+        <a href="/staff/products/" class="action-card card-products">
+            <div class="action-info">
+                <h3>Manage Products</h3>
+                <p>Update inventory, books and clothing</p>
+            </div>
+            <div class="action-icon">📦</div>
+        </a>
+        <a href="/staff/suppliers/" class="action-card card-suppliers">
+            <div class="action-info">
+                <h3>Manage Suppliers</h3>
+                <p>Manage partner suppliers and contacts</p>
+            </div>
+            <div class="action-icon">🏭</div>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadStats() {
+        if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+            window.location.href = '/staff/login/';
+            return;
+        }
+
+        try {
+            // Get order stats
+            const orderResp = await fetch('/api/orders/staff/stats/', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const orderData = await orderResp.json();
+            
+            if (orderData.success) {
+                document.getElementById('statTotalOrders').innerText = orderData.data.total;
+                document.getElementById('statPendingOrders').innerText = orderData.data.pending;
+                document.getElementById('statDeliveredOrders').innerText = orderData.data.delivered;
+            }
+
+            // Get customer stats
+            const customerResp = await fetch('/api/customer/staff/stats/', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const customerData = await customerResp.json();
+            
+            if (customerData.success) {
+                document.getElementById('statTotalUsers').innerText = customerData.data.total_users;
+            }
+
+        } catch (err) {
+            console.error('Error loading stats:', err);
+            showAlert('Failed to load dashboard statistics', 'error');
+        }
+    }
+
+    loadStats();
+</script>
+{% endblock %}

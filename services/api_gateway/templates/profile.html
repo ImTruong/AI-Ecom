@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - TruongShop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 30px;
+    }
+
+    .profile-title {
+        grid-column: 1 / -1;
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #333;
+        text-align: center;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        height: fit-content;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .btn-update {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .address-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 5px solid #e0e0e0;
+        position: relative;
+        transition: all 0.3s;
+    }
+    .address-card.default {
+        border-left-color: #667eea;
+        background: #f0f4ff;
+    }
+    .address-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 10px;
+    }
+    .default-badge {
+        background: #667eea;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-left: 5px;
+    }
+
+    .address-modal {
+        display: none;
+        position: fixed;
+        top: 0; left:0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        align-items: center; justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        width: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="profile-title">👤 My Account</h1>
+
+<div class="profile-container">
+    <!-- Profile Info -->
+    <div class="profile-card">
+        <h3>Basic Information</h3>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+        
+        <form id="profileForm" onsubmit="updateProfile(event)">
+            <div class="form-group">
+                <label class="form-label">Email (Username)</label>
+                <input type="email" id="email" class="form-input" disabled>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="full_name" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="phone" class="form-input">
+            </div>
+
+            <button type="submit" class="btn-update" id="btnUpdate">Update Profile</button>
+        </form>
+    </div>
+
+    <!-- Address Management -->
+    <div class="profile-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">📍 Shipping Addresses</h3>
+            <button class="btn btn-sm btn-primary" onclick="openAddressModal()">+ Add New</button>
+        </div>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+        
+        <div id="addressList">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div id="addressModal" class="address-modal">
+    <div class="modal-content">
+        <h3>Add Shipping Address</h3>
+        <form onsubmit="saveAddress(event)">
+            <div class="form-group">
+                <label class="form-label">Recipient Name</label>
+                <input type="text" id="addrName" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="text" id="addrPhone" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Full Address</label>
+                <textarea id="addrLine" class="form-input" rows="3" required></textarea>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="addrDefault">
+                <label class="form-label" style="margin: 0;">Set as default address</label>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Save Address</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddressModal()" style="flex: 1;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadProfile() {
+        if (!isLoggedIn()) return window.location.href = '/login/';
+        try {
+            const resp = await fetch('/api/customer/profile/', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const data = await resp.json();
+            if (data.success) {
+                const profile = data.data;
+                document.getElementById('email').value = profile.email;
+                document.getElementById('full_name').value = profile.full_name;
+                document.getElementById('phone').value = profile.phone;
+                renderAddresses(profile.addresses || []);
+            }
+        } catch (e) { showAlert('Error loading profile', 'error'); }
+    }
+
+    function renderAddresses(addresses) {
+        const container = document.getElementById('addressList');
+        if (addresses.length === 0) {
+            container.innerHTML = '<p style="color: #666; text-align: center;">No addresses found.</p>';
+            return;
+        }
+
+        // Sort: default first
+        addresses.sort((a,b) => b.is_default - a.is_default);
+
+        container.innerHTML = addresses.map(addr => `
+            <div class="address-card ${addr.is_default ? 'default' : ''}">
+                <div class="address-actions">
+                    ${!addr.is_default ? `<button onclick="setDefault(${addr.id})" title="Set as default" style="background:none; border:none; cursor:pointer;">⭐</button>` : ''}
+                    <button onclick="deleteAddress(${addr.id})" title="Delete" style="background:none; border:none; cursor:pointer; color: #ff4757;">🗑️</button>
+                </div>
+                <div style="font-weight: 700; font-size: 16px; margin-bottom: 5px;">
+                    ${addr.full_name} ${addr.is_default ? '<span class="default-badge">Default</span>' : ''}
+                </div>
+                <div style="color: #666; font-size: 14px; margin-bottom: 5px;">📞 ${addr.phone}</div>
+                <div style="line-height: 1.4;">${addr.address_line}</div>
+            </div>
+        `).join('');
+    }
+
+    async function updateProfile(e) {
+        e.preventDefault();
+        try {
+            const resp = await fetch('/api/customer/profile/update/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify({
+                    full_name: document.getElementById('full_name').value,
+                    phone: document.getElementById('phone').value
+                })
+            });
+            const data = await resp.json();
+            if (data.success) showAlert('Profile updated!');
+        } catch (e) { showAlert('Update failed', 'error'); }
+    }
+
+    function openAddressModal() { document.getElementById('addressModal').style.display = 'flex'; }
+    function closeAddressModal() { document.getElementById('addressModal').style.display = 'none'; }
+
+    async function saveAddress(e) {
+        e.preventDefault();
+        const data = {
+            full_name: document.getElementById('addrName').value,
+            phone: document.getElementById('addrPhone').value,
+            address_line: document.getElementById('addrLine').value,
+            is_default: document.getElementById('addrDefault').checked
+        };
+        try {
+            const resp = await fetch('/api/customer/address/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify(data)
+            });
+            const res = await resp.json();
+            if (res.success) {
+                showAlert('Address added!');
+                closeAddressModal();
+                loadProfile();
+            }
+        } catch (e) { showAlert('Save failed', 'error'); }
+    }
+
+    async function setDefault(id) {
+        try {
+            const resp = await fetch(`/api/customer/address/set-default/${id}/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (res.success) loadProfile();
+        } catch (e) { showAlert('Error setting default', 'error'); }
+    }
+
+    async function deleteAddress(id) {
+        if (!confirm('Delete this address?')) return;
+        try {
+            const resp = await fetch(`/api/customer/address/delete/${id}/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (res.success) loadProfile();
+        } catch (e) { showAlert('Delete failed', 'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}
