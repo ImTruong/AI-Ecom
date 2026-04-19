@@ -5,3 +5,4 @@ qdrant-client
 numpy
 python-jose[cryptography]
 python-multipart
+google-generativeai

@@ -18,4 +18,5 @@ urlpatterns = [
     path('staff/products/', views.staff_products, name='staff_products'),
     path('staff/suppliers/', views.staff_suppliers, name='staff_suppliers'),
     path('product/detail/<int:product_id>/', views.product_detail, name='product_detail'),
+    path('ai-assistant/', views.ai_assistant, name='ai_assistant'),
 ]

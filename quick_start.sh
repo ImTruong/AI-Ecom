@@ -29,7 +29,7 @@ sleep 20
 
 # Step 2: Migrations
 echo -e "${BLUE}Step 2: Synchronizing Database Schemas...${NC}"
-services=("auth-service" "customer-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
+services=("auth-service" "customer-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service" "book-service" "clothes-service" "laptop-service" "phone-service" "tablet-service" "camera-service" "headphone-service" "watch-service" "shoe-service" "furniture-service")
 
 for service in "${services[@]}"; do
     echo "  - Migrating $service..."
@@ -38,7 +38,7 @@ done
 
 # Step 3: Master Seed
 echo -e "${BLUE}Step 3: Populating Master Seed Data...${NC}"
-db_containers=("auth_db" "customer_db" "product_db" "rating_db" "supplier_db")
+db_containers=("auth_db" "customer_db" "product_db" "rating_db" "supplier_db" "book_db" "clothes_db" "laptop_db" "phone_db" "tablet_db" "camera_db" "headphone_db" "watch_db" "shoe_db" "furniture_db")
 
 for db_container in "${db_containers[@]}"; do
     service_prefix=$(echo $db_container | cut -d'_' -f1)

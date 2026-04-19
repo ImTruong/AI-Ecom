@@ -61,6 +61,50 @@ class RoutingMiddleware:
             'service': 'supplier-service',
             'url': os.getenv('SUPPLIER_SERVICE_URL', 'http://supplier-service:8000'),
         },
+        '/api/laptop/': {
+            'service': 'laptop-service',
+            'url': os.getenv('LAPTOP_SERVICE_URL', 'http://laptop-service:8000'),
+        },
+        '/api/phone/': {
+            'service': 'phone-service',
+            'url': os.getenv('PHONE_SERVICE_URL', 'http://phone-service:8000'),
+        },
+        '/api/tablet/': {
+            'service': 'tablet-service',
+            'url': os.getenv('TABLET_SERVICE_URL', 'http://tablet-service:8000'),
+        },
+        '/api/camera/': {
+            'service': 'camera-service',
+            'url': os.getenv('CAMERA_SERVICE_URL', 'http://camera-service:8000'),
+        },
+        '/api/headphone/': {
+            'service': 'headphone-service',
+            'url': os.getenv('HEADPHONE_SERVICE_URL', 'http://headphone-service:8000'),
+        },
+        '/api/watch/': {
+            'service': 'watch-service',
+            'url': os.getenv('WATCH_SERVICE_URL', 'http://watch-service:8000'),
+        },
+        '/api/shoe/': {
+            'service': 'shoe-service',
+            'url': os.getenv('SHOE_SERVICE_URL', 'http://shoe-service:8000'),
+        },
+        '/api/furniture/': {
+            'service': 'furniture-service',
+            'url': os.getenv('FURNITURE_SERVICE_URL', 'http://furniture-service:8000'),
+        },
+        '/api/tracking/': {
+            'service': 'tracking-service',
+            'url': os.getenv('TRACKING_SERVICE_URL', 'http://tracking-service:8000'),
+        },
+        '/api/recommendations/': {
+            'service': 'recommendation-service',
+            'url': os.getenv('RECOMMENDATION_SERVICE_URL', 'http://recommendation-service:8001'),
+        },
+        '/api/ai-chat/': {
+            'service': 'recommendation-service',
+            'url': os.getenv('RECOMMENDATION_SERVICE_URL', 'http://recommendation-service:8001'),
+        },
     }
     
     def __init__(self, get_response):
@@ -70,6 +114,10 @@ class RoutingMiddleware:
         """Process request"""
         path = request.path
         print(f"ROUTING DEBUG: Incoming path is '{path}'")
+
+        # Special Case: Aggregating products from 10 distributed services
+        if path == '/api/products/' and request.method == 'GET':
+            return self.aggregate_products(request)
         
         # Check if path should be routed
         route_config = self.get_route_config(path)
@@ -87,6 +135,40 @@ class RoutingMiddleware:
             if path.startswith(prefix):
                 return config
         return None
+
+    def aggregate_products(self, request):
+        """Aggregator: Fetch products from 10 category services in parallel"""
+        from concurrent.futures import ThreadPoolExecutor
+        
+        services = [
+            'book-service', 'clothes-service', 'laptop-service', 'phone-service',
+            'tablet-service', 'camera-service', 'headphone-service', 'watch-service',
+            'shoe-service', 'furniture-service', 'product-service'
+        ]
+        
+        def fetch_service_products(service_name):
+            try:
+                url = f"http://{service_name}:8000/api/products/"
+                # Forward query params if any
+                if request.GET:
+                    url += f"?{request.GET.urlencode()}"
+                
+                resp = requests.get(url, timeout=3)
+                if resp.status_code == 200:
+                    return resp.json()
+            except Exception as e:
+                logger.error(f"Error fetching from {service_name}: {e}")
+            return []
+
+        all_products = []
+        with ThreadPoolExecutor(max_workers=len(services)) as executor:
+            # Fetch all in parallel
+            results = list(executor.map(fetch_service_products, services))
+            for res in results:
+                if isinstance(res, list):
+                    all_products.extend(res)
+
+        return JsonResponse(all_products, safe=False)
     
     def forward_request(self, request, route_config):
         """Forward request to microservice"""
@@ -137,8 +219,7 @@ class RoutingMiddleware:
                 content_type=response.headers.get('Content-Type', 'application/json')
             )
             
-            # Forward relevant headers. Note: Content-Length should NOT be forwarded manually
-            # as Django will calculate it correctly based on the content provided.
+            # Forward relevant headers.
             if 'Content-Type' in response.headers:
                 django_response['Content-Type'] = response.headers['Content-Type']
             

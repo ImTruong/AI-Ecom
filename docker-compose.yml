@@ -165,6 +165,146 @@ services:
     networks:
       - microservices_network
 
+  book_db:
+    image: postgres:15-alpine
+    container_name: book_db
+    environment:
+      POSTGRES_DB: book_db
+      POSTGRES_USER: book_user
+      POSTGRES_PASSWORD: book_pass
+    ports:
+      - "5451:5432"
+    volumes:
+      - book_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  clothes_db:
+    image: postgres:15-alpine
+    container_name: clothes_db
+    environment:
+      POSTGRES_DB: clothes_db
+      POSTGRES_USER: clothes_user
+      POSTGRES_PASSWORD: clothes_pass
+    ports:
+      - "5452:5432"
+    volumes:
+      - clothes_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  laptop_db:
+    image: postgres:15-alpine
+    container_name: laptop_db
+    environment:
+      POSTGRES_DB: laptop_db
+      POSTGRES_USER: laptop_user
+      POSTGRES_PASSWORD: laptop_pass
+    ports:
+      - "5453:5432"
+    volumes:
+      - laptop_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  phone_db:
+    image: postgres:15-alpine
+    container_name: phone_db
+    environment:
+      POSTGRES_DB: phone_db
+      POSTGRES_USER: phone_user
+      POSTGRES_PASSWORD: phone_pass
+    ports:
+      - "5454:5432"
+    volumes:
+      - phone_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  tablet_db:
+    image: postgres:15-alpine
+    container_name: tablet_db
+    environment:
+      POSTGRES_DB: tablet_db
+      POSTGRES_USER: tablet_user
+      POSTGRES_PASSWORD: tablet_pass
+    ports:
+      - "5455:5432"
+    volumes:
+      - tablet_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  camera_db:
+    image: postgres:15-alpine
+    container_name: camera_db
+    environment:
+      POSTGRES_DB: camera_db
+      POSTGRES_USER: camera_user
+      POSTGRES_PASSWORD: camera_pass
+    ports:
+      - "5456:5432"
+    volumes:
+      - camera_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  headphone_db:
+    image: postgres:15-alpine
+    container_name: headphone_db
+    environment:
+      POSTGRES_DB: headphone_db
+      POSTGRES_USER: headphone_user
+      POSTGRES_PASSWORD: headphone_pass
+    ports:
+      - "5457:5432"
+    volumes:
+      - headphone_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  watch_db:
+    image: postgres:15-alpine
+    container_name: watch_db
+    environment:
+      POSTGRES_DB: watch_db
+      POSTGRES_USER: watch_user
+      POSTGRES_PASSWORD: watch_pass
+    ports:
+      - "5458:5432"
+    volumes:
+      - watch_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  shoe_db:
+    image: postgres:15-alpine
+    container_name: shoe_db
+    environment:
+      POSTGRES_DB: shoe_db
+      POSTGRES_USER: shoe_user
+      POSTGRES_PASSWORD: shoe_pass
+    ports:
+      - "5459:5432"
+    volumes:
+      - shoe_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+  furniture_db:
+    image: postgres:15-alpine
+    container_name: furniture_db
+    environment:
+      POSTGRES_DB: furniture_db
+      POSTGRES_USER: furniture_user
+      POSTGRES_PASSWORD: furniture_pass
+    ports:
+      - "5460:5432"
+    volumes:
+      - furniture_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
 
   # RabbitMQ for message broker
   rabbitmq:
@@ -313,9 +453,25 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:8000
       - CUSTOMER_SERVICE_URL=http://customer-service:8000
       - STAFF_SERVICE_URL=http://staff-service:8000
+      - PRODUCT_SERVICE_URL=http://product-service:8000
+      - CART_SERVICE_URL=http://cart-service:8000
       - ORDER_SERVICE_URL=http://order-service:8000
       - PAYMENT_SERVICE_URL=http://payment-service:8000
       - VOUCHER_SERVICE_URL=http://voucher-service:8000
+      - RATING_SERVICE_URL=http://rating-service:8000
+      - SUPPLIER_SERVICE_URL=http://supplier-service:8000
+      - TRACKING_SERVICE_URL=http://tracking-service:8000
+      - BOOK_SERVICE_URL=http://book-service:8000
+      - CLOTHES_SERVICE_URL=http://clothes-service:8000
+      - LAPTOP_SERVICE_URL=http://laptop-service:8000
+      - PHONE_SERVICE_URL=http://phone-service:8000
+      - TABLET_SERVICE_URL=http://tablet-service:8000
+      - CAMERA_SERVICE_URL=http://camera-service:8000
+      - HEADPHONE_SERVICE_URL=http://headphone-service:8000
+      - WATCH_SERVICE_URL=http://watch-service:8000
+      - SHOE_SERVICE_URL=http://shoe-service:8000
+      - FURNITURE_SERVICE_URL=http://furniture-service:8000
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:8001
       - SECRET_KEY=your-secret-key-change-in-production
       - DEBUG=True
     ports:
@@ -332,6 +488,16 @@ services:
       - voucher-service
       - rating-service
       - supplier-service
+      - book-service
+      - clothes-service
+      - laptop-service
+      - phone-service
+      - tablet-service
+      - camera-service
+      - headphone-service
+      - watch-service
+      - shoe-service
+      - furniture-service
     networks:
       - microservices_network
     volumes:
@@ -477,6 +643,226 @@ services:
       - ./shared:/shared
     command: python manage.py runserver 0.0.0.0:8000
 
+  book-service:
+    build:
+      context: .
+      dockerfile: services/book_service/Dockerfile
+    container_name: book-service
+    environment:
+      - DATABASE_URL=postgresql://book_user:book_pass@book_db:5432/book_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8021:8000"
+    depends_on:
+      - book_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/book_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  clothes-service:
+    build:
+      context: .
+      dockerfile: services/clothes_service/Dockerfile
+    container_name: clothes-service
+    environment:
+      - DATABASE_URL=postgresql://clothes_user:clothes_pass@clothes_db:5432/clothes_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8022:8000"
+    depends_on:
+      - clothes_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/clothes_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  laptop-service:
+    build:
+      context: .
+      dockerfile: services/laptop_service/Dockerfile
+    container_name: laptop-service
+    environment:
+      - DATABASE_URL=postgresql://laptop_user:laptop_pass@laptop_db:5432/laptop_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8023:8000"
+    depends_on:
+      - laptop_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/laptop_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  phone-service:
+    build:
+      context: .
+      dockerfile: services/phone_service/Dockerfile
+    container_name: phone-service
+    environment:
+      - DATABASE_URL=postgresql://phone_user:phone_pass@phone_db:5432/phone_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8024:8000"
+    depends_on:
+      - phone_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/phone_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  tablet-service:
+    build:
+      context: .
+      dockerfile: services/tablet_service/Dockerfile
+    container_name: tablet-service
+    environment:
+      - DATABASE_URL=postgresql://tablet_user:tablet_pass@tablet_db:5432/tablet_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8025:8000"
+    depends_on:
+      - tablet_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/tablet_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  camera-service:
+    build:
+      context: .
+      dockerfile: services/camera_service/Dockerfile
+    container_name: camera-service
+    environment:
+      - DATABASE_URL=postgresql://camera_user:camera_pass@camera_db:5432/camera_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8026:8000"
+    depends_on:
+      - camera_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/camera_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  headphone-service:
+    build:
+      context: .
+      dockerfile: services/headphone_service/Dockerfile
+    container_name: headphone-service
+    environment:
+      - DATABASE_URL=postgresql://headphone_user:headphone_pass@headphone_db:5432/headphone_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8027:8000"
+    depends_on:
+      - headphone_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/headphone_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  watch-service:
+    build:
+      context: .
+      dockerfile: services/watch_service/Dockerfile
+    container_name: watch-service
+    environment:
+      - DATABASE_URL=postgresql://watch_user:watch_pass@watch_db:5432/watch_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8028:8000"
+    depends_on:
+      - watch_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/watch_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  shoe-service:
+    build:
+      context: .
+      dockerfile: services/shoe_service/Dockerfile
+    container_name: shoe-service
+    environment:
+      - DATABASE_URL=postgresql://shoe_user:shoe_pass@shoe_db:5432/shoe_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8029:8000"
+    depends_on:
+      - shoe_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/shoe_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
+  furniture-service:
+    build:
+      context: .
+      dockerfile: services/furniture_service/Dockerfile
+    container_name: furniture-service
+    environment:
+      - DATABASE_URL=postgresql://furniture_user:furniture_pass@furniture_db:5432/furniture_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=True
+    ports:
+      - "8030:8000"
+    depends_on:
+      - furniture_db
+      - rabbitmq
+    networks:
+      - microservices_network
+    volumes:
+      - ./services/furniture_service:/app
+      - ./shared:/shared
+    command: python manage.py runserver 0.0.0.0:8000
+
 
   # Background Workers
   auth-publisher:
@@ -585,3 +971,13 @@ volumes:
   supplier_db_data:
   rabbitmq_data:
   qdrant_data:
+  book_db_data:
+  clothes_db_data:
+  laptop_db_data:
+  phone_db_data:
+  tablet_db_data:
+  camera_db_data:
+  headphone_db_data:
+  watch_db_data:
+  shoe_db_data:
+  furniture_db_data:

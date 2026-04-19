@@ -62,9 +62,11 @@ def staff_suppliers(request):
 
 def product_detail(request, product_id):
     """Product detail page"""
-    return render(request, 'product_detail.html', {
-        'product_id': product_id
     })
+
+def ai_assistant(request):
+    """AI Chat Assistant page"""
+    return render(request, 'ai_assistant.html')
 
 def health_check(request):
     """Health check endpoint"""

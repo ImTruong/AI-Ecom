@@ -10,7 +10,7 @@
 
 **System Overview**: E-commerce platform với 11 microservices và message-driven architecture.
 
-**Last Updated**: 2026-04-06  
+**Last Updated**: 2026-04-14  
 **Implementation Status**: ✅ 100% Complete
 
 ---
@@ -23,108 +23,86 @@ graph TB
         FE[🌐 Web Frontend<br/>Django Templates + JavaScript]
     end
     
-    subgraph "API Gateway Layer"
-        GW[🚪 API Gateway :8000<br/>Request Router & Load Balancer]
+    subgraph "API Gateway Layer (Aggregator)"
+        GW[🚪 API Gateway :8000<br/>🛡️ Aggregator Pattern<br/>Unified Product Entry]
     end
     
     subgraph "Authentication Layer"
         AUTH[🔐 Auth Service :8001<br/>JWT Token Management]
-        AUTHDB[(🗃️ auth_db :5432<br/>Users & Tokens)]
-        AUTHPUB[📤 Auth Publisher<br/>Event Broadcasting]
+        AUTHDB[(🗃️ auth_db :5432)]
+        AUTHPUB[📤 Auth Publisher]
+    end
+
+    subgraph "Distributed Product Network"
+        BK[📚 Book Service :8021]
+        CL[👕 Clothes Service :8022]
+        LP[💻 Laptop Service :8023]
+        PH[📱 Phone Service :8024]
+        TB[📟 Tablet Service :8025]
+        CAM[📷 Camera Service :8026]
+        HP[🎧 Headphone Service :8027]
+        WT[⌚ Watch Service :8028]
+        SH[👟 Shoe Service :8029]
+        FN[🛋️ Furniture Service :8030]
+        PROD[📦 Product Service :8004]
+    end
+    
+    subgraph "AI & Analytics"
+        REC[✨ Recommendation Service :8101]
+        VEC[🧪 Vector Sync Tool]
+        QDR[💎 Qdrant DB :6333]
+        TRACK[📊 Tracking Service :8010]
     end
     
     subgraph "Core Business Services"
-        CUST[👥 Customer Service :8002<br/>Profile & Address Management]
-        STAFF[👨‍💼 Staff Service :8003<br/>Admin Operations]
-        
-        PROD[📦 Product Service :8004<br/>Unified Catalog & Inventory]
-        SUPP[🏭 Supplier Service :8011<br/>Vendor Management]
-        
-        CART[🛒 Cart Service :8006<br/>Shopping Cart Logic]
-        ORDER[📦 Order Service :8007<br/>Order Processing]
-        PAY[💳 Payment Service :8008<br/>Payment Processing]
-        VOUCH[🎟️ Voucher Service :8009<br/>Discount Management]
-        
-        RATE[⭐ Rating Service :8010<br/>Review & Rating System]
-        TRACK[📊 Tracking Service :8012<br/>User Analytics & History]
-    end
-    
-    
-    
-    subgraph "Data Layer"
-        CUSTDB[(🗃️ customer_db :5433)]
-        STAFFDB[(🗃️ staff_db :5434)]
-        PRODDB[(🗃️ product_db :5435)]
-        CARTDB[(🗃️ cart_db :5436)]
-        ORDERDB[(🗃️ order_db :5438)]
-        PAYDB[(🗃️ payment_db :5439)]
-        VOUCHDB[(🗃️ voucher_db :5440)]
-        RATEDB[(🗃️ rating_db :5441)]
-        SUPPDB[(🗃️ supplier_db :5442)]
-        TRACKDB[(🗃️ tracking_db :5443)]
+        CUST[👥 Customer Service :8002]
+        STAFF[👨‍💼 Staff Service :8003]
+        SUPP[🏭 Supplier Service :8011]
+        CART[🛒 Cart Service :8006]
+        ORDER[📦 Order Service :8007]
+        PAY[💳 Payment Service :8008]
+        VOUCH[🎟️ Voucher Service :8009]
+        RATE[⭐ Rating Service :8005]
     end
     
     subgraph "Message Broker Layer"
-        MQ[🐰 RabbitMQ :5672<br/>Event-Driven Communication]
-        CUSTCONS[📥 Customer Consumer<br/>Event Processing]
-    end
-    
-    subgraph "Infrastructure Layer"
-        DOCKER[🐳 Docker Compose<br/>Container Orchestration]
-        NET[🌐 Custom Network<br/>Service Discovery]
+        MQ[🐰 RabbitMQ :5672]
+        CUSTCONS[📥 Customer Consumer]
     end
 
-    %% Frontend connections
+    %% Connections
     FE --> GW
+    FE --> REC
     
-    %% API Gateway connections
+    %% Aggregator Logic
+    GW -- "Scatter/Gather" --> Distributed Product Network
+    
     GW --> AUTH
-    GW --> CUST
-    GW --> STAFF
-    GW --> PROD
-    GW --> CART
-    GW --> ORDER
-    GW --> PAY
-    GW --> VOUCH
-    GW --> RATE
-    GW --> SUPP
+    GW --> Core Business Services
     GW --> TRACK
     
-    %% Service to Database connections
-    AUTH --> AUTHDB
-    CUST --> CUSTDB
-    STAFF --> STAFFDB
-    PROD --> PRODDB
-    CART --> CARTDB
-    ORDER --> ORDERDB
-    PAY --> PAYDB
-    VOUCH --> VOUCHDB
-    RATE --> RATEDB
-    TRACK --> TRACKDB
-    SUPP --> SUPPDB
+    %% AI Pipeline
+    VEC -- "Embeddings" --> QDR
+    REC -- "Search" --> QDR
+    TRACK -- "User Profile" --> REC
     
-    %% Message Broker connections
+    AUTH --> AUTHDB
     AUTH --> AUTHPUB
     AUTHPUB --> MQ
     MQ --> CUSTCONS
-    CUSTCONS --> CUSTDB
-    
     
     %% Styling
     classDef frontend fill:#e1f5fe
     classDef gateway fill:#f3e5f5
-    classDef auth fill:#fff3e0
-    classDef business fill:#e8f5e8
+    classDef product fill:#fff9c4
     classDef ai fill:#fce4ec
-    classDef data fill:#f1f8e9
-    classDef infra fill:#f5f5f5
+    classDef business fill:#e8f5e8
     
-    class FE,CW frontend
+    class FE frontend
     class GW gateway
-    class AUTH,AUTHPUB auth
-    class CUST,STAFF,PROD,CART,ORDER,PAY,VOUCH,RATE,SUPP business
-    class AUTHDB,CUSTDB,STAFFDB,PRODDB,CARTDB,ORDERDB,PAYDB,VOUCHDB,RATEDB,SUPPDB data
-    class MQ,CUSTCONS,DOCKER,NET infra
+    class BK,CL,LP,PH,TB,CAM,HP,WT,SH,FN,PROD product
+    class REC,VEC,QDR,TRACK ai
+    class CUST,STAFF,SUPP,CART,ORDER,PAY,VOUCH,RATE business
 ```
 
 ---
@@ -141,8 +119,9 @@ graph TB
 │  • Request routing to appropriate microservices                │
 │  • Load balancing across service instances                     │
 │  • Authentication middleware                                   │
-│  • Rate limiting and throttling                               │
-│  • Response aggregation                                       │
+│  • Response aggregation (Scatter-Gather Pattern)               │
+│  • Logic: GET /api/products/ parallel queries 11 services        │
+│  • Unified Product Schema for frontend simplicity              │
 │  • Static file serving (CSS, JS, images)                     │
 │  • Frontend template rendering                               │
 │                                                                 │
@@ -317,6 +296,321 @@ graph TB
 │  • POST /products/update-stock/ - Transactional stock changes  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+### 📚 **Book Service** (:8021)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📚 BOOK SERVICE - Category Catalog (Books)                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Book-only catalog & search                                  │
+│  • Category/genre filtering                                    │
+│  • Attributes via JSON (author, isbn, publisher, language)     │
+│  • Variant handling (format: Hardcover/Paperback)              │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: book_db                                           │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /books/ - List books                                    │
+│  • GET /books/<id>/ - Book details                             │
+│  • GET /books/categories/ - Categories                         │
+│  • POST /books/manage/ - Create/Update (Staff)                 │
+│  • DELETE /books/manage/delete/<id>/ - Delete (Staff)          │
+│  • POST /books/update-stock/ - Stock update                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 👕 **Clothes Service** (:8022)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  👕 CLOTHES SERVICE - Category Catalog (Clothes)                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Apparel catalog & search                                    │
+│  • Category filtering                                          │
+│  • Attributes via JSON (size, color, material, brand)          │
+│  • Variant handling (size/color combinations)                  │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: clothes_db                                        │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /clothes/ - List clothes                                │
+│  • GET /clothes/<id>/ - Clothes details                        │
+│  • GET /clothes/categories/ - Categories                       │
+│  • POST /clothes/manage/ - Create/Update (Staff)               │
+│  • DELETE /clothes/manage/delete/<id>/ - Delete (Staff)        │
+│  • POST /clothes/update-stock/ - Stock update                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 💻 **Laptop Service** (:8023)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  💻 LAPTOP SERVICE - Category Catalog (Laptops)                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Laptop catalog & search                                     │
+│  • Category filtering                                          │
+│  • Attributes via JSON (cpu, ram, storage, gpu)                │
+│  • Variant handling (config combinations)                      │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: laptop_db                                         │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /laptops/ - List laptops                                │
+│  • GET /laptops/<id>/ - Laptop details                         │
+│  • GET /laptops/categories/ - Categories                       │
+│  • POST /laptops/manage/ - Create/Update (Staff)               │
+│  • DELETE /laptops/manage/delete/<id>/ - Delete (Staff)        │
+│  • POST /laptops/update-stock/ - Stock update                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 📱 **Phone Service** (:8024)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📱 PHONE SERVICE - Category Catalog (Phones)                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Phone catalog & search                                      │
+│  • Category filtering                                          │
+│  • Attributes via JSON (brand, chipset, storage, camera)       │
+│  • Variant handling (storage/color combinations)               │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: phone_db                                          │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /phones/ - List phones                                  │
+│  • GET /phones/<id>/ - Phone details                           │
+│  • GET /phones/categories/ - Categories                        │
+│  • POST /phones/manage/ - Create/Update (Staff)                │
+│  • DELETE /phones/manage/delete/<id>/ - Delete (Staff)         │
+│  • POST /phones/update-stock/ - Stock update                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 📟 **Tablet Service** (:8025)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📟 TABLET SERVICE - Category Catalog (Tablets)                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Tablet catalog & search                                     │
+│  • Category filtering                                          │
+│  • Attributes via JSON (screen, chipset, storage, battery)     │
+│  • Variant handling (storage/color combinations)               │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: tablet_db                                         │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /tablets/ - List tablets                                │
+│  • GET /tablets/<id>/ - Tablet details                         │
+│  • GET /tablets/categories/ - Categories                       │
+│  • POST /tablets/manage/ - Create/Update (Staff)               │
+│  • DELETE /tablets/manage/delete/<id>/ - Delete (Staff)        │
+│  • POST /tablets/update-stock/ - Stock update                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 📷 **Camera Service** (:8026)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📷 CAMERA SERVICE - Category Catalog (Cameras)                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Camera catalog & search                                     │
+│  • Category filtering                                          │
+│  • Attributes via JSON (sensor, lens, resolution, mount)       │
+│  • Variant handling (lens/kit combinations)                    │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: camera_db                                         │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /cameras/ - List cameras                                │
+│  • GET /cameras/<id>/ - Camera details                         │
+│  • GET /cameras/categories/ - Categories                       │
+│  • POST /cameras/manage/ - Create/Update (Staff)               │
+│  • DELETE /cameras/manage/delete/<id>/ - Delete (Staff)        │
+│  • POST /cameras/update-stock/ - Stock update                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🎧 **Headphone Service** (:8027)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎧 HEADPHONE SERVICE - Category Catalog (Headphones)          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Headphone catalog & search                                  │
+│  • Category filtering                                          │
+│  • Attributes via JSON (driver, type, wireless, mic)           │
+│  • Variant handling (color/edition combinations)               │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: headphone_db                                      │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /headphones/ - List headphones                          │
+│  • GET /headphones/<id>/ - Headphone details                   │
+│  • GET /headphones/categories/ - Categories                    │
+│  • POST /headphones/manage/ - Create/Update (Staff)            │
+│  • DELETE /headphones/manage/delete/<id>/ - Delete (Staff)     │
+│  • POST /headphones/update-stock/ - Stock update               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ⌚ **Watch Service** (:8028)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ⌚ WATCH SERVICE - Category Catalog (Watches)                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Watch catalog & search                                      │
+│  • Category filtering                                          │
+│  • Attributes via JSON (movement, material, size, strap)       │
+│  • Variant handling (strap/color combinations)                 │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: watch_db                                          │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /watches/ - List watches                                │
+│  • GET /watches/<id>/ - Watch details                          │
+│  • GET /watches/categories/ - Categories                       │
+│  • POST /watches/manage/ - Create/Update (Staff)               │
+│  • DELETE /watches/manage/delete/<id>/ - Delete (Staff)        │
+│  • POST /watches/update-stock/ - Stock update                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 👟 **Shoe Service** (:8029)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  👟 SHOE SERVICE - Category Catalog (Shoes)                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Shoe catalog & search                                       │
+│  • Category filtering                                          │
+│  • Attributes via JSON (size, material, gender, brand)         │
+│  • Variant handling (size/color combinations)                  │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: shoe_db                                           │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /shoes/ - List shoes                                    │
+│  • GET /shoes/<id>/ - Shoe details                             │
+│  • GET /shoes/categories/ - Categories                         │
+│  • POST /shoes/manage/ - Create/Update (Staff)                 │
+│  • DELETE /shoes/manage/delete/<id>/ - Delete (Staff)          │
+│  • POST /shoes/update-stock/ - Stock update                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🛋️ **Furniture Service** (:8030)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🛋️ FURNITURE SERVICE - Category Catalog (Furniture)            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Furniture catalog & search                                  │
+│  • Category filtering                                          │
+│  • Attributes via JSON (material, dimensions, style, brand)    │
+│  • Variant handling (color/size combinations)                  │
+│  • Stock tracking per variant                                  │
+│                                                                 │
+│  🗃️ Database: furniture_db                                      │
+│  Tables: products, product_variants, categories                │
+│                                                                 │
+│  🔗 API Endpoints:                                              │
+│  • GET /furniture/ - List furniture                            │
+│  • GET /furniture/<id>/ - Furniture details                    │
+│  • GET /furniture/categories/ - Categories                     │
+│  • POST /furniture/manage/ - Create/Update (Staff)             │
+│  • DELETE /furniture/manage/delete/<id>/ - Delete (Staff)      │
+│  • POST /furniture/update-stock/ - Stock update                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🚀 **Distributed Product network** (10+ Services)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📦 DISTRIBUTED CATALOG - Category Specialized Services         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Services:                                                  │
+│  • book-service (:8021)      • furniture-service (:8030)      │
+│  • clothes-service (:8022)   • shoe-service (:8029)           │
+│  • laptop-service (:8023)    • watch-service (:8028)          │
+│  • phone-service (:8024)     • headphone-service (:8027)      │
+│  • tablet-service (:8025)    • camera-service (:8026)         │
+│                                                                 │
+│  📋 Shared Logic (Cloned Template):                             │
+│  • Independent database per category (laptop_db, book_db, etc.)│
+│  • Specialized attributes per type                             │
+│  • Independent scaling & maintenance                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ✨ **AI Recommendation Service** (:8101)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ✨ RECOMMENDATION SERVICE - AI Weighted Ranker                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Functions:                                                  │
+│  • Hybrid recommendation merging view/cart/purchase data       │
+│  • Weighted Average Vector calculation (384-dimensional)        │
+│  • Vector similarity search via Qdrant                         │
+│  • Relevance-based sorting (highest score prioritized)          │
+│                                                                 │
+│  💎 Vector Storage: Qdrant (:6333)                             │
+│  • Collection: "products"                                      │
+│  • Metric: Cosine Similarity                                   │
+│                                                                 │
+│  🧪 Vector Sync Service:                                        │
+│  • Mandatory one-time sync tool                                │
+│  • Generates embeddings using 'all-MiniLM-L6-v2'               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 ```
 
 ### 🛒 **Cart Service** (:8006)
@@ -740,6 +1034,13 @@ PostgreSQL Cluster - 11 Dedicated Databases
 │                                                                 │
 │  🏭 supplier_db (:5442)                                        │
 │  • suppliers (vendor management & supply chain)               │
+│                                                                 │
+│  📦 Distributed Category DBs (:5451 - :5460)                   │
+│  • book_db, clothes_db, laptop_db, phone_db, tablet_db,       │
+│  • camera_db, headphone_db, watch_db, shoe_db, furniture_db   │
+│                                                                 │
+│  💎 Qdrant Vector Storage (:6333)                              │
+│  • High-dimensional embeddings for recommendation search       │
 │                                                                 │
 │  🔒 Security Features:                                         │
 │  • Individual user credentials per service                    │

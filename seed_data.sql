@@ -85,3 +85,39 @@ ON CONFLICT DO NOTHING;
 INSERT INTO customers (auth_customer_id, email, full_name, is_active, created_at, updated_at)
 VALUES (1, 'customer@truongshop.com', 'Nguyễn Văn Khách', true, NOW(), NOW())
 ON CONFLICT (auth_customer_id) DO NOTHING;
+
+-- ===========================================
+-- DISTRIBUTED PRODUCT SEEDS (For specialized services)
+-- ===========================================
+
+-- 6. Diversified Product Data for the 10 New Services
+-- (These will be skips in containers that don't have matching local tables, 
+-- but will populate correctly in the specific service containers)
+
+INSERT INTO products (id, name, description, price, product_type, category_obj_id, image_url, supplier_id, attributes, is_active, created_at, updated_at)
+VALUES 
+(30, 'MacBook Air M2', 'Thin and light powerful laptop.', 32000000, 'laptop', 1, 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500', 1, '{"cpu": "M2", "ram": "8GB"}', true, NOW(), NOW()),
+(31, 'Surface Laptop 5', 'Elegant and powerful.', 28000000, 'laptop', 1, 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500', 1, '{"os": "Windows 11"}', true, NOW(), NOW()),
+(40, 'Galaxy S23 Ultra', 'The ultimate smartphone.', 25000000, 'phone', 1, 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500', 1, '{"camera": "200MP", "storage": "512GB"}', true, NOW(), NOW()),
+(41, 'Google Pixel 8', 'The smartest phone.', 20000000, 'phone', 1, 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500', 1, '{"chip": "Tensor G3"}', true, NOW(), NOW()),
+(50, 'iPad Pro 12.9', 'The most capable tablet.', 30000000, 'tablet', 1, 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500', 1, '{"screen": "Liquid Retina XDR"}', true, NOW(), NOW()),
+(60, 'Sony A7 IV', 'The hybrid master camera.', 62000000, 'camera', 1, 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500', 1, '{"sensor": "Full Frame"}', true, NOW(), NOW()),
+(70, 'WH-1000XM5', 'Industry-leading noise cancelling.', 8000000, 'headphone', 1, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 1, '{"battery": "30h"}', true, NOW(), NOW()),
+(80, 'Apple Watch Ultra', 'The most rugged watch.', 19000000, 'watch', 1, 'https://images.unsplash.com/photo-1544117518-30df57809ca7?w=500', 1, '{"gps": "Dual Frequency"}', true, NOW(), NOW()),
+(90, 'Air Jordan 1', 'The iconic sneaker.', 4500000, 'shoe', 1, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500', 2, '{"color": "Red/White"}', true, NOW(), NOW()),
+(100, 'Standing Desk', 'Adjustable height desk.', 12000000, 'furniture', 1, 'https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=500', 2, '{"material": "Wood"}', true, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO product_variants (id, product_id, name, price_override, stock, sku, options)
+VALUES
+(30, 30, 'Silver', NULL, 10, 'LP-MA-S', '{"color": "Silver"}'),
+(31, 31, 'Black', NULL, 5, 'LP-SL-B', '{"color": "Black"}'),
+(40, 40, 'Green', NULL, 20, 'PH-GS-G', '{"color": "Green"}'),
+(41, 41, 'Rose', NULL, 15, 'PH-GP-R', '{"color": "Rose"}'),
+(50, 50, 'Space Gray', NULL, 5, 'TB-IP-S', '{"color": "Space Gray"}'),
+(60, 60, 'Body Only', NULL, 3, 'CM-SA-B', '{"package": "Body"}'),
+(70, 70, 'Midnight', NULL, 50, 'HP-WH-M', '{"color": "Midnight"}'),
+(80, 80, 'Alpine Loop', NULL, 10, 'WT-AW-A', '{"strap": "Alpine"}'),
+(90, 90, 'Size 42', NULL, 25, 'SH-AJ-42', '{"size": "42"}'),
+(100, 100, 'Walnut', NULL, 5, 'FR-SD-W', '{"finish": "Walnut"}')
+ON CONFLICT (id) DO NOTHING;

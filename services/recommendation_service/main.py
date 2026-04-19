@@ -6,7 +6,18 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from fastapi.middleware.cors import CORSMiddleware
 
+from pydantic import BaseModel
+import google.generativeai as genai
+
 app = FastAPI(title="Recommendation Service")
+
+# Configure Gemini
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+class ChatRequest(BaseModel):
+    message: str
 
 # Add CORS middleware
 app.add_middleware(
@@ -32,36 +43,18 @@ WEIGHTS = {
 
 client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
-def ensure_collection():
-    try:
-        collections = client.get_collections().collections
-        exists = any(c.name == COLLECTION_NAME for c in collections)
-        if not exists:
-            print(f"⚠️ Collection '{COLLECTION_NAME}' does not exist. Creating empty collection...")
-            client.create_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),
-            )
-    except Exception as e:
-        print(f"❌ Error checking/creating collection: {e}")
-
-@app.get("/api/recommendations/{user_id}")
-async def get_user_recommendations(user_id: int, limit: int = 10):
-    ensure_collection()
-    
+async def calculate_user_embedding(user_id: int):
+    """Calculate the weighted average embedding for a user based on their history"""
     # 1. Fetch user history from tracking service
     try:
         url = f"{TRACKING_SERVICE_URL}user-history/{user_id}/"
-        print(f"📡 Fetching history from: {url}")
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
         history_data = resp.json()
-        print(f"✅ History retrieved: {history_data.get('success')}")
         history = history_data.get('data', {})
     except Exception as e:
         print(f"❌ Tracking Service Error: {e}")
-        # Try to return fallbacks instead of crashing
-        return await get_fallback_products(limit)
+        return None, []
 
     views = history.get('views', [])
     carts = history.get('carts', [])
@@ -75,10 +68,8 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
     for p in purchases:
         actions.append({'product_id': int(p['product_id']), 'weight': WEIGHTS['purchase']})
 
-    print(f"📊 Total user actions: {len(actions)}")
-
     if not actions:
-        return await get_fallback_products(limit)
+        return None, []
 
     # 2. Fetch vectors for these products from Qdrant
     product_ids = list(set(a['product_id'] for a in actions))
@@ -89,13 +80,11 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
             ids=product_ids,
             with_vectors=True
         )
-        print(f"💎 Retrieved {len(points)} vectors from Qdrant")
-    except Exception as e:
-        print(f"❌ Qdrant Retrieve Error: {e}")
-        return await get_fallback_products(limit)
+    except Exception:
+        return None, []
 
     if not points:
-        return await get_fallback_products(limit)
+        return None, []
 
     # Map product_id to vector
     vector_map = {p.id: p.vector for p in points}
@@ -113,9 +102,33 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
             total_weight += weight
 
     if total_weight == 0:
+        return None, []
+
+    return (averaged_vector / total_weight).tolist(), actions
+
+def ensure_collection():
+    try:
+        collections = client.get_collections().collections
+        exists = any(c.name == COLLECTION_NAME for c in collections)
+        if not exists:
+            print(f"⚠️ Collection '{COLLECTION_NAME}' does not exist. Creating empty collection...")
+            client.create_collection(
+                collection_name=COLLECTION_NAME,
+                vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),
+            )
+    except Exception as e:
+        print(f"❌ Error checking/creating collection: {e}")
+
+@app.get("/api/recommendations/{user_id}")
+async def get_user_recommendations(user_id: int, limit: int = 10):
+    ensure_collection()
+    
+    averaged_vector, actions = await calculate_user_embedding(user_id)
+
+    if not averaged_vector:
         return await get_fallback_products(limit)
 
-    averaged_vector = averaged_vector / total_weight
+    product_ids = list(set(a['product_id'] for a in actions))
 
     # 4. Search Qdrant for similar products
     try:
@@ -165,6 +178,64 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
         "recommendations": recommendations,
         "history_count": len(actions)
     }
+
+@app.post("/api/ai-chat/{user_id}")
+async def ai_chat(user_id: int, chat_req: ChatRequest):
+    """AI Assistant: Uses User Embedding + Gemini to answer questions with product context"""
+    ensure_collection()
+    
+    # 1. Get User's Behavioral Profile (Embedding)
+    user_vector, _ = await calculate_user_embedding(user_id)
+    
+    context_products = []
+    if user_vector:
+        # Search for products relevant to user's general taste
+        try:
+            results = client.search(
+                collection_name=COLLECTION_NAME,
+                query_vector=user_vector,
+                limit=5
+            )
+            for r in results:
+                name = r.payload.get('name', 'Unknown Product')
+                cat = r.payload.get('category', 'General')
+                context_products.append(f"- {name} ({cat})")
+        except Exception as e:
+            print(f"❌ Qdrant Search Error in Chat: {e}")
+
+    # 2. Build Prompt
+    context_str = "\n".join(context_products) if context_products else "No specific preference history found."
+    
+    prompt = f"""
+    You are a helpful e-commerce AI assistant. 
+    The user is asking: "{chat_req.message}"
+    
+    User Profile Context (Products they seem to like based on behavior):
+    {context_str}
+    
+    Please answer the user's question. If you recommend something, base it on their profile context if relevant. 
+    Be concise, friendly, and helpful.
+    """
+
+    # 3. Call LLM
+    if not GEMINI_API_KEY:
+        return {
+            "success": True,
+            "answer": f"I see you're interested in: {', '.join([p.split('(')[0].strip('- ') for p in context_products]) if context_products else 'our store'}. (Note: Gemini API key not configured, returning mock response for: {chat_req.message})",
+            "context_count": len(context_products)
+        }
+
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        return {
+            "success": True,
+            "answer": response.text,
+            "context_count": len(context_products)
+        }
+    except Exception as e:
+        print(f"❌ Gemini API Error: {e}")
+        raise HTTPException(status_code=500, detail=f"AI Service Error: {str(e)}")
 
 async def get_fallback_products(limit):
     try:
