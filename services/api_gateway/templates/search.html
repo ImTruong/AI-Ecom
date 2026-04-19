@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Search results for "{{ query }}" - TruongShop{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="glass-card p-4 d-flex align-items-center justify-content-between bg-white">
+            <h2 class="fw-bold mb-0">Search Results</h2>
+            <div class="text-muted">Found <span id="result-count">...</span> products for "<strong>{{ query }}</strong>"</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4" id="search-grid">
+    <div class="col-12 text-center py-5" id="search-spinner">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+        <p class="mt-3 text-muted">Searching across microservices...</p>
+    </div>
+</div>
+
+<script>
+    const query = "{{ query }}";
+    
+    async function performSearch() {
+        const grid = document.getElementById('search-grid');
+        try {
+            // We use the recommendation service for semantic search if possible, 
+            // or just the product service with a search query.
+            const res = await fetch(`/api/products/?search=${encodeURIComponent(query)}`);
+            const products = await res.json();
+            
+            document.getElementById('search-spinner').style.display = 'none';
+            document.getElementById('result-count').textContent = products.length;
+
+            if (products.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <img src="https://cdni.iconscout.com/illustration/premium/thumb/no-result-found-6842456-5604112.png" style="max-width: 300px;" class="mb-4">
+                        <h3 class="text-muted">Oops! No matches for "${query}"</h3>
+                        <p class="text-muted">Try using different keywords or categories.</p>
+                        <a href="/" class="btn btn-vibrant mt-3 px-5">Back to Home</a>
+                    </div>`;
+                return;
+            }
+
+            products.forEach(p => {
+                const col = document.createElement('div');
+                col.className = 'col-12 col-md-6 col-lg-4 col-xl-3 mb-4';
+                col.innerHTML = `
+                    <div class="glass-card h-100 p-0 overflow-hidden border-0 position-relative hover-lift shadow-sm bg-white">
+                        <div class="p-4 text-center" style="height: 200px;">
+                            <img src="${p.image_url || 'https://via.placeholder.com/400x400?text=' + p.name}" 
+                                 class="img-fluid h-100" style="object-fit: contain;" alt="${p.name}">
+                        </div>
+                        <div class="card-body p-4 border-top">
+                            <h5 class="fw-bold text-dark text-truncate mb-2">${p.name}</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5 fw-bold text-primary">
+                                    ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                                </span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="/product/detail/${p.id}/" class="btn btn-outline-secondary rounded-pill flex-grow-1">View</a>
+                                <button class="btn btn-vibrant rounded-pill px-3" onclick="addToCart('${p.product_type}', ${p.id}, ${p.price}, '${p.name}', '${p.image_url}')">
+                                    <i class="fa fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(col);
+            });
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = `<div class="alert alert-danger">Search failed.</div>`;
+        }
+    }
+
+    async function addToCart(type, id, price, name, img) {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            showAlert('Please login to add to cart', 'warning');
+            return;
+        }
+        try {
+            const res = await fetch('/api/cart/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ 
+                    product_type: type, 
+                    product_id: id, 
+                    price: price,
+                    product_name: name,
+                    image_url: img,
+                    quantity: 1 
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showAlert('Added to cart!');
+                refreshCartBadge();
+            }
+        } catch (e) { showAlert('Error', 'danger'); }
+    }
+
+    if(query) performSearch();
+</script>
+
+<style>
+    .hover-lift { transition: transform 0.3s; }
+    .hover-lift:hover { transform: translateY(-5px); }
+</style>
+{% endblock %}

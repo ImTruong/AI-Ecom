@@ -66,6 +66,11 @@ def product_detail(request, product_id):
         'product_id': product_id
     })
 
+def search_page(request):
+    """Search results page"""
+    query = request.GET.get('q', '')
+    return render(request, 'search.html', {'query': query})
+
 def health_check(request):
     """Health check endpoint"""
     return JsonResponse({

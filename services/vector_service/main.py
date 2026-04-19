@@ -11,15 +11,20 @@ QDRANT_HOST = os.getenv('QDRANT_HOST', 'qdrant')
 QDRANT_PORT = int(os.getenv('QDRANT_PORT', 6333))
 COLLECTION_NAME = "products"
 
-def fetch_products():
+def fetch_products(retries=10, delay=5):
     print(f"🔍 Fetching products from {PRODUCT_SERVICE_URL}...")
-    try:
-        response = requests.get(PRODUCT_SERVICE_URL)
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        print(f"❌ Error fetching products: {e}")
-        return []
+    for i in range(retries):
+        try:
+            response = requests.get(PRODUCT_SERVICE_URL, timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"⚠️ Attempt {i+1}/{retries} failed: {e}")
+            if i < retries - 1:
+                time.sleep(delay)
+            else:
+                print(f"❌ Error fetching products after {retries} attempts.")
+                return []
 
 def format_product_text(p):
     """Combine name, category, description, attributes, and variants into a single string"""
@@ -82,9 +87,11 @@ def main():
             id=p['id'],
             vector=vector,
             payload={
+                "id": p['id'],
                 "name": p['name'],
                 "category": p['category'],
                 "product_type": p['product_type'],
+                "price": p['price'],
                 "image_url": p.get('image_url', ''),
                 "raw_text": text
             }

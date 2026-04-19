@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 8000
 
 # Run migrations and start the server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD python wait_for_db.py && python manage.py migrate --noinput && python -u manage.py runserver 0.0.0.0:8000

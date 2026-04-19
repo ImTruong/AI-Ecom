@@ -25,5 +25,5 @@ RUN python manage.py collectstatic --noinput || true
 # Expose port
 EXPOSE 8000
 
-# Run migrations and start server
-CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+# Run database check, migrations and start server
+CMD python wait_for_db.py && python manage.py migrate --noinput && python -u manage.py runserver 0.0.0.0:8000

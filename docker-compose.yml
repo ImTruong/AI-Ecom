@@ -180,11 +180,6 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - microservices_network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Tracking Service
   tracking-service:
@@ -205,7 +200,6 @@ services:
     volumes:
       - ./services/tracking_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Product Service
   product-service:
@@ -228,7 +222,6 @@ services:
     volumes:
       - ./services/product_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Auth Service
   auth-service:
@@ -251,7 +244,6 @@ services:
     volumes:
       - ./services/auth_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Customer Service
   customer-service:
@@ -276,7 +268,6 @@ services:
     volumes:
       - ./services/customer_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Staff Service
   staff-service:
@@ -301,7 +292,6 @@ services:
     volumes:
       - ./services/staff_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # API Gateway
   api-gateway:
@@ -337,7 +327,6 @@ services:
     volumes:
       - ./services/api_gateway:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Cart Service
   cart-service:
@@ -360,7 +349,6 @@ services:
     volumes:
       - ./services/cart_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Order Service
   order-service:
@@ -383,7 +371,6 @@ services:
     volumes:
       - ./services/order_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Payment Service
   payment-service:
@@ -406,7 +393,6 @@ services:
     volumes:
       - ./services/payment_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Voucher Service
   voucher-service:
@@ -429,7 +415,6 @@ services:
     volumes:
       - ./services/voucher_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Rating Service
   rating-service:
@@ -452,7 +437,6 @@ services:
     volumes:
       - ./services/rating_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
   # Supplier Service
   supplier-service:
@@ -475,7 +459,6 @@ services:
     volumes:
       - ./services/supplier_service:/app
       - ./shared:/shared
-    command: python manage.py runserver 0.0.0.0:8000
 
 
   # Background Workers
@@ -493,7 +476,7 @@ services:
       - DATABASE_URL=postgresql://auth_user:auth_pass@auth_db:5432/auth_db
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       auth-service:
         condition: service_started
     networks:
@@ -514,7 +497,7 @@ services:
       - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       customer-service:
         condition: service_started
     networks:
@@ -559,7 +542,7 @@ services:
       dockerfile: services/vector_service/Dockerfile
     container_name: vector-service
     environment:
-      - PRODUCT_SERVICE_URL=http://api-gateway:8000/api/products/
+      - PRODUCT_SERVICE_URL=http://product-service:8000/api/products/
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
     depends_on:

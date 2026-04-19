@@ -1,87 +1,93 @@
--- ===========================================
--- MASTER SEED DATA FOR TRUONGSHOP
--- ===========================================
+-- Master Seed Data for Enterprise Product Structure
+-- Handle 10 categories and polymorphic products
 
--- 1. AUTH SERVICE (auth_db)
-INSERT INTO customers (id, email, password_hash, full_name, is_active, created_at, updated_at)
-VALUES (1, 'customer@truongshop.com', 'pbkdf2_sha256$600000$randomsalt123$abcdefghijklmnopqrstuvwxyz1234567890', 'Nguyễn Văn Khách', true, NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+-- 1. Clear existing data
+DELETE FROM products_book;
+DELETE FROM products_clothes;
+DELETE FROM products_laptop;
+DELETE FROM products_phone;
+DELETE FROM products_tablet;
+DELETE FROM products_camera;
+DELETE FROM products_headphone;
+DELETE FROM products_watch;
+DELETE FROM products_shoe;
+DELETE FROM products_furniture;
+DELETE FROM products;
+DELETE FROM categories;
 
-INSERT INTO staff (id, email, password_hash, full_name, role, is_active, created_at, updated_at)
-VALUES (1, 'staff@truongshop.com', 'pbkdf2_sha256$600000$randomsalt456$abcdefghijklmnopqrstuvwxyz0987654321', 'Trần Thị Nhân Viên', 'admin', true, NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+-- 2. Seed Categories
+INSERT INTO categories (name, slug, description, icon) VALUES
+('Books', 'books', 'Books, E-books and Audiobooks', 'book'),
+('Clothes', 'clothes', 'Fashion and Apparel', 'tshirt'),
+('Laptops', 'laptops', 'High-performance computing', 'laptop'),
+('Phones', 'phones', 'Smartphones and Accessories', 'mobile-alt'),
+('Tablets', 'tablets', 'Portable touch devices', 'tablet-alt'),
+('Cameras', 'cameras', 'Professional and hobbyist photography', 'camera'),
+('Headphones', 'headphones', 'Audio and music gear', 'headphones'),
+('Watches', 'watches', 'Analog and Smart watches', 'clock'),
+('Shoes', 'shoes', 'Footwear for all occasions', 'shoe-prints'),
+('Furniture', 'furniture', 'Home and Office furniture', 'couch');
 
--- 2. SUPPLIER SERVICE (supplier_db)
-INSERT INTO suppliers (id, name, email, phone, address, created_at, updated_at)
-VALUES 
-(1, 'Books Wholesale Co', 'sales@bw.com', '555-0111', '123 Main St', NOW(), NOW()),
-(2, 'Global Textiles', 'info@gt.com', '555-0222', '456 Textile Blvd', NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+-- 3. Seed Products (Base Table)
+-- We need to insert into 'products' first, then into specific tables.
+-- Using IDs starting from 100 for clarity
 
--- 3. PRODUCT SERVICE (product_db)
-INSERT INTO categories (id, name, description, created_at)
-VALUES 
-(1, 'Programming', 'Books and items for developers', NOW()),
-(2, 'T-Shirt', 'Stylish developer t-shirts', NOW()),
-(3, 'Self-Help', 'Books for personal growth and productivity', NOW()),
-(4, 'Hoodie', 'Warm and stylish hoodies', NOW()),
-(5, 'Accessories', 'Tech accessories and more', NOW())
-ON CONFLICT (id) DO NOTHING;
+-- Book
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (101, (SELECT id FROM categories WHERE slug='books'), 'Clean Code', 'A Handbook of Agile Software Craftsmanship', 450000, 'https://m.media-amazon.com/images/I/41xShlnTZTL._SX376_BO1,204,203,200_.jpg', 1, true, NOW(), NOW());
+INSERT INTO products_book (product_ptr_id, author, isbn, publisher, page_count)
+VALUES (101, 'Robert C. Martin', '978-0132350884', 'Prentice Hall', 464);
 
-INSERT INTO products (id, name, description, price, product_type, category_obj_id, image_url, supplier_id, attributes, is_active, created_at, updated_at)
-VALUES 
-(1, 'Clean Code', 'A Handbook of Agile Software Craftsmanship.', 450000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/41xShlnTZTL._SX376_BO1,204,203,200_.jpg', 1, '{"author": "Robert C. Martin"}', true, NOW(), NOW()),
-(2, 'The Pragmatic Programmer', 'Your Journey To Mastery.', 520000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/51cUVaBWZzL._SX396_BO1,204,203,200_.jpg', 1, '{"author": "Andrew Hunt"}', true, NOW(), NOW()),
-(3, 'Developer T-Shirt', 'Comfortable cotton t-shirt.', 299000, 'clothes', 2, 'https://i.pinimg.com/originals/a3/18/64/a318643ad39b00dca6de73e901d2169c.jpg', 2, '{}', true, NOW(), NOW()),
-(4, 'Programmer Hoodie', 'Warm hoodie with code design.', 599000, 'clothes', 4, 'https://images-na.ssl-images-amazon.com/images/I/61kFGcrHSQL._UX466_.jpg', 2, '{}', true, NOW(), NOW()),
-(10, 'Introduction to Algorithms', 'The Bible of algorithms.', 1200000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/41T077EHWGL._SX412_BO1,204,203,200_.jpg', 1, '{"author": "CLRS"}', true, NOW(), NOW()),
-(11, 'Design Patterns', 'Reusable Object-Oriented Software.', 850000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/51szY7S9SXL._SX395_BO1,204,203,200_.jpg', 1, '{"author": "Gang of Four"}', true, NOW(), NOW()),
-(12, 'Refactoring', 'Improving Existing Code.', 950000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/41S7iWreAgL._SX395_BO1,204,203,200_.jpg', 1, '{"author": "Martin Fowler"}', true, NOW(), NOW()),
-(13, 'Python Crash Course', 'Project-Based Introduction.', 450000, 'book', 1, 'https://images-na.ssl-images-amazon.com/images/I/51Hh410SxvL._SX379_BO1,204,203,200_.jpg', 1, '{"author": "Eric Matthes"}', true, NOW(), NOW()),
-(14, 'Soft Skills', 'The developer life manual.', 350000, 'book', 3, 'https://images-na.ssl-images-amazon.com/images/I/4102-Y98fKL._SX331_BO1,204,203,200_.jpg', 1, '{"author": "John Sonmez"}', true, NOW(), NOW()),
-(15, 'Deep Work', 'Rules for Focused Success.', 250000, 'book', 3, 'https://images-na.ssl-images-amazon.com/images/I/417P6UQC0CL._SX326_BO1,204,203,200_.jpg', 1, '{"author": "Cal Newport"}', true, NOW(), NOW()),
-(16, 'Atomic Habits', 'Build Good Habits.', 280000, 'book', 3, 'https://images-na.ssl-images-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg', 1, '{"author": "James Clear"}', true, NOW(), NOW()),
-(17, 'Linux Terminal T-Shirt', '$ sudo rm -rf / print.', 250000, 'clothes', 2, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(18, 'Git Hero Hoodie', 'git commit -m "Save life".', 550000, 'clothes', 4, 'https://m.media-amazon.com/images/I/61k7B6kE-L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(19, 'Cyber Security Cap', 'Protect your head.', 150000, 'clothes', 5, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(20, 'JavaScript Ninja T-Shirt', 'Show your JS mastery.', 270000, 'clothes', 2, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(21, 'Docker Container Socks', 'Keep your feet isolated.', 120000, 'clothes', 5, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(22, 'Code Review Mug', 'Drink coffee, find bugs.', 180000, 'clothes', 5, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(23, 'Desk Mat', 'Large desk mat.', 350000, 'clothes', 5, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW()),
-(24, 'Binary Code Jacket', 'Stylish jacket.', 890000, 'clothes', 4, 'https://m.media-amazon.com/images/I/61mNnQ9oK+L._AC_UX679_.jpg', 2, '{}', true, NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+-- Laptop
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (102, (SELECT id FROM categories WHERE slug='laptops'), 'MacBook Pro M2', 'Powerful laptop for professionals', 35000000, 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp-spacegray-select-202206?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1664497359473', 2, true, NOW(), NOW());
+INSERT INTO products_laptop (product_ptr_id, cpu, ram, storage, gpu)
+VALUES (102, 'Apple M2 Pro', 16, '512GB SSD', '16-core GPU');
 
-INSERT INTO product_variants (id, product_id, name, price_override, stock, sku, options)
-VALUES
-(1, 1, 'Hardcover', NULL, 25, 'BK-CC-01', '{"format": "Hardcover"}'),
-(2, 1, 'E-book', 300000, 100, 'BK-CC-02', '{"format": "E-book"}'),
-(3, 2, 'Paperback', NULL, 18, 'BK-PP-01', '{"format": "Paperback"}'),
-(4, 3, 'Black, S', NULL, 10, 'CL-DT-BS', '{"color": "Black", "size": "S"}'),
-(5, 3, 'Black, M', NULL, 15, 'CL-DT-BM', '{"color": "Black", "size": "M"}'),
-(10, 10, 'Hardcover', NULL, 10, 'BK-ALGO-H', '{"format": "Hardcover"}'),
-(11, 11, 'Paperback', NULL, 15, 'BK-DP-P', '{"format": "Paperback"}'),
-(12, 12, 'Hardcover', NULL, 20, 'BK-REF-H', '{"format": "Hardcover"}'),
-(13, 13, 'Paperback', NULL, 50, 'BK-PY-P', '{"format": "Paperback"}'),
-(14, 14, 'E-book', 150000, 100, 'BK-SS-E', '{"format": "E-book"}'),
-(15, 15, 'Paperback', NULL, 30, 'BK-DW-P', '{"format": "Paperback"}'),
-(16, 16, 'Paperback', NULL, 40, 'BK-AH-P', '{"format": "Paperback"}'),
-(17, 17, 'Black, L', NULL, 25, 'CL-LINUX-L', '{"color": "Black", "size": "L"}'),
-(18, 18, 'Black, XL', NULL, 15, 'CL-GIT-XL', '{"color": "Black", "size": "XL"}'),
-(19, 19, 'Universal', NULL, 100, 'CL-CAP-U', '{"size": "Universal"}'),
-(20, 20, 'Yellow, M', NULL, 30, 'CL-JS-M', '{"color": "Yellow", "size": "M"}'),
-(21, 21, 'Universal', NULL, 50, 'CL-SOCK-U', '{"size": "Universal"}'),
-(22, 22, 'White', NULL, 20, 'CL-MUG-W', '{"color": "White"}'),
-(23, 23, 'Extra Large', NULL, 15, 'CL-MAT-XL', '{"size": "XL"}'),
-(24, 24, 'Black, M', NULL, 10, 'CL-JACK-M', '{"color": "Black", "size": "M"}')
-ON CONFLICT (id) DO NOTHING;
+-- Phone
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (103, (SELECT id FROM categories WHERE slug='phones'), 'iPhone 14 Pro', 'Dynamic Island, 48MP Camera', 25000000, 'https://m.media-amazon.com/images/I/61XO4bORHUL._AC_SL1500_.jpg', 2, true, NOW(), NOW());
+INSERT INTO products_phone (product_ptr_id, screen_size, battery, camera_specs)
+VALUES (103, '6.1 inch OLED', 3200, '48MP Main, 12MP Ultra Wide');
 
--- 4. RATING SERVICE (rating_db)
-INSERT INTO ratings (order_id, customer_id, product_type, product_id, product_name, stars, comment, created_at)
-VALUES 
-(1, 1, 'book', 1, 'Clean Code', 5, 'Exceptional book!', NOW())
-ON CONFLICT DO NOTHING;
+-- Clothes
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (104, (SELECT id FROM categories WHERE slug='clothes'), 'Git Hero Hoodie', 'Stay comfortable while coding', 550000, 'https://m.media-amazon.com/images/I/61k7B6kE-L._AC_UX679_.jpg', 3, true, NOW(), NOW());
+INSERT INTO products_clothes (product_ptr_id, brand, material, gender)
+VALUES (104, 'DevStyle', 'Cotton/Polyester', 'Unisex');
 
--- 5. CUSTOMER SERVICE (customer_db)
-INSERT INTO customers (auth_customer_id, email, full_name, is_active, created_at, updated_at)
-VALUES (1, 'customer@truongshop.com', 'Nguyễn Văn Khách', true, NOW(), NOW())
-ON CONFLICT (auth_customer_id) DO NOTHING;
+-- Tablet
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (105, (SELECT id FROM categories WHERE slug='tablets'), 'iPad Air', 'Light, bright, full of might', 15000000, 'https://m.media-amazon.com/images/I/61XZQXFQ36L._AC_SL1500_.jpg', 2, true, NOW(), NOW());
+INSERT INTO products_tablet (product_ptr_id, screen_size, os, is_stylus_supported)
+VALUES (105, '10.9 inch Liquid Retina', 'iPadOS', true);
+
+-- Camera
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (106, (SELECT id FROM categories WHERE slug='cameras'), 'Sony A7 IV', 'The basic has never been this good', 60000000, 'https://m.media-amazon.com/images/I/718W93+D-OL._AC_SL1500_.jpg', 4, true, NOW(), NOW());
+INSERT INTO products_camera (product_ptr_id, resolution, sensor_type, lens_included)
+VALUES (106, '33MP', 'Full-frame CMOS', 'Body Only');
+
+-- Headphone
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (107, (SELECT id FROM categories WHERE slug='headphones'), 'Sony WH-1000XM5', 'Industry-leading noise cancelling', 8000000, 'https://m.media-amazon.com/images/I/51SKmu2G9FL._AC_SL1200_.jpg', 4, true, NOW(), NOW());
+INSERT INTO products_headphone (product_ptr_id, type, is_wireless, noise_cancelling)
+VALUES (107, 'Over-ear', true, true);
+
+-- Watch
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (108, (SELECT id FROM categories WHERE slug='watches'), 'Apple Watch Ultra', 'The ultimate sports watch', 20000000, 'https://m.media-amazon.com/images/I/91zI7SNo6XL._AC_SL1500_.jpg', 2, true, NOW(), NOW());
+INSERT INTO products_watch (product_ptr_id, style, water_resistance, band_material)
+VALUES (108, 'Smart', '100m', 'Ocean Band');
+
+-- Shoe
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (109, (SELECT id FROM categories WHERE slug='shoes'), 'Nike Air Max', 'Classic comfort with style', 3000000, 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/603ed60b-f35c-4384-8186-508b98b9a1a0/air-max-270-shoes-V4D79L.png', 5, true, NOW(), NOW());
+INSERT INTO products_shoe (product_ptr_id, size_eu, material, shoe_type)
+VALUES (109, 42, 'Mesh/Synthetic', 'Sneaker');
+
+-- Furniture
+INSERT INTO products (id, category_id, name, description, price, image_url, supplier_id, is_active, created_at, updated_at)
+VALUES (110, (SELECT id FROM categories WHERE slug='furniture'), 'Ergonomic Chair', 'Built for long working hours', 5000000, 'https://m.media-amazon.com/images/I/718yG7XonfL._AC_SL1500_.jpg', 6, true, NOW(), NOW());
+INSERT INTO products_furniture (product_ptr_id, material, dimensions, weight_capacity)
+VALUES (110, 'Breathable Mesh', '70x70x120cm', '150kg');

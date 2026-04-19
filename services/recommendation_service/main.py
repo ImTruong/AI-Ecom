@@ -128,41 +128,23 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
         print(f"❌ Qdrant Search Error: {e}")
         return await get_fallback_products(limit)
 
-    # 5. Filter and format
-    seen_ids = set(product_ids)
+    # 5. Format results
     recommendations = []
-    
-    # First pass: try to find new products (not seen)
     for r in results:
-        if r.id not in seen_ids:
-            recommendations.append({
-                "id": r.id,
-                "score": r.score,
-                "payload": r.payload
-            })
-            if len(recommendations) >= limit:
-                break
-    
-    # Second pass: if we don't have enough, allow seen products (if the catalog is small)
-    if len(recommendations) < limit:
-        for r in results:
-            if r.id in seen_ids and not any(rec['id'] == r.id for rec in recommendations):
-                recommendations.append({
-                    "id": r.id,
-                    "score": r.score,
-                    "payload": r.payload,
-                    "note": "Already viewed"
-                })
-                if len(recommendations) >= limit:
-                    break
+        recommendations.append({
+            "id": r.id,
+            "score": float(r.score),
+            "payload": r.payload,
+            "is_previously_interacted": r.id in seen_ids
+        })
 
-    # Final Sort: Ensure the highest score is at position #1
+    # Sort: Ensure the highest score is at position #1
     recommendations.sort(key=lambda x: x['score'], reverse=True)
 
     return {
         "success": True,
         "user_id": user_id,
-        "recommendations": recommendations,
+        "recommendations": recommendations[:5],
         "history_count": len(actions)
     }
 

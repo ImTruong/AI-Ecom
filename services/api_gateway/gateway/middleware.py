@@ -25,14 +25,6 @@ class RoutingMiddleware:
             'service': 'customer-service',
             'url': os.getenv('CUSTOMER_SERVICE_URL', 'http://customer-service:8000'),
         },
-        '/api/books/': {
-            'service': 'book-service',
-            'url': os.getenv('BOOK_SERVICE_URL', 'http://book-service:8000'),
-        },
-        '/api/clothes/': {
-            'service': 'clothes-service',
-            'url': os.getenv('CLOTHES_SERVICE_URL', 'http://clothes-service:8000'),
-        },
         '/api/products/': {
             'service': 'product-service',
             'url': os.getenv('PRODUCT_SERVICE_URL', 'http://product-service:8000'),
@@ -60,6 +52,14 @@ class RoutingMiddleware:
         '/api/suppliers/': {
             'service': 'supplier-service',
             'url': os.getenv('SUPPLIER_SERVICE_URL', 'http://supplier-service:8000'),
+        },
+        '/api/staff/': {
+            'service': 'staff-service',
+            'url': os.getenv('STAFF_SERVICE_URL', 'http://staff-service:8000'),
+        },
+        '/api/recommendations/': {
+            'service': 'recommendation-service',
+            'url': os.getenv('RECOMMENDATION_SERVICE_URL', 'http://recommendation-service:8001'),
         },
     }
     
@@ -92,75 +92,70 @@ class RoutingMiddleware:
         """Forward request to microservice"""
         try:
             # Build target URL
-            target_url = route_config['url'] + request.path
-            
+            internal_base_url = route_config['url'].rstrip('/')
+            target_url = f"{internal_base_url}{request.path}"
             if request.GET:
-                query_string = request.GET.urlencode()
-                target_url += f'?{query_string}'
+                target_url += f"?{request.GET.urlencode()}"
             
-            # Prepare headers
+            # Prepare headers - carefully filter
             headers = {}
+            for key, value in request.headers.items():
+                if key.lower() not in ['host', 'content-length', 'connection']:
+                    headers[key] = value
             
-            # Forward Authorization header if present
-            if 'HTTP_AUTHORIZATION' in request.META:
-                headers['Authorization'] = request.META['HTTP_AUTHORIZATION']
-            
-            # Forward Content-Type
-            if 'CONTENT_TYPE' in request.META:
-                headers['Content-Type'] = request.META['CONTENT_TYPE']
-            
-            # Prepare body
+            # Read body safely
             body = None
             if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+                body = request.body
+            
+            # Forward with retries
+            import time
+            max_retries = 3
+            for attempt in range(max_retries):
                 try:
-                    body = request.body
-                except Exception as e:
-                    logger.error(f"Error reading request body: {e}")
+                    print(f"DEBUG: Forwarding {request.method} {request.path} -> {target_url} (Attempt {attempt+1})")
+                    response = requests.request(
+                        method=request.method,
+                        url=target_url,
+                        headers=headers,
+                        data=body,
+                        timeout=15,
+                        allow_redirects=False
+                    )
+                    
+                    # Create Django response
+                    django_response = HttpResponse(
+                        content=response.content,
+                        status=response.status_code,
+                        content_type=response.headers.get('Content-Type', 'application/json')
+                    )
+                    
+                    # Copy headers back
+                    for key, value in response.headers.items():
+                        if key.lower() not in ['content-encoding', 'transfer-encoding', 'content-length', 'connection']:
+                            django_response[key] = value
+                            
+                    return django_response
+                    
+                except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                    print(f"⚠️ Gateway Forwarding Error: {e}")
+                    if attempt < max_retries - 1:
+                        time.sleep(2)
+                    else:
+                        return JsonResponse({
+                            'success': False, 
+                            'error': f'Service {route_config["service"]} unreachable',
+                            'details': str(e)
+                        }, status=503)
             
-            # Make request to microservice
-            logger.info(f"Forwarding {request.method} {request.path} to {target_url}")
-            print(f"FORWARDING: {request.method} {request.path} -> {target_url}")
+            return JsonResponse({'success': False, 'error': 'Gateway timeout'}, status=504)
             
-            response = requests.request(
-                method=request.method,
-                url=target_url,
-                headers=headers,
-                data=body,
-                timeout=30,
-                allow_redirects=False
-            )
+            return JsonResponse({'success': False, 'error': 'Max retries reached'}, status=503)
             
-            # Create Django response from microservice response
-            django_response = HttpResponse(
-                content=response.content,
-                status=response.status_code,
-                content_type=response.headers.get('Content-Type', 'application/json')
-            )
-            
-            # Forward relevant headers. Note: Content-Length should NOT be forwarded manually
-            # as Django will calculate it correctly based on the content provided.
-            if 'Content-Type' in response.headers:
-                django_response['Content-Type'] = response.headers['Content-Type']
-            
-            return django_response
-        
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"Connection error to {route_config['service']}: {e}")
-            return JsonResponse({
-                'success': False,
-                'error': f"Service {route_config['service']} is unavailable"
-            }, status=503)
-        
-        except requests.exceptions.Timeout as e:
-            logger.error(f"Timeout connecting to {route_config['service']}: {e}")
-            return JsonResponse({
-                'success': False,
-                'error': f"Service {route_config['service']} timed out"
-            }, status=504)
-        
         except Exception as e:
             logger.error(f"Error forwarding request: {e}")
             return JsonResponse({
                 'success': False,
-                'error': 'Internal gateway error'
+                'error': 'Internal gateway error',
+                'details': str(e)
             }, status=500)

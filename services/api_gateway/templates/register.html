@@ -1,209 +1,114 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - TruongShop{% endblock %}
-
-{% block extra_css %}
-<style>
-    .auth-container {
-        max-width: 450px;
-        margin: 50px auto;
-    }
-
-    .auth-card {
-        background: white;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .auth-title {
-        font-size: 32px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 30px;
-        color: #333;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 8px;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-    }
-
-    .form-input:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s;
-        margin-top: 10px;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-submit:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .auth-footer {
-        text-align: center;
-        margin-top: 20px;
-        color: #666;
-    }
-
-    .auth-footer a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-
-    .password-hint {
-        font-size: 12px;
-        color: #999;
-        margin-top: 5px;
-    }
-</style>
-{% endblock %}
+{% block title %}Join TruongShop - Enterprise AI E-commerce{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h1 class="auth-title">📝 Register</h1>
-        
-        <form id="registerForm" onsubmit="register(event)">
-            <div class="form-group">
-                <label class="form-label">Full Name</label>
-                <input type="text" id="full_name" class="form-input" required placeholder="Enter your full name">
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="glass-card overflow-hidden border-0 shadow-lg bg-white">
+            <div class="row g-0">
+                <div class="col-lg-5 d-none d-lg-block" style="background: var(--primary-gradient); padding: 5rem;">
+                    <div class="h-100 d-flex flex-column justify-content-center text-white">
+                        <h1 class="display-4 fw-bold mb-4">Start Your Journey.</h1>
+                        <p class="fs-5 opacity-75">Access exclusive AI-curated deals and personalized recommendations across 10 specialized product categories.</p>
+                        <div class="mt-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-white bg-opacity-25 p-2 me-3"><i class="fa fa-bolt"></i></div>
+                                <span>Instant Sync with Qdrant AI</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-white bg-opacity-25 p-2 me-3"><i class="fa fa-shield-halved"></i></div>
+                                <span>Enterprise Grade Security</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 p-4 p-md-5">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold text-dark">Create Account</h2>
+                        <p class="text-muted">Join the next-gen microservices marketplace</p>
+                    </div>
+
+                    <form id="registerForm" onsubmit="handleRegister(event)" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-uppercase">Full Name</label>
+                            <input type="text" id="full_name" class="form-control rounded-pill px-4 py-3 border-2" placeholder="John Doe" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-uppercase">Email Address</label>
+                            <input type="email" id="email" class="form-control rounded-pill px-4 py-3 border-2" placeholder="name@example.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase">Password</label>
+                            <input type="password" id="password" class="form-control rounded-pill px-4 py-3 border-2" placeholder="••••••••" required minlength="8">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase">Confirm Password</label>
+                            <input type="password" id="confirm_password" class="form-control rounded-pill px-4 py-3 border-2" placeholder="••••••••" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-uppercase">Delivery Address (Optional)</label>
+                            <textarea id="address" class="form-control rounded-4 px-4 py-3 border-2" rows="2" placeholder="123 AI Street, Tech City"></textarea>
+                        </div>
+                        
+                        <div class="col-12 mt-5">
+                            <button type="submit" id="regBtn" class="btn btn-vibrant w-100 py-3 rounded-pill fs-5 shadow">
+                                Create Account <i class="fa fa-user-plus ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-5">
+                        <span class="text-muted">Already a member?</span>
+                        <a href="/login/" class="text-primary fw-bold text-decoration-none ms-2">Sign In Instead</a>
+                    </div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="email" class="form-input" required placeholder="Enter your email">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" id="password" class="form-input" required placeholder="Enter your password">
-                <div class="password-hint">At least 8 characters</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" id="confirm_password" class="form-input" required placeholder="Confirm your password">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Phone (Optional)</label>
-                <input type="tel" id="phone" class="form-input" placeholder="Enter your phone number">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Address (Optional)</label>
-                <textarea id="address" class="form-input" rows="3" placeholder="Enter your address"></textarea>
-            </div>
-
-            <button type="submit" class="btn-submit" id="btnSubmit">Register</button>
-        </form>
-
-        <div class="auth-footer">
-            Already have an account? <a href="/login/">Login here</a>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // Redirect if already logged in
-    if (isLoggedIn()) {
-        window.location.href = '/';
-    }
+    if(isLoggedIn()) window.location.href = '/';
 
-    async function register(event) {
-        event.preventDefault();
+    async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById('regBtn');
+        const pass = document.getElementById('password').value;
+        const confirm = document.getElementById('confirm_password').value;
 
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm_password').value;
+        if(pass !== confirm) return showAlert("Passwords do not match!", "danger");
 
-        if (password !== confirmPassword) {
-            showAlert('Passwords do not match', 'error');
-            return;
-        }
-
-        if (password.length < 8) {
-            showAlert('Password must be at least 8 characters', 'error');
-            return;
-        }
-
-        const btnSubmit = document.getElementById('btnSubmit');
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Registering...';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
 
         try {
-            const response = await fetch('/api/auth/customer/register/', {
+            const res = await fetch('/api/auth/customer/register/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
-                    password: password,
+                    password: pass,
                     full_name: document.getElementById('full_name').value,
-                    phone: document.getElementById('phone').value,
                     address: document.getElementById('address').value
                 })
             });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setToken(data.data.access_token);
+            const back = await res.json();
+            
+            if(back.success) {
+                setToken(back.data.access_token);
                 localStorage.setItem('user_role', 'customer');
-                showAlert('Registration successful! Redirecting...', 'success');
+                showAlert("Welcome to TruongShop! Redirecting...");
                 setTimeout(() => window.location.href = '/', 1500);
             } else {
-                showAlert(data.error || 'Registration failed', 'error');
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = 'Register';
+                showAlert(back.error || "Registration failed", "danger");
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
             }
-        } catch (error) {
-            console.error('Error during registration:', error);
-            showAlert('Error during registration', 'error');
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Register';
+        } catch (e) {
+            showAlert("Auth Service unreachable", "danger");
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
         }
     }
 </script>

@@ -57,16 +57,18 @@ def add_to_cart(request):
                     'error': f'Missing required field: {field}'
                 }, status=400)
         
-        # Validate product_type (accept both singular and plural)
-        if data['product_type'] in ['book', 'books']:
-            data['product_type'] = 'book'
-        elif data['product_type'] in ['clothes']:
-            data['product_type'] = 'clothes'
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': 'Invalid product_type. Must be "book" or "clothes"'
-            }, status=400)
+        # Validate REQUIRED_TYPES
+        VALID_TYPES = ['laptop', 'phone', 'book', 'clothes', 'watch', 'camera', 'shoe', 'furniture', 'tablet', 'headphone']
+        if data['product_type'] not in VALID_TYPES:
+            # Try to sanitize (e.g., 'books' -> 'book')
+            sanitized = data['product_type'].rstrip('s')
+            if sanitized in VALID_TYPES:
+                data['product_type'] = sanitized
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': f"Invalid product_type: {data['product_type']}. Must be one of {VALID_TYPES}"
+                }, status=400)
         
         quantity = data.get('quantity', 1)
         

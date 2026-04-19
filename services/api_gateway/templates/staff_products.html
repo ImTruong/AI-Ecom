@@ -1,586 +1,318 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Manage Products - TruongShop{% endblock %}
-
-{% block extra_css %}
-<style>
-    .admin-card {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-    .product-filters {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .filter-group select {
-        padding: 8px 15px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-    }
-    .product-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .product-table th, .product-table td {
-        padding: 15px;
-        text-align: left;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .product-table th {
-        background: #f8f9fa;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 12px;
-        color: #666;
-    }
-    
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(5px);
-        z-index: 2000;
-        align-items: center;
-        justify-content: center;
-    }
-    .modal-content {
-        background: white;
-        padding: 40px;
-        border-radius: 25px;
-        width: 100%;
-        max-width: 900px;
-        max-height: 90vh;
-        overflow-y: auto;
-        position: relative;
-    }
-    .modal-close {
-        position: absolute;
-        top: 25px;
-        right: 25px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-    }
-    
-    .section-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin: 20px 0 15px 0;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-    .form-group {
-        margin-bottom: 15px;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        color: #444;
-    }
-    .form-group input, .form-group textarea, .form-group select {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        font-size: 15px;
-        transition: border-color 0.3s;
-    }
-    .form-group input:focus {
-        border-color: #667eea;
-        outline: none;
-    }
-    
-    .variant-row {
-        background: #f8faff;
-        padding: 15px;
-        border-radius: 15px;
-        margin-bottom: 10px;
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 40px;
-        gap: 10px;
-        align-items: center;
-    }
-    .attribute-row {
-        display: grid;
-        grid-template-columns: 1fr 2fr 40px;
-        gap: 10px;
-        margin-bottom: 8px;
-    }
-</style>
-{% endblock %}
+{% block title %}Manage Products - Staff Dashboard{% endblock %}
 
 {% block content %}
-<div class="admin-card">
-    <div class="page-header">
-        <h1>📦 Inventory Management</h1>
-        <button class="btn btn-dark" onclick="openModal()">+ Create New Product</button>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-boxes me-2"></i>Product Management</h2>
+        <button class="btn btn-primary rounded-pill px-4" onclick="openAddModal()">
+            <i class="fas fa-plus me-2"></i>Add New Product
+        </button>
     </div>
 
-    <div class="product-filters">
-        <div class="filter-group">
-            <label>Type:</label>
-            <select id="filterType" onchange="loadProducts()">
-                <option value="">All Types</option>
-                <option value="book">Books</option>
-                <option value="clothes">Clothes</option>
-            </select>
+    <!-- Product List -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Product</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="product-list">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
         </div>
-        <div class="filter-group">
-            <label>Category:</label>
-            <select id="filterCategory" onchange="loadProducts()">
-                <option value="">All Categories</option>
-            </select>
-        </div>
-        <div class="filter-group" style="margin-left: auto;">
-            <input type="text" id="productSearch" placeholder="Search product name..." style="padding: 10px; border-radius: 10px; border: 1px solid #ddd;" onkeyup="searchProducts()">
-        </div>
-    </div>
-
-    <div class="product-list-container">
-        <table class="product-table">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Product Details</th>
-                    <th>Category</th>
-                    <th>Base Price</th>
-                    <th>Options</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="productsList">
-                <!-- Data loaded via JS -->
-            </tbody>
-        </table>
     </div>
 </div>
 
-<!-- Add/Edit Modal -->
-<div id="productModal" class="modal">
-    <div class="modal-content">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle">Add New Product</h2>
-        <form id="productForm" onsubmit="saveProduct(event)">
-            <input type="hidden" id="pid">
-            
-            <div class="section-title">Common Information</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Product Type</label>
-                    <select id="ptype" required onchange="adjustUIByType()">
-                        <option value="book">Book</option>
-                        <option value="clothes">Clothes</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="pcategory" required></select>
-                </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Product Name</label>
-                    <input type="text" id="pname" required placeholder="Full name of product">
-                </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Description</label>
-                    <textarea id="pdesc" rows="2" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Base Price ($)</label>
-                    <input type="number" step="0.01" id="pprice" required>
-                </div>
-                <div class="form-group">
-                    <label>Supplier</label>
-                    <select id="psupplier" required></select>
-                </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Image URL</label>
-                    <input type="text" id="pimage">
-                </div>
+<!-- Modal -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalTitle">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            <div class="modal-body p-4">
+                <form id="productForm">
+                    <input type="hidden" id="edit-id">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="form-name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="form-category" required onchange="onCategoryChange()">
+                                <!-- Categories loaded here -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Price (VND)</label>
+                            <input type="number" class="form-control" id="form-price" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Image URL</label>
+                            <input type="text" class="form-control" id="form-image">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="form-description" rows="3"></textarea>
+                        </div>
 
-            <div class="section-title">
-                Dynamic Attributes
-                <button type="button" class="btn btn-sm btn-secondary" onclick="addAttributeRow()">+ Add Field</button>
+                        <!-- Dynamic Attributes Section -->
+                        <div class="col-12 mt-4">
+                            <div class="card bg-light border-0 p-3 rounded-3">
+                                <h6 class="fw-bold mb-3"><i class="fas fa-tags me-2"></i>Specific Attributes</h6>
+                                <div class="row g-3" id="dynamic-fields">
+                                    <div class="col-12 text-muted small italic">Select a category to see specific fields.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div id="attributesContainer">
-                <!-- Attribute rows -->
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="saveProduct()">Save Product</button>
             </div>
-
-            <div class="section-title">
-                Product Variations (Combos/Options)
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="addVariantRow()">+ Add Manual Variant</button>
-                    <button type="button" class="btn btn-sm btn-info" onclick="toggleGenerator()" style="background: #e1f5fe; color: #01579b;">⚙️ Variant Generator</button>
-                </div>
-            </div>
-
-            <!-- Variant Generator UI -->
-            <div id="variantGenerator" style="display: none; background: #f9f9f9; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed #ccc;">
-                <h4 style="margin-top: 0; font-size: 14px; color: #555;">Option Generator</h4>
-                <p style="font-size: 11px; color: #888; margin-bottom: 10px;">Enter types (e.g. Color) and values separated by commas (e.g. Red, Blue).</p>
-                <div id="optionTypesContainer" style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Option types here -->
-                </div>
-                <div style="margin-top: 10px; display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-sm" onclick="addOptionTypeRow()" style="font-size: 11px;">+ Add Option Type</button>
-                    <button type="button" class="btn btn-sm btn-primary" onclick="generateVariantsFromOptions()" style="font-size: 11px; background: #667eea;">Generate Combinations</button>
-                </div>
-            </div>
-
-            <div id="variantsContainer">
-                <!-- Variant rows -->
-            </div>
-
-            <div style="margin-top: 30px; display: flex; gap: 15px;">
-                <button type="submit" class="btn btn-dark" style="flex: 1; padding: 15px;">🚀 Save Product & Inventory</button>
-                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">Cancel</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    let allProducts = [];
     let categories = [];
-    let suppliers = [];
+    const CATEGORY_ATTRS = {
+        'books': [
+            { name: 'author', label: 'Author', type: 'text' },
+            { name: 'isbn', label: 'ISBN', type: 'text' },
+            { name: 'publisher', label: 'Publisher', type: 'text' },
+            { name: 'page_count', label: 'Pages', type: 'number' }
+        ],
+        'clothes': [
+            { name: 'brand', label: 'Brand', type: 'text' },
+            { name: 'material', label: 'Material', type: 'text' },
+            { name: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex'] }
+        ],
+        'laptops': [
+            { name: 'cpu', label: 'CPU', type: 'text' },
+            { name: 'ram', label: 'RAM (GB)', type: 'number' },
+            { name: 'storage', label: 'Storage', type: 'text' },
+            { name: 'gpu', label: 'GPU', type: 'text' }
+        ],
+        'phones': [
+            { name: 'screen_size', label: 'Screen Size', type: 'text' },
+            { name: 'battery', label: 'Battery (mAh)', type: 'number' },
+            { name: 'camera_specs', label: 'Camera Specs', type: 'text' }
+        ],
+        'tablets': [
+            { name: 'screen_size', label: 'Screen Size', type: 'text' },
+            { name: 'os', label: 'OS', type: 'text' },
+            { name: 'is_stylus_supported', label: 'Stylus Supported', type: 'checkbox' }
+        ],
+        'cameras': [
+            { name: 'resolution', label: 'Resolution', type: 'text' },
+            { name: 'sensor_type', label: 'Sensor Type', type: 'text' },
+            { name: 'lens_included', label: 'Lens Included', type: 'text' }
+        ],
+        'headphones': [
+            { name: 'type', label: 'Type', type: 'select', options: ['Over-ear', 'In-ear', 'On-ear'] },
+            { name: 'is_wireless', label: 'Wireless', type: 'checkbox' },
+            { name: 'noise_cancelling', label: 'Noise Cancelling', type: 'checkbox' }
+        ],
+        'watches': [
+            { name: 'style', label: 'Style', type: 'select', options: ['Analog', 'Digital', 'Smart'] },
+            { name: 'water_resistance', label: 'Water', type: 'text' },
+            { name: 'band_material', label: 'Band', type: 'text' }
+        ],
+        'shoes': [
+            { name: 'size_eu', label: 'Size (EU)', type: 'number' },
+            { name: 'material', label: 'Material', type: 'text' },
+            { name: 'shoe_type', label: 'Type', type: 'text' }
+        ],
+        'furniture': [
+            { name: 'material', label: 'Material', type: 'text' },
+            { name: 'dimensions', label: 'Dimensions', type: 'text' },
+            { name: 'weight_capacity', label: 'Weight Cap', type: 'text' }
+        ]
+    };
 
     async function init() {
-        await Promise.all([
-            loadCategories(),
-            loadSuppliers()
-        ]);
+        await loadCategories();
         await loadProducts();
     }
 
     async function loadCategories() {
-        try {
-            const resp = await fetch('/api/products/categories/');
-            categories = await resp.json();
-            const selects = [document.getElementById('filterCategory'), document.getElementById('pcategory')];
-            selects.forEach(s => {
-                const isFilter = s.id === 'filterCategory';
-                s.innerHTML = isFilter ? '<option value="">All Categories</option>' : '';
-                categories.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.id;
-                    opt.innerText = c.name;
-                    s.appendChild(opt);
-                });
-            });
-        } catch (e) {
-            console.error('Error loading categories:', e);
-        }
-    }
-
-    async function loadSuppliers() {
-        try {
-            const resp = await fetch('/api/suppliers/');
-            const res = await resp.json();
-            if (res.success) {
-                suppliers = res.data;
-                const select = document.getElementById('psupplier');
-                select.innerHTML = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-            }
-        } catch (e) {
-            console.error('Error loading suppliers:', e);
-        }
+        const resp = await fetch('/api/products/categories/');
+        categories = await resp.json();
+        const select = document.getElementById('form-category');
+        select.innerHTML = '<option value="">Select Category</option>';
+        categories.forEach(c => {
+            select.innerHTML += `<option value="${c.id}" data-slug="${c.slug}">${c.name}</option>`;
+        });
     }
 
     async function loadProducts() {
-        const type = document.getElementById('filterType').value;
-        const catId = document.getElementById('filterCategory').value;
+        const resp = await fetch('/api/products/');
+        const products = await resp.json();
+        const list = document.getElementById('product-list');
+        list.innerHTML = '';
         
-        let url = '/api/products/';
-        const params = new URLSearchParams();
-        if (type) params.append('type', type);
-        if (catId) params.append('category_id', catId);
-        if (params.toString()) url += '?' + params.toString();
-
-        try {
-            const resp = await fetch(url);
-            allProducts = await resp.json();
-            renderTable(allProducts);
-        } catch (e) {
-            showAlert('Failed to load products', 'error');
-        }
-    }
-
-    function renderTable(products) {
-        const list = document.getElementById('productsList');
-        list.innerHTML = products.map(p => `
-            <tr>
-                <td><span style="background: ${p.product_type === 'book' ? '#1a1a1a' : '#667eea'}; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase;">${p.product_type}</span></td>
-                <td>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <div style="width: 50px; height: 50px; background: #eee; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                            ${p.image_url ? `<img src="${p.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="font-size: 20px;">${p.product_type === 'book' ? '📚' : '👕'}</span>`}
-                        </div>
+        products.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="ps-4">
+                    <div class="d-flex align-items-center">
+                        <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="rounded me-3" width="40" height="40" style="object-fit: contain;">
                         <div>
-                            <div style="font-weight: 700; color: #333;">${p.name}</div>
-                            <div style="font-size: 12px; color: #888;">${Object.entries(p.attributes).map(([k, v]) => `${k}:${v}`).join(' | ')}</div>
+                            <div class="fw-bold">${p.name}</div>
+                            <div class="text-muted small">ID: ${p.id}</div>
                         </div>
                     </div>
                 </td>
-                <td><span style="color: #666; font-size: 14px;">${p.category || 'Uncategorized'}</span></td>
-                <td><span style="font-weight: 800; color: #1a1a1a;">$${p.price}</span></td>
-                <td><span style="background: #f0f0f0; padding: 2px 8px; border-radius: 5px; font-size: 13px;">${p.variants.length} options</span></td>
-                <td>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-sm" onclick="editProduct(${p.id})">✏️</button>
-                        <button class="btn btn-sm" style="color: #ff4757;" onclick="deleteProduct(${p.id})">🗑️</button>
-                    </div>
+                <td>${p.category}</td>
+                <td><span class="badge bg-light text-dark border">${p.product_type}</span></td>
+                <td class="fw-bold text-primary">${new Intl.NumberFormat('vi-VN').format(p.price)}</td>
+                <td class="text-end pe-4">
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal(${p.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
                 </td>
-            </tr>
-        `).join('');
+            `;
+            list.appendChild(tr);
+        });
     }
 
-    function searchProducts() {
-        const q = document.getElementById('productSearch').value.toLowerCase();
-        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
-        renderTable(filtered);
+    function onCategoryChange() {
+        const select = document.getElementById('form-category');
+        const slug = select.options[select.selectedIndex].dataset.slug;
+        renderDynamicFields(slug);
     }
 
-    function rotateIcon() { /* Cool visual effect placeholder */ }
-
-    function adjustUIByType() {
-        const type = document.getElementById('ptype').value;
-        const container = document.getElementById('attributesContainer');
+    function renderDynamicFields(slug, values = {}) {
+        const container = document.getElementById('dynamic-fields');
+        container.innerHTML = '';
         
-        // If container is empty, add default fields for the type
-        if (container.children.length === 0) {
-            if (type === 'book') {
-                addAttributeRow('author', '');
-                addAttributeRow('isbn', '');
-            } else if (type === 'clothes') {
-                addAttributeRow('material', '');
-                addAttributeRow('gender', 'Unisex');
-            }
+        const attrs = CATEGORY_ATTRS[slug];
+        if (!attrs) {
+            container.innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
+            return;
         }
-    }
 
-    function addAttributeRow(key = '', val = '') {
-        const container = document.getElementById('attributesContainer');
-        const div = document.createElement('div');
-        div.className = 'attribute-row';
-        div.innerHTML = `
-            <input type="text" class="attr-key" placeholder="Field name" value="${key}">
-            <input type="text" class="attr-val" placeholder="Value" value="${val}">
-            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()" style="color: red;">&times;</button>
-        `;
-        container.appendChild(div);
-    }
-
-    function addVariantRow(data = null) {
-        const container = document.getElementById('variantsContainer');
-        const div = document.createElement('div');
-        div.className = 'variant-row';
-        div.innerHTML = `
-            <input type="text" class="var-name" placeholder="Name (e.g. Red, Size M)" value="${data ? data.name : ''}" required style="flex: 2">
-            <input type="number" step="0.01" class="var-price" placeholder="Price" value="${data ? data.price || data.price_override || '' : ''}" style="flex: 1">
-            <input type="number" class="var-stock" placeholder="Stock" value="${data ? data.stock : '10'}" required style="flex: 1">
-            <input type="text" class="var-sku" placeholder="SKU" value="${data ? data.sku : ''}" style="flex: 1">
-            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()" style="color: red;">&times;</button>
-        `;
-        container.appendChild(div);
-    }
-
-    // --- Variant Generator Logic ---
-    function toggleGenerator() {
-        const gen = document.getElementById('variantGenerator');
-        gen.style.display = gen.style.display === 'none' ? 'block' : 'none';
-        if (gen.style.display === 'block' && document.getElementById('optionTypesContainer').children.length === 0) {
-            addOptionTypeRow();
-        }
-    }
-
-    function addOptionTypeRow() {
-        const container = document.getElementById('optionTypesContainer');
-        const div = document.createElement('div');
-        div.style = "display: flex; gap: 10px;";
-        div.innerHTML = `
-            <input type="text" class="opt-type" placeholder="Type (e.g. Color)" style="flex: 1">
-            <input type="text" class="opt-values" placeholder="Values (Red, Blue, Green)" style="flex: 3">
-            <button type="button" class="btn btn-sm" onclick="this.parentElement.remove()">🗑️</button>
-        `;
-        container.appendChild(div);
-    }
-
-    function generateVariantsFromOptions() {
-        const optionTypes = [];
-        document.querySelectorAll('#optionTypesContainer > div').forEach(row => {
-            const type = row.querySelector('.opt-type').value.trim();
-            const values = row.querySelector('.opt-values').value.split(',').map(v => v.trim()).filter(v => v);
-            if (type && values.length > 0) {
-                optionTypes.push({ type, values });
-            }
-        });
-
-        if (optionTypes.length === 0) return;
-
-        // Cartesian product
-        const cartesian = (arrays) => {
-            return arrays.reduce((a, b) => a.flatMap(d => b.values.map(e => ({ ...d, [b.type]: e }))), [{}]);
-        };
-
-        const combinations = cartesian(optionTypes);
-        const basePrice = document.getElementById('pprice').value;
-
-        combinations.forEach(combo => {
-            const name = Object.values(combo).join(', ');
-            addVariantRow({
-                name: name,
-                price: basePrice,
-                stock: 10,
-                sku: ''
-            });
-        });
-
-        toggleGenerator(); // Close generator
-    }
-
-    function openModal() {
-        document.getElementById('productForm').reset();
-        document.getElementById('pid').value = '';
-        document.getElementById('attributesContainer').innerHTML = '';
-        document.getElementById('variantsContainer').innerHTML = '';
-        document.getElementById('modalTitle').innerText = 'Add New Product';
-        document.getElementById('productModal').style.display = 'flex';
-        adjustUIByType();
-    }
-
-    function closeModal() {
-        document.getElementById('productModal').style.display = 'none';
-    }
-
-    function editProduct(id) {
-        const p = allProducts.find(x => x.id === id);
-        if (!p) return;
-
-        openModal();
-        document.getElementById('modalTitle').innerText = 'Edit Product';
-        document.getElementById('pid').value = p.id;
-        document.getElementById('ptype').value = p.product_type;
-        document.getElementById('pcategory').value = p.category_id || '';
-        document.getElementById('pname').value = p.name;
-        document.getElementById('pdesc').value = p.description;
-        document.getElementById('pprice').value = p.price;
-        document.getElementById('psupplier').value = p.supplier_id || '';
-        document.getElementById('pimage').value = p.image_url;
-
-        // Load attributes
-        document.getElementById('attributesContainer').innerHTML = '';
-        Object.entries(p.attributes).forEach(([k, v]) => addAttributeRow(k, v));
-
-        // Load variants
-        document.getElementById('variantsContainer').innerHTML = '';
-        p.variants.forEach(v => addVariantRow(v));
-    }
-
-    async function saveProduct(e) {
-        e.preventDefault();
-        const id = document.getElementById('pid').value;
-        const type = document.getElementById('ptype').value;
-        
-        // Collect attributes
-        const attributes = {};
-        document.querySelectorAll('.attribute-row').forEach(row => {
-            const k = row.querySelector('.attr-key').value.trim();
-            const v = row.querySelector('.attr-val').value.trim();
-            if (k) attributes[k] = v;
-        });
-
-        // Collect variants
-        const variants = [];
-        document.querySelectorAll('.variant-row').forEach(row => {
-            variants.push({
-                name: row.querySelector('.var-name').value,
-                price_override: row.querySelector('.var-price').value || null,
-                stock: row.querySelector('.var-stock').value,
-                sku: row.querySelector('.var-sku').value || null
-            });
-        });
-
-        const data = {
-            name: document.getElementById('pname').value,
-            description: document.getElementById('pdesc').value,
-            price: document.getElementById('pprice').value,
-            product_type: type,
-            category_id: document.getElementById('pcategory').value,
-            supplier_id: document.getElementById('psupplier').value,
-            image_url: document.getElementById('pimage').value,
-            attributes: attributes,
-            variants: variants
-        };
-
-        const token = getToken();
-        // We probably need a POST/PUT endpoint in product-service that handles the whole product+variants package.
-        // Let's assume we use /api/products/manage/ (I will create this)
-        try {
-            const resp = await fetch('/api/products/manage/', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ id, ...data })
-            });
-            const res = await resp.json();
-            if (res.success) {
-                showAlert('Product saved successfully');
-                closeModal();
-                loadProducts();
+        attrs.forEach(attr => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6';
+            let inputNode = '';
+            
+            if (attr.type === 'select') {
+                inputNode = `<select class="form-select dyn-attr" name="${attr.name}">
+                    ${attr.options.map(opt => `<option value="${opt}" ${values[attr.name] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>`;
+            } else if (attr.type === 'checkbox') {
+                inputNode = `<div class="form-check mt-2">
+                    <input class="form-check-input dyn-attr" type="checkbox" name="${attr.name}" ${values[attr.name] ? 'checked' : ''}>
+                    <label class="form-check-label">Yes</label>
+                </div>`;
             } else {
-                showAlert(res.error || 'Failed to save product', 'error');
+                inputNode = `<input type="${attr.type}" class="form-control dyn-attr" name="${attr.name}" value="${values[attr.name] || ''}">`;
             }
-        } catch (e) {
-            showAlert('Communication error', 'error');
+
+            col.innerHTML = `
+                <label class="form-label small">${attr.label}</label>
+                ${inputNode}
+            `;
+            container.appendChild(col);
+        });
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').textContent = 'Add Product';
+        document.getElementById('edit-id').value = '';
+        document.getElementById('productForm').reset();
+        document.getElementById('dynamic-fields').innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+
+    async function openEditModal(id) {
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        const resp = await fetch(`/api/products/${id}/`);
+        const p = await resp.json();
+        
+        document.getElementById('edit-id').value = p.id;
+        document.getElementById('form-name').value = p.name;
+        document.getElementById('form-description').value = p.description;
+        document.getElementById('form-price').value = p.price;
+        document.getElementById('form-image').value = p.image_url;
+        
+        const catSelect = document.getElementById('form-category');
+        catSelect.value = p.category_id;
+        
+        const slug = catSelect.options[catSelect.selectedIndex].dataset.slug;
+        renderDynamicFields(slug, p);
+        
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+
+    async function saveProduct() {
+        const id = document.getElementById('edit-id').value;
+        const select = document.getElementById('form-category');
+        const category_id = select.value;
+        const product_type = select.options[select.selectedIndex].dataset.slug.replace(/s$/, ''); // singularize (laptops -> laptop)
+        
+        const payload = {
+            id: id || null,
+            name: document.getElementById('form-name').value,
+            category_id: parseInt(category_id),
+            product_type: product_type === 'clothe' ? 'clothes' : product_type, // Special case for clothes
+            price: parseFloat(document.getElementById('form-price').value),
+            description: document.getElementById('form-description').value,
+            image_url: document.getElementById('form-image').value,
+            supplier_id: 1 // mock
+        };
+
+        // Add dynamic attributes
+        document.querySelectorAll('.dyn-attr').forEach(input => {
+            if (input.type === 'checkbox') {
+                payload[input.name] = input.checked;
+            } else {
+                payload[input.name] = input.value;
+            }
+        });
+
+        const resp = await fetch('/api/products/manage/', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const res = await resp.json();
+        if (res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+            loadProducts();
+        } else {
+            alert('Error: ' + res.error);
         }
     }
 
     async function deleteProduct(id) {
-        if (!confirm('Permanently remove this product and all its variants?')) return;
-        try {
-            const resp = await fetch(`/api/products/manage/delete/${id}/`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${getToken()}` }
-            });
-            const res = await resp.json();
-            if (res.success) {
-                showAlert('Product removed');
-                loadProducts();
-            }
-        } catch (e) {
-            showAlert('Error deleting product', 'error');
-        }
+        if (!confirm('Are you sure you want to delete this product?')) return;
+        const resp = await fetch(`/api/products/manage/${id}/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        if ((await resp.json()).success) loadProducts();
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    init();
 </script>
 {% endblock %}
