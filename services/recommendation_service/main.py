@@ -46,7 +46,7 @@ def ensure_collection():
         print(f"❌ Error checking/creating collection: {e}")
 
 @app.get("/api/recommendations/{user_id}")
-async def get_user_recommendations(user_id: int, limit: int = 10):
+async def get_user_recommendations(user_id: int, limit: int = 6):
     ensure_collection()
     
     # 1. Fetch user history from tracking service
@@ -74,6 +74,8 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
         actions.append({'product_id': int(c['product_id']), 'weight': WEIGHTS['cart']})
     for p in purchases:
         actions.append({'product_id': int(p['product_id']), 'weight': WEIGHTS['purchase']})
+
+    seen_ids = {a['product_id'] for a in actions}
 
     print(f"📊 Total user actions: {len(actions)}")
 
@@ -144,7 +146,7 @@ async def get_user_recommendations(user_id: int, limit: int = 10):
     return {
         "success": True,
         "user_id": user_id,
-        "recommendations": recommendations[:5],
+        "recommendations": recommendations[:limit],
         "history_count": len(actions)
     }
 

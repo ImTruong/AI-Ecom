@@ -81,6 +81,9 @@
 
             // AI tracking: log-view
             logTracking('log-view', { product_id: pId, product_type: pData.product_type });
+            
+            // Trigger AI Chatbot (Silently record to Graph)
+            triggerAI('view', '', pId);
 
         } catch (e) {
             showAlert("Error loading product", "danger");
@@ -136,6 +139,10 @@
             if(back.success) {
                 showAlert(`Successfully added ${qty} item(s) to cart!`, "success");
                 refreshCartBadge();
+                
+                // Trigger AI Chatbot with product context
+                triggerAI('cart', '', pId);
+
                 // AI tracking: log-cart
                 logTracking('log-cart', {
                     product_id: pId,

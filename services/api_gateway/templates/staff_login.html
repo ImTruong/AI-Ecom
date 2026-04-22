@@ -167,7 +167,9 @@
             if (data.success) {
                 setToken(data.data.access_token);
                 localStorage.setItem('user_role', 'staff');
-                localStorage.setItem('userId', data.data.user.id);
+                if (data.data.user && data.data.user.id !== undefined) {
+                    localStorage.setItem('user_id', data.data.user.id);
+                }
                 showAlert('Login successful! Welcome back.', 'success');
                 setTimeout(() => {
                     window.location.href = '/staff/dashboard/';

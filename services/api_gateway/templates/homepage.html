@@ -167,6 +167,14 @@
             if (data.success) {
                 showAlert('Added to cart!');
                 refreshCartBadge();
+                await logTracking('log-cart', {
+                    product_id: id,
+                    product_type: type,
+                    action_type: 'add',
+                    price: price,
+                    quantity: 1
+                });
+                await loadRecommendations();
             } else {
                 showAlert(data.message || 'Error adding to cart', 'danger');
             }
@@ -177,6 +185,19 @@
 
     function scrollToProducts() {
         document.getElementById('category-nav').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function logTracking(endpoint, data) {
+        const userId = localStorage.getItem('user_id');
+        try {
+            return fetch(`/api/tracking/${endpoint}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, customer_id: userId })
+            }).catch(e => console.warn('Tracking failed:', e));
+        } catch (e) {
+            return null;
+        }
     }
 
     async function loadRecommendations() {

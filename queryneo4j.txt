@@ -1,0 +1,22 @@
+// 1. Query lấy 20 dòng bảng (Dùng cho ảnh 20 dòng)
+MATCH (u:User)-[r]->(target)
+RETURN 
+    u.id AS UserID, 
+    type(r) AS Action, 
+    labels(target)[0] AS Type, 
+    coalesce(target.name, target.text, target.code) AS Name, 
+    r.timestamp AS Time
+ORDER BY r.timestamp DESC
+LIMIT 20;
+
+// 2. Query đồ thị phức tạp (Dùng cho ảnh Graph đẹp)
+MATCH (u:User)-[r1]->(p:Product)-[r2:BELONGS_TO]->(c:Category)
+OPTIONAL MATCH (u)-[r3:USED_VOUCHER]->(v:Voucher)-[r4:APPLICABLE_TO]->(c)
+OPTIONAL MATCH (p)-[r5:FREQUENTLY_BOUGHT_WITH]->(p2:Product)
+RETURN u, r1, p, r2, c, r3, v, r4, r5, p2
+LIMIT 200;
+
+// 3. Query xem toàn bộ các mối quan hệ (Cực kỳ phức tạp)
+MATCH (n)-[r]->(m) 
+RETURN n, r, m 
+LIMIT 300;

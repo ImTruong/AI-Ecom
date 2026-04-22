@@ -140,6 +140,38 @@
         </div>
     </footer>
 
+    <!-- Chatbot Component -->
+    <div id="aiChatWrapper">
+        <button id="aiChatOpen" class="shadow-lg">
+            <span class="pulse-ring"></span>
+            <i class="fa fa-robot fs-4"></i>
+        </button>
+
+        <div id="aiChatWindow" class="glass-card shadow-2xl d-none">
+            <div class="chat-header d-flex align-items-center justify-content-between p-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="robot-avatar">
+                        <i class="fa fa-microchip text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-white">TruongAI Assistant</h6>
+                        <span class="text-white-50 small"><span class="online-dot"></span> Powered by RAG & LSTM</span>
+                    </div>
+                </div>
+                <button class="btn-close btn-close-white" onclick="toggleChat()"></button>
+            </div>
+            <div id="chatMessages" class="p-3 overflow-y-auto">
+                <div class="msg bot-msg">Chào bạn! Tôi có thể giúp gì cho cuộc mua sắm của bạn hôm nay?</div>
+            </div>
+            <div class="chat-input-area p-3 border-top">
+                <div class="input-group">
+                    <input type="text" id="chatInput" class="form-control rounded-pill-start border-0" placeholder="Hỏi AI về sản phẩm...">
+                    <button class="btn btn-vibrant rounded-pill-end px-3" onclick="sendChatMessage()"><i class="fa fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -165,11 +197,94 @@
         function clearToken() { localStorage.removeItem('access_token'); }
         function isLoggedIn() { return !!getToken(); }
 
+        // --- Chatbot Logic ---
+        function toggleChat() {
+            const win = document.getElementById('aiChatWindow');
+            win.classList.toggle('d-none');
+            if(!win.classList.contains('d-none')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        document.getElementById('aiChatOpen').addEventListener('click', toggleChat);
+
+        async function triggerAI(triggerType, customMessage = "", productId = null) {
+            const userId = localStorage.getItem('user_id');
+            const win = document.getElementById('aiChatWindow');
+
+            if(!userId) {
+                if(triggerType === 'chat') {
+                    if(win.classList.contains('d-none')) win.classList.remove('d-none');
+                    addBotMessage("Vui lòng đăng nhập để tôi có thể cá nhân hóa gợi ý cho bạn nhé! 😊");
+                }
+                return;
+            }
+
+            if(win.classList.contains('d-none')) win.classList.remove('d-none');
+
+            document.getElementById('chatMessages').innerHTML += `<div class="msg bot-msg typing">AI đang phân tích...</div>`;
+            scrollToBottom();
+
+            try {
+                const res = await fetch('/api/chatbot/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        message: customMessage,
+                        trigger: triggerType,
+                        product_id: productId ? parseInt(productId) : null
+                    })
+                });
+                const data = await res.json();
+                const typing = document.querySelector('.typing');
+                if(typing) typing.remove();
+                if(data.success) addBotMessage(data.reply, data.recommendations);
+            } catch(e) { console.error(e); }
+        }
+
+        function addBotMessage(text, recs=[]) {
+            const box = document.getElementById('chatMessages');
+            let html = `<div class="msg bot-msg">${text}</div>`;
+            if(recs && recs.length > 0) {
+                html += `<div class="rec-grid mt-2">`;
+                recs.forEach(r => {
+                    html += `<div class="rec-chip" onclick="window.location.href='/product/detail/${r.id}/'"><i class="fa fa-star text-warning me-1"></i> ${r.name}</div>`;
+                });
+                html += `</div>`;
+            }
+            box.innerHTML += html;
+            scrollToBottom();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            document.getElementById('chatMessages').innerHTML += `<div class="msg user-msg">${msg}</div>`;
+            input.value = '';
+            triggerAI('chat', msg);
+        }
+
+        function scrollToBottom() {
+            const box = document.getElementById('chatMessages');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        if(window.location.pathname === '/search/') {
+            setTimeout(() => triggerAI('search'), 1000);
+        }
+
+        // --- Auth & Cart Logic ---
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login/';
+        }
+
         function updateUI() {
             const userMenu = document.getElementById('userMenu');
             const token = localStorage.getItem('access_token');
             const role = localStorage.getItem('user_role');
-
             if (token && role) {
                 userMenu.innerHTML = `
                     <button class="btn btn-outline-light rounded-pill px-4 dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -186,8 +301,7 @@
                         `}
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item py-2 text-danger" href="#" onclick="logout()"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
-                    </ul>
-                `;
+                    </ul>`;
             } else {
                 userMenu.innerHTML = `<a href="/login/" class="btn btn-outline-light rounded-pill px-4">Login</a>`;
             }
@@ -197,26 +311,47 @@
             const token = localStorage.getItem('access_token');
             if (!token) return;
             try {
-                const res = await fetch('/api/cart/', {
-                    headers: {'Authorization': `Bearer ${token}`}
-                });
+                const res = await fetch('/api/cart/', { headers: {'Authorization': `Bearer ${token}`} });
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('cartBadge').textContent = data.data.items.length;
+                    if(window.justAddedToCart) {
+                        triggerAI('cart');
+                        window.justAddedToCart = false;
+                    }
                 }
             } catch (e) { console.error(e); }
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = '/login/';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             updateUI();
             refreshCartBadge();
         });
+
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') sendChatMessage();
+        });
     </script>
+    <style>
+        #aiChatWrapper { position: fixed; bottom: 30px; right: 30px; z-index: 1050; }
+        #aiChatOpen { width: 65px; height: 65px; border-radius: 50%; background: var(--vibrant-gradient); border: none; color: white; position: relative; z-index: 2; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #aiChatOpen:hover { transform: scale(1.1) rotate(5deg); }
+        .pulse-ring { content: ''; position: absolute; width: 100%; height: 100%; background: rgba(118, 75, 162, 0.4); border-radius: 50%; animation: pulse-robot 2s infinite; z-index: -1; top: 0; left: 0; }
+        @keyframes pulse-robot { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+        #aiChatWindow { position: absolute; bottom: 82px; right: 0; width: 350px; height: 500px; display: flex; flex-direction: column; overflow: hidden; animation: slide-up 0.4s ease; border-radius: 20px; }
+        @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .chat-header { background: var(--vibrant-gradient); color: white; }
+        .robot-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .online-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        #chatMessages { flex-grow: 1; background: #fafbfc; display: flex; flex-direction: column; }
+        .msg { max-width: 85%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4; }
+        .bot-msg { background: white; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-bottom-left-radius: 4px; align-self: flex-start; margin-right: auto; }
+        .user-msg { background: var(--vibrant-gradient); color: white; align-self: flex-end; margin-left: auto; border-bottom-right-radius: 4px; }
+        .typing { font-style: italic; color: #888; }
+        .rec-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .rec-chip { background: white; border: 1px solid #eee; padding: 6px 12px; border-radius: 50px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .rec-chip:hover { border-color: #764ba2; color: #764ba2; transform: translateY(-2px); }
+    </style>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

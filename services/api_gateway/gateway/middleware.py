@@ -61,6 +61,14 @@ class RoutingMiddleware:
             'service': 'recommendation-service',
             'url': os.getenv('RECOMMENDATION_SERVICE_URL', 'http://recommendation-service:8001'),
         },
+        '/api/chatbot/': {
+            'service': 'chatbot-service',
+            'url': os.getenv('CHATBOT_SERVICE_URL', 'http://chatbot-service:8000'),
+        },
+        '/api/tracking/': {
+            'service': 'tracking-service',
+            'url': os.getenv('TRACKING_SERVICE_URL', 'http://tracking-service:8000'),
+        },
     }
     
     def __init__(self, get_response):
