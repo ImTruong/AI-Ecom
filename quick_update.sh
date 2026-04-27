@@ -22,16 +22,16 @@ else
 fi
 
 # 1. Ensure all network, core infrastructure, and workers are up
-$DOCKER_CMD up -d rabbitmq auth_db customer_db staff_db product_db cart_db order_db payment_db voucher_db rating_db supplier_db tracking_db auth-publisher customer-consumer
+$DOCKER_CMD up -d rabbitmq auth_db customer_db staff_db product_db cart_db order_db payment_db voucher_db rating_db supplier_db tracking_db user-publisher customer-consumer
 sleep 5
 
 # 2. Rebuild and restart all microservices
 echo "📦 Building and updating all microservices..."
-$DOCKER_CMD up -d --build api-gateway auth-service customer-service product-service staff-service cart-service order-service payment-service voucher-service rating-service supplier-service tracking-service
+$DOCKER_CMD up -d --build api-gateway user-service customer-service product-service staff-service cart-service order-service payment-service voucher-service rating-service supplier-service tracking-service
 
 # 3. Always check for migrations and apply them in all services
 echo "📝 Checking for and applying database migrations..."
-services=("auth-service" "customer-service" "product-service" "staff-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
+services=("user-service" "customer-service" "product-service" "staff-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
 
 for service in "${services[@]}"; do
     if [ $($DOCKER_CMD ps -q $service) ]; then
@@ -48,10 +48,11 @@ echo -e "${GREEN}✅ QUICK UPDATE COMPLETE!${NC}"
 echo -e "🌐 API Gateway:  http://localhost:8000"
 echo -e "🌐 Tracking Stats: http://localhost:8000/api/tracking/stats/"
 
-echo -e "${BLUE}🌱 Seeding Products, Vouchers & Default Users...${NC}"
+echo -e "${BLUE}🌱 Seeding RBAC Roles, Products, Vouchers & Default Users...${NC}"
+$DOCKER_CMD exec -T user-service python seed_roles.py || echo "RBAC roles seeding failed"
 $DOCKER_CMD exec -T product-service python seed_products.py || echo "Product seeding failed"
 $DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo "Voucher seeding failed"
-$DOCKER_CMD exec -T auth-service python seed_users.py || echo "User seeding failed"
+$DOCKER_CMD exec -T user-service python seed_users.py || echo "User seeding failed"
 
 echo -e "${BLUE}📊 Refreshing Knowledge Graph Data...${NC}"
 $DOCKER_CMD exec -T knowledge-service python importer.py || echo "Knowledge import failed"

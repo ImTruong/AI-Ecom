@@ -348,8 +348,10 @@
     let currentStatus = 'all';
 
     async function loadUsers() {
-        if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
-            window.location.href = '/staff/login/';
+        const userRole = localStorage.getItem('user_role');
+        // Only admin can manage users, regular staff cannot
+        if (!isLoggedIn() || userRole !== 'admin') {
+            window.location.href = '/staff/dashboard/';
             return;
         }
 
@@ -358,7 +360,7 @@
             if (currentSearch) params.set('search', currentSearch);
             if (currentStatus !== 'all') params.set('status', currentStatus);
             
-            const url = `/api/customer/staff/list/${params.toString() ? `?${params.toString()}` : ''}`;
+            const url = `/api/auth/admin/users/${params.toString() ? `?${params.toString()}` : ''}`;
             const resp = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${getToken()}` }
             });
@@ -526,6 +528,12 @@
 
     function closeDetailModal() {
         document.getElementById('userDetailModal').classList.remove('show');
+    }
+
+    // Ensure auth functions are available
+    if (typeof isLoggedIn !== 'function') {
+        function isLoggedIn() { return !!localStorage.getItem('access_token'); }
+        function getToken() { return localStorage.getItem('access_token'); }
     }
 
     document.addEventListener('DOMContentLoaded', loadUsers);

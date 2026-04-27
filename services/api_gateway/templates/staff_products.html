@@ -94,6 +94,39 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Dynamic Attributes Management -->
+                        <div class="col-12 mt-4">
+                            <div class="card bg-light border-0 p-3 rounded-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0"><i class="fas fa-cogs me-2"></i>Variant Attributes</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAttributeManager()">
+                                        <i class="fas fa-cog me-1"></i>Manage Attributes
+                                    </button>
+                                </div>
+                                <div class="small text-muted mb-2">
+                                    Define attributes (e.g., Size, Color, Material) and their options. Each variant must have exactly one option from each attribute.
+                                </div>
+                                <div id="selected-attributes-display" class="d-flex flex-wrap gap-2 mb-2">
+                                    <!-- Selected attributes will show here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variants Section -->
+                        <div class="col-12 mt-4">
+                            <div class="card bg-light border-0 p-3 rounded-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0"><i class="fas fa-layer-group me-2"></i>Product Variants</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVariant()">
+                                        <i class="fas fa-plus me-1"></i>Add Variant
+                                    </button>
+                                </div>
+                                <div id="variants-container">
+                                    <div class="text-muted small italic">No variants. Click Add Variant and select options for each attribute.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -111,6 +144,8 @@
     let suppliersById = {};
     let currentCategory = null;
     let currentSearch = '';
+    let allAttributes = []; // Store all available attributes
+    let selectedAttributeIds = []; // Attributes selected for this product
 
     const CLOTH_ATTRS = [
         { name: 'color', label: 'Color', type: 'select', options: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow'] },
@@ -177,7 +212,8 @@
     const CLOTHING_SLUGS = new Set(['clothes', 't-shirt', 'tshirt', 'hoodie', 'pant', 'pants']);
 
     async function init() {
-        if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+        const userRole = localStorage.getItem('user_role');
+        if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
             window.location.href = '/staff/login/';
             return;
         }
@@ -340,6 +376,8 @@
         document.getElementById('edit-id').value = '';
         document.getElementById('productForm').reset();
         document.getElementById('dynamic-fields').innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
+        document.getElementById('variants-container').innerHTML = '<div class="text-muted small italic">No variants. Click Add Variant to create size/color options.</div>';
+        variantCounter = 0;
         if (suppliers.length > 0) {
             document.getElementById('form-supplier').value = suppliers[0].id;
         }
@@ -365,6 +403,68 @@
         
         const slug = catSelect.options[catSelect.selectedIndex].dataset.slug;
         renderDynamicFields(slug, p);
+        
+        // Load existing variants
+        document.getElementById('variants-container').innerHTML = '<div class="text-muted small italic">No variants.</div>';
+        variantCounter = 0;
+        if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+            document.getElementById('variants-container').innerHTML = '';
+            p.variants.forEach(v => {
+                variantCounter++;
+                const div = document.createElement('div');
+                div.className = 'row g-2 mb-2 variant-row';
+                div.id = `variant-${variantCounter}`;
+                const opts = v.options || {};
+                const colorVal = opts.color || '';
+                const sizeVal = opts.size || '';
+                div.innerHTML = `
+                    <div class="col-md-2">
+                        <label class="form-label small">Color</label>
+                        <select class="form-select form-select-sm variant-color">
+                            <option value="">-</option>
+                            <option value="Black" ${colorVal==='Black'?'selected':''}>Black</option>
+                            <option value="White" ${colorVal==='White'?'selected':''}>White</option>
+                            <option value="Red" ${colorVal==='Red'?'selected':''}>Red</option>
+                            <option value="Blue" ${colorVal==='Blue'?'selected':''}>Blue</option>
+                            <option value="Green" ${colorVal==='Green'?'selected':''}>Green</option>
+                            <option value="Yellow" ${colorVal==='Yellow'?'selected':''}>Yellow</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Size</label>
+                        <select class="form-select form-select-sm variant-size">
+                            <option value="">-</option>
+                            <option value="XS" ${sizeVal==='XS'?'selected':''}>XS</option>
+                            <option value="S" ${sizeVal==='S'?'selected':''}>S</option>
+                            <option value="M" ${sizeVal==='M'?'selected':''}>M</option>
+                            <option value="L" ${sizeVal==='L'?'selected':''}>L</option>
+                            <option value="XL" ${sizeVal==='XL'?'selected':''}>XL</option>
+                            <option value="30" ${sizeVal==='30'?'selected':''}>30</option>
+                            <option value="31" ${sizeVal==='31'?'selected':''}>31</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Price Override</label>
+                        <input type="number" class="form-control form-control-sm variant-price" value="${v.price_override || ''}" placeholder="Optional">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Stock</label>
+                        <input type="number" class="form-control form-control-sm variant-stock" value="${v.stock || 0}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">SKU</label>
+                        <input type="text" class="form-control form-control-sm variant-sku" value="${v.sku || ''}" placeholder="SKU">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small">&nbsp;</label>
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                document.getElementById('variants-container').appendChild(div);
+            });
+        }
         
         new bootstrap.Modal(document.getElementById('productModal')).show();
     }
@@ -399,11 +499,14 @@
             }
         });
 
+        // Add variants
+        payload.variants = collectVariants();
+
         const resp = await fetch('/api/products/manage/', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${getToken()}`
             },
             body: JSON.stringify(payload)
         });
@@ -421,11 +524,417 @@
         if (!confirm('Are you sure you want to delete this product?')) return;
         const resp = await fetch(`/api/products/manage/${id}/`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            headers: { 'Authorization': `Bearer ${getToken()}` }
         });
         if ((await resp.json()).success) loadProducts();
     }
 
-    init();
+    // Attribute Management Functions
+    async function loadAttributes() {
+        try {
+            const resp = await fetch('/api/products/attributes/');
+            const data = await resp.json();
+            if (data.success) {
+                allAttributes = data.attributes;
+                updateSelectedAttributesDisplay();
+            }
+        } catch (e) {
+            console.error('Failed to load attributes:', e);
+        }
+    }
+
+    function openAttributeManager() {
+        // Create modal for managing attributes
+        let modalHtml = `
+            <div class="modal fade" id="attributeManagerModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Manage Attributes</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Create New Attribute</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="new-attribute-name" placeholder="e.g., Material, Size, Color">
+                                    <button class="btn btn-primary" onclick="createNewAttribute()">Create</button>
+                                </div>
+                            </div>
+                            <hr>
+                            <h6>Existing Attributes</h6>
+                            <div id="attributes-list" class="list-group">
+                                ${allAttributes.map(attr => `
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong>${attr.name}</strong>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-primary me-1" onclick="toggleAttributeForProduct(${attr.id})">
+                                                    ${selectedAttributeIds.includes(attr.id) ? 'Remove from Product' : 'Add to Product'}
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteAttribute(${attr.id})">Delete</button>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm mb-2">
+                                            <input type="text" class="form-control" id="new-value-${attr.id}" placeholder="New option value">
+                                            <button class="btn btn-outline-secondary" onclick="addAttributeValue(${attr.id})">Add Option</button>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            ${attr.values.map(v => `
+                                                <span class="badge bg-light text-dark border">
+                                                    ${v.value}
+                                                    <button class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="deleteAttributeValue(${v.id})"></button>
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('attributeManagerModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to body
+        const div = document.createElement('div');
+        div.innerHTML = modalHtml;
+        document.body.appendChild(div);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('attributeManagerModal'));
+        modal.show();
+    }
+
+    async function createNewAttribute() {
+        const name = document.getElementById('new-attribute-name').value.trim();
+        if (!name) return;
+        
+        try {
+            const resp = await fetch('/api/products/attributes/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify({ name })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                allAttributes.push(data.attribute);
+                selectedAttributeIds.push(data.attribute.id);
+                openAttributeManager(); // Refresh modal
+                updateSelectedAttributesDisplay();
+                updateVariantForms();
+            }
+        } catch (e) {
+            console.error('Failed to create attribute:', e);
+        }
+    }
+
+    async function addAttributeValue(attributeId) {
+        const value = document.getElementById(`new-value-${attributeId}`).value.trim();
+        if (!value) return;
+        
+        try {
+            const resp = await fetch(`/api/products/attributes/${attributeId}/values/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify({ value })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                // Update local data
+                const attr = allAttributes.find(a => a.id === attributeId);
+                if (attr) {
+                    attr.values.push(data.value);
+                }
+                openAttributeManager(); // Refresh modal
+                updateVariantForms();
+            }
+        } catch (e) {
+            console.error('Failed to add value:', e);
+        }
+    }
+
+    async function deleteAttribute(attributeId) {
+        if (!confirm('Delete this attribute and all its values?')) return;
+        
+        try {
+            const resp = await fetch(`/api/products/attributes/${attributeId}/delete/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            if ((await resp.json()).success) {
+                allAttributes = allAttributes.filter(a => a.id !== attributeId);
+                selectedAttributeIds = selectedAttributeIds.filter(id => id !== attributeId);
+                openAttributeManager(); // Refresh modal
+                updateSelectedAttributesDisplay();
+                updateVariantForms();
+            }
+        } catch (e) {
+            console.error('Failed to delete attribute:', e);
+        }
+    }
+
+    async function deleteAttributeValue(valueId) {
+        if (!confirm('Delete this value?')) return;
+        
+        try {
+            const resp = await fetch(`/api/products/attribute-values/${valueId}/delete/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            if ((await resp.json()).success) {
+                // Update local data
+                allAttributes.forEach(attr => {
+                    attr.values = attr.values.filter(v => v.id !== valueId);
+                });
+                openAttributeManager(); // Refresh modal
+                updateVariantForms();
+            }
+        } catch (e) {
+            console.error('Failed to delete value:', e);
+        }
+    }
+
+    function toggleAttributeForProduct(attributeId) {
+        if (selectedAttributeIds.includes(attributeId)) {
+            selectedAttributeIds = selectedAttributeIds.filter(id => id !== attributeId);
+        } else {
+            selectedAttributeIds.push(attributeId);
+        }
+        updateSelectedAttributesDisplay();
+        updateVariantForms();
+        openAttributeManager(); // Refresh modal
+    }
+
+    function updateSelectedAttributesDisplay() {
+        const container = document.getElementById('selected-attributes-display');
+        if (!container) return;
+        
+        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
+        if (selectedAttrs.length === 0) {
+            container.innerHTML = '<span class="text-muted small">No attributes selected. Click "Manage Attributes" to add.</span>';
+        } else {
+            container.innerHTML = selectedAttrs.map(attr => `
+                <span class="badge bg-primary">${attr.name}</span>
+            `).join('');
+        }
+    }
+
+    function updateVariantForms() {
+        // Update all existing variant rows to show new attribute options
+        document.querySelectorAll('.variant-row').forEach(row => {
+            updateVariantRow(row);
+        });
+    }
+
+    function updateVariantRow(row) {
+        // Clear existing attribute selects
+        const existingSelects = row.querySelectorAll('.variant-attribute-select');
+        existingSelects.forEach(s => {
+            const wrapper = s.closest('.col-md-2');
+            if (wrapper) wrapper.remove();
+        });
+        
+        // Add new selects for selected attributes
+        const firstCol = row.querySelector('.col-md-2');
+        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
+        
+        selectedAttrs.forEach(attr => {
+            const div = document.createElement('div');
+            div.className = 'col-md-2';
+            div.innerHTML = `
+                <label class="form-label small">${attr.name} *</label>
+                <select class="form-select form-select-sm variant-attribute-select" data-attribute-id="${attr.id}" required>
+                    <option value="">Select ${attr.name}</option>
+                    ${attr.values.map(v => `<option value="${v.id}">${v.value}</option>`).join('')}
+                </select>
+            `;
+            if (firstCol) {
+                row.insertBefore(div, firstCol);
+            } else {
+                row.appendChild(div);
+            }
+        });
+    }
+
+    // Variant management functions
+    let variantCounter = 0;
+
+    function addVariant() {
+        variantCounter++;
+        const container = document.getElementById('variants-container');
+        // Remove "No variants" message if present
+        if (container.children.length === 1 && container.children[0].classList.contains('text-muted')) {
+            container.innerHTML = '';
+        }
+        
+        // Check if any attributes are selected
+        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
+        
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 variant-row';
+        div.id = `variant-${variantCounter}`;
+        
+        let attributeHtml = '';
+        selectedAttrs.forEach(attr => {
+            attributeHtml += `
+                <div class="col-md-2">
+                    <label class="form-label small">${attr.name} *</label>
+                    <select class="form-select form-select-sm variant-attribute-select" data-attribute-id="${attr.id}" required>
+                        <option value="">Select ${attr.name}</option>
+                        ${attr.values.map(v => `<option value="${v.id}">${v.value}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        });
+        
+        div.innerHTML = `
+            ${attributeHtml}
+            <div class="col-md-2">
+                <label class="form-label small">Price Override</label>
+                <input type="number" class="form-control form-control-sm variant-price" placeholder="Optional">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Stock *</label>
+                <input type="number" class="form-control form-control-sm variant-stock" value="0" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">SKU</label>
+                <input type="text" class="form-control form-control-sm variant-sku" placeholder="SKU">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small">&nbsp;</label>
+                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function collectVariants() {
+        const variants = [];
+        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
+        
+        document.querySelectorAll('.variant-row').forEach(row => {
+            const price = row.querySelector('.variant-price')?.value;
+            const stock = row.querySelector('.variant-stock')?.value || 0;
+            const sku = row.querySelector('.variant-sku')?.value || '';
+
+            // Collect attribute selections
+            const options = {};
+            const option_values = [];
+            let variantNameParts = [];
+            let hasAllAttributes = true;
+            
+            row.querySelectorAll('.variant-attribute-select').forEach(select => {
+                const valueId = select.value;
+                const attributeId = select.dataset.attributeId;
+                
+                if (!valueId) {
+                    hasAllAttributes = false;
+                    return;
+                }
+                
+                const attr = allAttributes.find(a => a.id == attributeId);
+                const val = attr?.values.find(v => v.id == valueId);
+                
+                if (attr && val) {
+                    options[attr.name.toLowerCase()] = val.value;
+                    option_values.push({
+                        attribute: attr.name,
+                        value: val.value
+                    });
+                    variantNameParts.push(val.value);
+                }
+            });
+            
+            // Only add variant if it has all required attributes
+            if (hasAllAttributes && selectedAttrs.length > 0) {
+                variants.push({
+                    name: variantNameParts.join(' / ') || 'Default',
+                    price_override: price ? parseFloat(price) : null,
+                    stock: parseInt(stock) || 0,
+                    sku: sku,
+                    options: options,
+                    option_values: option_values
+                });
+            }
+        });
+        return variants;
+    }
+
+    // Initialize
+    async function init() {
+        const userRole = localStorage.getItem('user_role');
+        if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
+            window.location.href = '/staff/login/';
+            return;
+        }
+        
+        // Load attributes first
+        await loadAttributes();
+        
+        await loadSuppliers();
+        await loadCategories();
+        await loadProducts();
+    }
+
+    // Ensure auth functions are available before running init
+    if (typeof isLoggedIn !== 'function') {
+        function isLoggedIn() { return !!localStorage.getItem('access_token'); }
+        function getToken() { return localStorage.getItem('access_token'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Price Override</label>
+                <input type="number" class="form-control form-control-sm variant-price" placeholder="Optional">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Stock</label>
+                <input type="number" class="form-control form-control-sm variant-stock" value="0">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">SKU</label>
+                <input type="text" class="form-control form-control-sm variant-sku" placeholder="SKU">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small">&nbsp;</label>
+                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    // Ensure auth functions are available before running init
+    if (typeof isLoggedIn !== 'function') {
+        function isLoggedIn() { return !!localStorage.getItem('access_token'); }
+        function getToken() { return localStorage.getItem('access_token'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
 </script>
 {% endblock %}

@@ -143,7 +143,8 @@
 
     async function loadSuppliers() {
         try {
-            if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+            const userRole = localStorage.getItem('user_role');
+            if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
                 window.location.href = '/staff/login/';
                 return;
             }

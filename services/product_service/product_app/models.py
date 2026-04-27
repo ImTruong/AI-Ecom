@@ -104,6 +104,31 @@ class Product(models.Model):
                 for key, value in attributes.items():
                     if key not in data:
                         data[key] = value
+
+            # Include variants
+            try:
+                data['variants'] = [
+                    {
+                        'id': v.id,
+                        'name': v.name,
+                        'price_override': float(v.price_override) if v.price_override else None,
+                        'stock': v.stock,
+                        'sku': v.sku,
+                        'image_url': v.image_url,
+                        'options': v.options or {},
+                        'option_values': [
+                            {
+                                'id': opt.attribute_value_id,
+                                'attribute': opt.attribute_value.attribute.name,
+                                'value': opt.attribute_value.value,
+                            }
+                            for opt in v.option_values.select_related('attribute_value', 'attribute_value__attribute').all()
+                        ],
+                    }
+                    for v in self.variants.all()
+                ]
+            except Exception:
+                data['variants'] = []
                 
             return data
         except Exception as e:
@@ -193,3 +218,71 @@ class Furniture(Product):
 
     class Meta:
         db_table = 'products_furniture'
+
+
+# --- Product Variants ---
+
+class Attribute(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+
+    class Meta:
+        db_table = 'attributes'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class AttributeValue(models.Model):
+    attribute = models.ForeignKey(Attribute, related_name='values', on_delete=models.CASCADE)
+    value = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=120, blank=True)
+
+    class Meta:
+        db_table = 'attribute_values'
+        unique_together = [['attribute', 'value']]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.attribute.name}-{self.value}")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.attribute.name}: {self.value}"
+
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    price_override = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    stock = models.IntegerField(default=0)
+    sku = models.CharField(max_length=100, blank=True)
+    image_url = models.CharField(max_length=500, blank=True)
+    options = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = 'product_variants'
+        indexes = [
+            models.Index(fields=['product']),
+            models.Index(fields=['sku']),
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.name}"
+
+
+class ProductVariantOption(models.Model):
+    variant = models.ForeignKey(ProductVariant, related_name='option_values', on_delete=models.CASCADE)
+    attribute_value = models.ForeignKey(AttributeValue, related_name='variant_options', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'product_variant_options'
+        unique_together = [['variant', 'attribute_value']]
+
+    def __str__(self):
+        return f"{self.variant_id} -> {self.attribute_value_id}"

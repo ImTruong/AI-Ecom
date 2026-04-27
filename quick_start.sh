@@ -51,12 +51,23 @@ $DOCKER_CMD down --remove-orphans
 echo -e "${YELLOW}Building and starting services...${NC}"
 $DOCKER_CMD up -d --build
 
-echo -e "${BLUE}Waiting for services to be ready (30s)...${NC}"
-sleep 30
+echo -e "${BLUE}Waiting for services to be ready (60s)...${NC}"
+sleep 60
+
+# Check if user-service is healthy
+echo -e "${BLUE}Checking user-service health...${NC}"
+for i in {1..10}; do
+    if curl -s http://localhost:8001/api/auth/token/verify/ > /dev/null 2>&1 || curl -s http://localhost:8000/api/auth/token/verify/ > /dev/null 2>&1; then
+        echo -e "${GREEN}User service is ready!${NC}"
+        break
+    fi
+    echo "  Attempt $i/10 - waiting for user-service..."
+    sleep 5
+done
 
 # 2. Database Migrations
 echo -e "${YELLOW}Step 2: Running Database Migrations...${NC}"
-django_services=("auth-service" "customer-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
+django_services=("user-service" "customer-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
 
 for service in "${django_services[@]}"; do
     echo "  - Migrating $service..."
@@ -67,7 +78,8 @@ done
 echo -e "${GREEN}Step 3: Seeding data (Products, Vouchers, Default Users)...${NC}"
 $DOCKER_CMD exec -T product-service python seed_products.py || echo -e "${RED}Failed to seed products${NC}"
 $DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo -e "${RED}Failed to seed vouchers${NC}"
-$DOCKER_CMD exec -T auth-service python seed_users.py || echo -e "${RED}Failed to seed default users${NC}"
+$DOCKER_CMD exec -T user-service python seed_roles.py || echo -e "${RED}Failed to seed RBAC roles${NC}"
+$DOCKER_CMD exec -T user-service python seed_users.py || echo -e "${RED}Failed to seed default users${NC}"
 
 # 4. Vector Index (Qdrant)
 echo -e "${GREEN}Step 4: Building vector index for products...${NC}"

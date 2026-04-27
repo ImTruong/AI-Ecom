@@ -131,10 +131,10 @@ class GetStatsView(APIView):
 
 class GetUserHistoryView(APIView):
     def get(self, request, customer_id):
-        views = ProductView.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
-        carts = CartAction.objects.filter(customer_id=customer_id, action_type='add').order_by('-timestamp')[:50]
-        purchases = PurchaseAction.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
-        searches = SearchHistory.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
+        views = ProductView.objects.filter(customer_id=customer_id).order_by('-timestamp')[:20]
+        carts = CartAction.objects.filter(customer_id=customer_id, action_type='add').order_by('-timestamp')[:20]
+        purchases = PurchaseAction.objects.filter(customer_id=customer_id).order_by('-timestamp')[:20]
+        searches = SearchHistory.objects.filter(customer_id=customer_id).order_by('-timestamp')[:20]
         
         return Response({
             'success': True,

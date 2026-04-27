@@ -12,7 +12,7 @@ from jwt_utils import jwt_required
 from .models import Supplier
 
 @require_http_methods(["GET"])
-@jwt_required(user_types=['staff'])
+@jwt_required(user_types=['staff', 'admin'])
 def list_suppliers(request):
     """List all active suppliers (Staff only)"""
     try:
@@ -41,7 +41,7 @@ def list_suppliers(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @require_http_methods(["GET"])
-@jwt_required(user_types=['staff'])
+@jwt_required(user_types=['staff', 'admin'])
 def get_supplier(request, supplier_id):
     """Get supplier details"""
     try:
@@ -57,7 +57,7 @@ def get_supplier(request, supplier_id):
 
 @csrf_exempt
 @require_http_methods(["POST"])
-@jwt_required(user_types=['staff'])
+@jwt_required(user_types=['staff', 'admin'])
 def create_supplier(request):
     """Create a new supplier"""
     try:
@@ -88,7 +88,7 @@ def create_supplier(request):
 
 @csrf_exempt
 @require_http_methods(["PUT", "PATCH"])
-@jwt_required(user_types=['staff'])
+@jwt_required(user_types=['staff', 'admin'])
 def update_supplier(request, supplier_id):
     """Update supplier info"""
     try:
@@ -113,7 +113,7 @@ def update_supplier(request, supplier_id):
 
 @csrf_exempt
 @require_http_methods(["DELETE"])
-@jwt_required(user_types=['staff'])
+@jwt_required(user_types=['staff', 'admin'])
 def delete_supplier(request, supplier_id):
     """Delete a supplier"""
     try:

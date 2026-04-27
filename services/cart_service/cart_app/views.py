@@ -71,6 +71,8 @@ def add_to_cart(request):
                 }, status=400)
         
         quantity = data.get('quantity', 1)
+        variant_id = data.get('variant_id')
+        variant_name = data.get('variant_name')
         
         if quantity < 1:
             return JsonResponse({
@@ -87,9 +89,11 @@ def add_to_cart(request):
                 cart=cart,
                 product_type=data['product_type'],
                 product_id=data['product_id'],
+                variant_id=variant_id,
                 defaults={
                     'price': data['price'],
                     'product_name': data.get('product_name'),
+                    'variant_name': variant_name,
                     'image_url': data.get('image_url'),
                     'quantity': quantity
                 }
@@ -100,6 +104,7 @@ def add_to_cart(request):
                 cart_item.quantity += quantity
                 cart_item.price = data['price']
                 if data.get('product_name'): cart_item.product_name = data.get('product_name')
+                if variant_name: cart_item.variant_name = variant_name
                 if data.get('image_url'): cart_item.image_url = data.get('image_url')
                 cart_item.save()
         
@@ -144,6 +149,7 @@ def update_cart_item(request):
                 }, status=400)
         
         quantity = data['quantity']
+        variant_id = data.get('variant_id')
         
         if quantity < 1:
             return JsonResponse({
@@ -156,7 +162,8 @@ def update_cart_item(request):
             cart_item = CartItem.objects.get(
                 cart=cart,
                 product_type=data['product_type'],
-                product_id=data['product_id']
+                product_id=data['product_id'],
+                variant_id=variant_id
             )
             
             cart_item.quantity = quantity
@@ -197,13 +204,15 @@ def remove_from_cart(request, product_type, product_id):
     """Remove item from cart"""
     try:
         customer_id = request.user_id
+        variant_id = request.GET.get('variant_id')
         
         with transaction.atomic():
             cart = Cart.objects.get(customer_id=customer_id)
             cart_item = CartItem.objects.get(
                 cart=cart,
                 product_type=product_type,
-                product_id=product_id
+                product_id=product_id,
+                variant_id=variant_id
             )
             
             cart_item.delete()

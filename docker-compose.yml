@@ -14,6 +14,12 @@ services:
       - auth_db_data:/var/lib/postgresql/data
     networks:
       - microservices_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # PostgreSQL for Customer Service
   customer_db:
@@ -195,6 +201,12 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - microservices_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Tracking Service
   tracking-service:
@@ -239,12 +251,12 @@ services:
       - ./shared:/shared
       - ./seed_data.sql:/seed_data.sql
 
-  # Auth Service
-  auth-service:
+  # User Service (Auth + User Management)
+  user-service:
     build:
       context: .
       dockerfile: services/auth_service/Dockerfile
-    container_name: auth-service
+    container_name: user-service
     environment:
       - DATABASE_URL=postgresql://auth_user:auth_pass@auth_db:5432/auth_db
       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
@@ -253,13 +265,21 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      - auth_db
-      - rabbitmq
+      auth_db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microservices_network
     volumes:
       - ./services/auth_service:/app
       - ./shared:/shared
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/auth/token/verify/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Customer Service
   customer-service:
@@ -271,14 +291,14 @@ services:
       - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
       - SECRET_KEY=your-secret-key-change-in-production
-      - AUTH_SERVICE_URL=http://auth-service:8000
+      - USER_SERVICE_URL=http://user-service:8000
       - DEBUG=True
     ports:
       - "8002:8000"
     depends_on:
       - customer_db
       - rabbitmq
-      - auth-service
+      - user-service
     networks:
       - microservices_network
     volumes:
@@ -295,14 +315,14 @@ services:
       - DATABASE_URL=postgresql://staff_user:staff_pass@staff_db:5432/staff_db
       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
       - SECRET_KEY=your-secret-key-change-in-production
-      - AUTH_SERVICE_URL=http://auth-service:8000
+      - USER_SERVICE_URL=http://user-service:8000
       - DEBUG=True
     ports:
       - "8003:8000"
     depends_on:
       - staff_db
       - rabbitmq
-      - auth-service
+      - user-service
     networks:
       - microservices_network
     volumes:
@@ -316,9 +336,9 @@ services:
       dockerfile: services/api_gateway/Dockerfile
     container_name: api-gateway
     environment:
-      - AUTH_SERVICE_URL=http://auth-service:8000
+      - USER_SERVICE_URL=http://user-service:8000
       - CUSTOMER_SERVICE_URL=http://customer-service:8000
-      - STAFF_SERVICE_URL=http://staff-service:8000
+      - STAFF_SERVICE_URL=http://customer-service:8000
       - ORDER_SERVICE_URL=http://order-service:8000
       - PAYMENT_SERVICE_URL=http://payment-service:8000
       - VOUCHER_SERVICE_URL=http://voucher-service:8000
@@ -327,7 +347,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - auth-service
+      - user-service
       - customer-service
       - staff-service
       - product-service
@@ -478,11 +498,11 @@ services:
 
 
   # Background Workers
-  auth-publisher:
+  user-publisher:
     build:
       context: .
       dockerfile: services/auth_service/Dockerfile
-    container_name: auth-publisher
+    container_name: user-publisher
     volumes:
       - ./services/auth_service:/app
       - ./shared:/shared
@@ -493,7 +513,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_started
-      auth-service:
+      user-service:
         condition: service_started
     networks:
       - microservices_network

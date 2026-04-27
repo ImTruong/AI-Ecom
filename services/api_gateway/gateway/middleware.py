@@ -18,8 +18,8 @@ class RoutingMiddleware:
     # Service routing configuration
     ROUTES = {
         '/api/auth/': {
-            'service': 'auth-service',
-            'url': os.getenv('AUTH_SERVICE_URL', 'http://auth-service:8000'),
+            'service': 'user-service',
+            'url': os.getenv('USER_SERVICE_URL', 'http://user-service:8000'),
         },
         '/api/customer/': {
             'service': 'customer-service',
@@ -54,8 +54,8 @@ class RoutingMiddleware:
             'url': os.getenv('SUPPLIER_SERVICE_URL', 'http://supplier-service:8000'),
         },
         '/api/staff/': {
-            'service': 'staff-service',
-            'url': os.getenv('STAFF_SERVICE_URL', 'http://staff-service:8000'),
+            'service': 'customer-service',
+            'url': os.getenv('STAFF_SERVICE_URL', 'http://customer-service:8000'),
         },
         '/api/recommendations/': {
             'service': 'recommendation-service',

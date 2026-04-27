@@ -166,7 +166,8 @@
 
             if (data.success) {
                 setToken(data.data.access_token);
-                localStorage.setItem('user_role', 'staff');
+                const role = data.data.user?.role || 'staff';
+                localStorage.setItem('user_role', role);
                 if (data.data.user && data.data.user.id !== undefined) {
                     localStorage.setItem('user_id', data.data.user.id);
                 }
