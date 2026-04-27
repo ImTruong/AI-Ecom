@@ -10,15 +10,19 @@ NC='\033[0m'
 
 echo -e "${BLUE}♻️ RELOADING AI MICROSERVICES...${NC}"
 
-# Re-build specific services if needed
-docker-compose up -d --build api-gateway chatbot-service knowledge-service product-service
+# Detect Docker Compose version
+if docker compose version > /dev/null 2>&1; then
+    DOCKER_CMD="docker compose"
+else
+    DOCKER_CMD="docker-compose"
+fi
 
-# Run migrations (just in case)
-docker-compose exec -T api-gateway python manage.py migrate --noinput
+# Re-build only the updated services
+$DOCKER_CMD up -d --build api-gateway recommendation-service tracking-service chatbot-service
 
-# Refresh Knowledge Graph
-echo -e "${GREEN}📊 Refreshing Knowledge Graph Data...${NC}"
-docker-compose exec -T knowledge-service python importer.py
+# Rebuild vector index for updated search/recommendations
+echo -e "${GREEN}🧠 Rebuilding product vectors...${NC}"
+$DOCKER_CMD --profile manual run --rm --build vector-service || echo "Vector index rebuild failed"
 
 echo -e "${GREEN}✅ RELOAD COMPLETE!${NC}"
 echo -e "🌐 http://localhost:8000"

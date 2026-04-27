@@ -1,0 +1,533 @@
+{% extends "staff_base.html" %}
+
+{% block title %}Manage Users - Staff Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .users-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        padding: 40px;
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .title-group h1 {
+        font-size: 36px;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+    }
+
+    .title-group p {
+        color: #888;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .search-box input {
+        border-radius: 15px;
+        padding: 12px 20px;
+        border: 2px solid #eee;
+        width: 100%;
+        font-weight: 600;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tabs button {
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: 2px solid #eee;
+        background: white;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .filter-tabs button.active {
+        border-color: #667eea;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .filter-tabs button:hover {
+        border-color: #667eea;
+    }
+
+    .users-table-container {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 15px;
+        margin-top: -15px;
+    }
+
+    th {
+        text-align: left;
+        padding: 20px;
+        color: #adb5bd;
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    tbody tr {
+        background: #f8f9fa;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border-radius: 20px;
+    }
+
+    tbody tr:hover {
+        transform: translateY(-4px) scale(1.002);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.06);
+        background: #fff;
+    }
+
+    td {
+        padding: 25px 20px;
+        font-weight: 700;
+        color: #333;
+        font-size: 15px;
+    }
+
+    td:first-child { border-top-left-radius: 20px; border-bottom-left-radius: 20px; padding-left: 30px; }
+    td:last-child { border-top-right-radius: 20px; border-bottom-right-radius: 20px; padding-right: 30px; }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 12px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+
+    .user-name { font-weight: 800; color: #1a1a1a; font-size: 16px; }
+    .user-email { color: #666; font-size: 13px; font-weight: 500; }
+
+    .status-badge {
+        font-size: 12px;
+        font-weight: 900;
+        padding: 8px 15px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        display: inline-block;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-right: 8px;
+    }
+
+    .btn-view {
+        background: #e7f5ff;
+        color: #1c7ed6;
+    }
+
+    .btn-view:hover {
+        background: #1c7ed6;
+        color: white;
+    }
+
+    .btn-deactivate {
+        background: #ffe0e0;
+        color: #ff4757;
+    }
+
+    .btn-deactivate:hover {
+        background: #ff4757;
+        color: white;
+    }
+
+    /* Detail Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.show { display: flex !important; }
+
+    .modal-content {
+        background: white;
+        padding: 40px;
+        border-radius: 30px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-header h2 {
+        font-size: 28px;
+        font-weight: 900;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #999;
+        transition: all 0.3s;
+    }
+
+    .close-btn:hover { color: #333; }
+
+    .detail-row {
+        margin-bottom: 20px;
+    }
+
+    .detail-label {
+        font-size: 13px;
+        font-weight: 800;
+        color: #adb5bd;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+
+    .detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        word-break: break-all;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #888;
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="users-page">
+    <div class="page-header">
+        <div class="title-group">
+            <h1>👥 Manage Users</h1>
+            <p>Monitor and manage customer accounts</p>
+        </div>
+        <div class="search-box">
+            <input type="text" placeholder="Search by name, email, phone..." id="user-search" oninput="setSearchFilter(this.value)">
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <button class="tab-filter active" onclick="setStatusFilter('all')">All Users</button>
+        <button class="tab-filter" onclick="setStatusFilter('active')">Active</button>
+        <button class="tab-filter" onclick="setStatusFilter('inactive')">Inactive</button>
+    </div>
+
+    <div class="users-table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Registered</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 50px;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <p class="mt-3 text-muted fw-bold">Loading users...</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- User Detail Modal -->
+<div id="userDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">User Details</h2>
+            <button class="close-btn" onclick="closeDetailModal()">×</button>
+        </div>
+        <div id="modalBody">
+            <!-- Details loaded here -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentSearch = '';
+    let currentStatus = 'all';
+
+    async function loadUsers() {
+        if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+            window.location.href = '/staff/login/';
+            return;
+        }
+
+        try {
+            const params = new URLSearchParams();
+            if (currentSearch) params.set('search', currentSearch);
+            if (currentStatus !== 'all') params.set('status', currentStatus);
+            
+            const url = `/api/customer/staff/list/${params.toString() ? `?${params.toString()}` : ''}`;
+            const resp = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const data = await resp.json();
+
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (!data.success || !data.data || data.data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fa fa-inbox"></i>
+                                <h3>No Users Found</h3>
+                                <p>Try adjusting your search filters</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.data.map(user => {
+                const registered = new Date(user.created_at).toLocaleDateString('vi-VN');
+                const initials = (user.full_name || user.email || 'U').substring(0, 2).toUpperCase();
+                const statusClass = user.is_active ? 'badge-active' : 'badge-inactive';
+                const statusText = user.is_active ? 'Active' : 'Inactive';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">${initials}</div>
+                                <div>
+                                    <div class="user-name">${user.full_name || 'N/A'}</div>
+                                    <div class="user-email">#${user.id}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 14px;">
+                                <div>${user.email}</div>
+                                <div style="color: #888; font-size: 12px;">${user.phone || 'N/A'}</div>
+                            </div>
+                        </td>
+                        <td>${registered}</td>
+                        <td>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </td>
+                        <td>
+                            <button class="btn-action btn-view" onclick="viewUserDetail(${user.id})"><i class="fa fa-eye"></i> View</button>
+                            <button class="btn-action btn-deactivate" onclick="toggleUserStatus(${user.id}, ${user.is_active})">
+                                <i class="fa fa-${user.is_active ? 'ban' : 'check'}"></i> ${user.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            console.error(e);
+            showAlert('Failed to load users', 'danger');
+        }
+    }
+
+    async function viewUserDetail(userId) {
+        try {
+            const resp = await fetch(`/api/customer/${userId}/`, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const data = await resp.json();
+
+            if (!data.success) {
+                showAlert('Failed to load user details', 'danger');
+                return;
+            }
+
+            const user = data.data;
+            const registered = new Date(user.created_at).toLocaleString('vi-VN');
+            const statusHtml = `<span class="status-badge ${user.is_active ? 'badge-active' : 'badge-inactive'}">${user.is_active ? 'Active' : 'Inactive'}</span>`;
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value">${user.full_name || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">${user.email}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">${user.phone || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Address</div>
+                    <div class="detail-value">${user.address || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">${statusHtml}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Registered Date</div>
+                    <div class="detail-value">${registered}</div>
+                </div>
+                <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #f0f0f0;">
+                    <button class="btn btn-outline-danger" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 700;" onclick="toggleUserStatus(${user.id}, ${user.is_active ? 'true' : 'false'})">
+                        <i class="fa fa-${user.is_active ? 'ban' : 'check'} me-2"></i>${user.is_active ? 'Deactivate Account' : 'Activate Account'}
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('userDetailModal').classList.add('show');
+        } catch (e) {
+            console.error(e);
+            showAlert('Error loading user details', 'danger');
+        }
+    }
+
+    async function toggleUserStatus(userId, isCurrentlyActive) {
+        const action = isCurrentlyActive ? 'deactivate' : 'activate';
+        const confirm_msg = isCurrentlyActive 
+            ? 'Are you sure you want to DEACTIVATE this account?'
+            : 'Are you sure you want to ACTIVATE this account?';
+
+        if (!confirm(confirm_msg)) return;
+
+        try {
+            const resp = await fetch(`/api/customer/staff/toggle-status/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                showAlert(`Account ${action}d successfully`, 'success');
+                closeDetailModal();
+                loadUsers();
+            } else {
+                showAlert(data.error || `Failed to ${action} account`, 'danger');
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('Error updating account status', 'danger');
+        }
+    }
+
+    function setSearchFilter(value) {
+        currentSearch = value.trim();
+        loadUsers();
+    }
+
+    function setStatusFilter(status) {
+        currentStatus = status;
+        document.querySelectorAll('.tab-filter').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        loadUsers();
+    }
+
+    function closeDetailModal() {
+        document.getElementById('userDetailModal').classList.remove('show');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUsers);
+</script>
+{% endblock %}

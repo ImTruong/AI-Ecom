@@ -72,13 +72,11 @@ def manage_product(request):
         data = json.loads(request.body)
         pid = data.get('id')
         product_type = data.get('product_type', '').lower()
-        
-        model_class = TYPE_MODEL_MAP.get(product_type, Product)
-        
+
+        model_class = Product
+
         with transaction.atomic():
             if pid:
-                # To support changing type, we might need more complex logic
-                # But for now, assume type doesn't change or if it does, it's a new product
                 product = model_class.objects.get(pk=pid)
             else:
                 product = model_class()
@@ -88,16 +86,21 @@ def manage_product(request):
             product.description = data.get('description')
             product.price = data.get('price')
             product.category_id = data.get('category_id')
-            product.supplier_id = data.get('supplier_id')
+            supplier_id = data.get('supplier_id')
+            if supplier_id in [None, '']:
+                supplier_id = 1
+            product.supplier_id = supplier_id
             product.image_url = data.get('image_url', '')
-            
-            # Subclass specific fields
-            if model_class != Product:
-                base_fields = {f.name for f in Product._meta.get_fields()}
-                for field in model_class._meta.get_fields():
-                    if field.name not in base_fields and not field.is_relation:
-                        if field.name in data:
-                            setattr(product, field.name, data.get(field.name))
+            product.product_type = product_type or 'generic'
+
+            reserved_keys = {
+                'id', 'name', 'description', 'price', 'category_id', 'supplier_id',
+                'image_url', 'product_type', 'attributes'
+            }
+            attributes = data.get('attributes')
+            if not isinstance(attributes, dict):
+                attributes = {k: v for k, v in data.items() if k not in reserved_keys}
+            product.attributes = attributes
             
             product.save()
             

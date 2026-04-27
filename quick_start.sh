@@ -7,11 +7,21 @@ set -e
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}🚀 TRUONGSHOP AI-DRIVEN MICROSERVICES INITIALIZER${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+# Detect Docker Compose version
+if docker compose version > /dev/null 2>&1; then
+    DOCKER_CMD="docker compose"
+    echo -e "${GREEN}Using Docker Compose V2${NC}"
+else
+    DOCKER_CMD="docker-compose"
+    echo -e "${YELLOW}Using Docker Compose V1 (Legacy)${NC}"
+fi
 
 # 0. Check for API KEY
 if [ ! -f .env ]; then
@@ -20,12 +30,13 @@ if [ ! -f .env ]; then
 fi
 
 # Ask user for API Key if not present
-if grep -q "your-gemini-api-key-here" .env; then
+if grep -q "your-freellm-api-key-here" .env; then
     echo -e "${BLUE}AI CHATBOT CONFIGURATION:${NC}"
-    echo -ne "${YELLOW}If you have a Google Gemini API Key, enter it now (or press Enter to skip): ${NC}"
+    echo -ne "${YELLOW}If you have a FreeLLM API Key, enter it now (or press Enter to skip): ${NC}"
     read api_key
     if [ ! -z "$api_key" ]; then
-        sed -i '' "s/GEMINI_API_KEY=your-gemini-api-key-here/GEMINI_API_KEY=$api_key/" .env
+        # Fix sed command for Linux compatibility
+        sed -i "s/FREELLM_API_KEY=your-freellm-api-key-here/FREELLM_API_KEY=$api_key/" .env
         echo -e "${GREEN}API Key added! Chatbot will use real LLM responses.${NC}"
     else
         echo -e "${YELLOW}Skipping API Key. Chatbot will use high-quality local templates.${NC}"
@@ -33,8 +44,12 @@ if grep -q "your-gemini-api-key-here" .env; then
 fi
 
 # 1. Start Containers
-echo -e "${YELLOW}Step 1: Building and starting all containers...${NC}"
-docker-compose up -d --build
+echo -e "${YELLOW}Step 1: Cleaning up and starting all containers...${NC}"
+# Run down first to fix "ContainerConfig" and "ImageNotFound" inconsistencies
+$DOCKER_CMD down --remove-orphans
+
+echo -e "${YELLOW}Building and starting services...${NC}"
+$DOCKER_CMD up -d --build
 
 echo -e "${BLUE}Waiting for services to be ready (30s)...${NC}"
 sleep 30
@@ -45,12 +60,22 @@ django_services=("auth-service" "customer-service" "product-service" "cart-servi
 
 for service in "${django_services[@]}"; do
     echo "  - Migrating $service..."
-    docker-compose exec -T $service python manage.py migrate --noinput || true
+    $DOCKER_CMD exec -T $service python manage.py migrate --noinput || echo -e "${RED}Failed to migrate $service${NC}"
 done
 
-# 3. Knowledge Graph Population (Neo4j)
-echo -e "${GREEN}Step 3: Populating Neo4j Knowledge Graph (KB)...${NC}"
-docker-compose exec -T knowledge-service python importer.py
+# 3. Seed initial data (Products, Vouchers, Default Users)
+echo -e "${GREEN}Step 3: Seeding data (Products, Vouchers, Default Users)...${NC}"
+$DOCKER_CMD exec -T product-service python seed_products.py || echo -e "${RED}Failed to seed products${NC}"
+$DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo -e "${RED}Failed to seed vouchers${NC}"
+$DOCKER_CMD exec -T auth-service python seed_users.py || echo -e "${RED}Failed to seed default users${NC}"
+
+# 4. Vector Index (Qdrant)
+echo -e "${GREEN}Step 4: Building vector index for products...${NC}"
+$DOCKER_CMD --profile manual run --rm --build vector-service || echo -e "${RED}Failed to build vector index${NC}"
+
+# 5. Knowledge Graph Population (Neo4j)
+echo -e "${GREEN}Step 5: Populating Neo4j Knowledge Graph (KB)...${NC}"
+$DOCKER_CMD exec -T knowledge-service python importer.py || echo -e "${RED}Failed to populate knowledge graph${NC}"
 
 # 4. Final Summary
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

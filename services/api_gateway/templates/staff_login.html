@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "staff_base.html" %}
 
 {% block title %}Staff Login - TruongShop{% endblock %}
 
@@ -124,7 +124,7 @@
         <form id="staffLoginForm" onsubmit="handleStaffLogin(event)">
             <div class="form-group">
                 <label class="form-label">Email Address</label>
-                <input type="email" id="email" class="form-input" placeholder="staff@truongshop.com" required>
+                <input type="email" id="email" class="form-input" placeholder="staff@example.com" required>
             </div>
 
             <div class="form-group">
@@ -137,8 +137,8 @@
 
         <div class="demo-creds">
             <strong>Default Staff Credentials:</strong><br>
-            Email: <code>staff@truongshop.com</code><br>
-            Password: <code>staffpass123</code>
+            Email: <code>staff@example.com</code><br>
+            Password: <code>staff123</code>
         </div>
     </div>
 </div>

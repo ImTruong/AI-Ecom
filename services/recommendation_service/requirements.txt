@@ -3,5 +3,6 @@ uvicorn
 requests
 qdrant-client
 numpy
+sentence-transformers
 python-jose[cryptography]
 python-multipart

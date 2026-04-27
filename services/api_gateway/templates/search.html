@@ -25,10 +25,23 @@
     async function performSearch() {
         const grid = document.getElementById('search-grid');
         try {
-            // We use the recommendation service for semantic search if possible, 
-            // or just the product service with a search query.
-            const res = await fetch(`/api/products/?search=${encodeURIComponent(query)}`);
-            const products = await res.json();
+            const res = await fetch(`/api/recommendations/search?query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            let products = [];
+            if (data && data.success && data.recommendations) {
+                products = data.recommendations.map(r => {
+                    const payload = r.payload || {};
+                    return {
+                        ...payload,
+                        id: payload.id || r.id
+                    };
+                });
+            }
+
+            if (!products.length) {
+                const fallback = await fetch(`/api/products/?search=${encodeURIComponent(query)}`);
+                products = await fallback.json();
+            }
             
             document.getElementById('search-spinner').style.display = 'none';
             document.getElementById('result-count').textContent = products.length;
@@ -103,11 +116,34 @@
             if (data.success) {
                 showAlert('Added to cart!');
                 refreshCartBadge();
+                await logTracking('log-cart', {
+                    product_id: id,
+                    product_type: type,
+                    action_type: 'add',
+                    price: price,
+                    quantity: 1
+                });
             }
         } catch (e) { showAlert('Error', 'danger'); }
     }
 
-    if(query) performSearch();
+    async function logTracking(endpoint, data) {
+        const userId = localStorage.getItem('user_id');
+        try {
+            return fetch(`/api/tracking/${endpoint}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, customer_id: userId, query })
+            }).catch(e => console.warn('Tracking failed:', e));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    if(query) {
+        logTracking('log-search', { query });
+        performSearch();
+    }
 </script>
 
 <style>

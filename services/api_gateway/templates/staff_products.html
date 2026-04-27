@@ -1,14 +1,24 @@
-{% extends 'base.html' %}
+{% extends 'staff_base.html' %}
 
 {% block title %}Manage Products - Staff Dashboard{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-boxes me-2"></i>Product Management</h2>
-        <button class="btn btn-primary rounded-pill px-4" onclick="openAddModal()">
-            <i class="fas fa-plus me-2"></i>Add New Product
-        </button>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h2 class="mb-0"><i class="fas fa-boxes me-2"></i>Product Management</h2>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa fa-search"></i></span>
+                <input type="text" class="form-control" id="product-search" placeholder="Search products..." oninput="setSearchFilter(this.value)">
+            </div>
+            <button class="btn btn-primary rounded-pill px-4" onclick="openAddModal()">
+                <i class="fas fa-plus me-2"></i>Add New Product
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-4" id="category-filter">
+        <!-- Category nav injected here -->
     </div>
 
     <!-- Product List -->
@@ -20,6 +30,7 @@
                         <th class="ps-4">Product</th>
                         <th>Category</th>
                         <th>Type</th>
+                        <th>Supplier</th>
                         <th>Price</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
@@ -53,6 +64,12 @@
                             <label class="form-label">Category</label>
                             <select class="form-select" id="form-category" required onchange="onCategoryChange()">
                                 <!-- Categories loaded here -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Supplier</label>
+                            <select class="form-select" id="form-supplier" required>
+                                <!-- Suppliers loaded here -->
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -90,6 +107,17 @@
 
 <script>
     let categories = [];
+    let suppliers = [];
+    let suppliersById = {};
+    let currentCategory = null;
+    let currentSearch = '';
+
+    const CLOTH_ATTRS = [
+        { name: 'color', label: 'Color', type: 'select', options: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow'] },
+        { name: 'size', label: 'Size', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
+        { name: 'material', label: 'Material', type: 'text' }
+    ];
+
     const CATEGORY_ATTRS = {
         'books': [
             { name: 'author', label: 'Author', type: 'text' },
@@ -97,11 +125,12 @@
             { name: 'publisher', label: 'Publisher', type: 'text' },
             { name: 'page_count', label: 'Pages', type: 'number' }
         ],
-        'clothes': [
-            { name: 'brand', label: 'Brand', type: 'text' },
-            { name: 'material', label: 'Material', type: 'text' },
-            { name: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex'] }
-        ],
+        'clothes': CLOTH_ATTRS,
+        't-shirt': CLOTH_ATTRS,
+        'tshirt': CLOTH_ATTRS,
+        'hoodie': CLOTH_ATTRS,
+        'pant': CLOTH_ATTRS,
+        'pants': CLOTH_ATTRS,
         'laptops': [
             { name: 'cpu', label: 'CPU', type: 'text' },
             { name: 'ram', label: 'RAM (GB)', type: 'number' },
@@ -145,9 +174,40 @@
         ]
     };
 
+    const CLOTHING_SLUGS = new Set(['clothes', 't-shirt', 'tshirt', 'hoodie', 'pant', 'pants']);
+
     async function init() {
+        if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+            window.location.href = '/staff/login/';
+            return;
+        }
+        await loadSuppliers();
         await loadCategories();
         await loadProducts();
+    }
+
+    async function loadSuppliers() {
+        try {
+            const resp = await fetch('/api/suppliers/?only_active=true', {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const res = await resp.json();
+            if (!res.success) {
+                suppliers = [];
+                suppliersById = {};
+                return;
+            }
+            suppliers = res.data || [];
+            suppliersById = {};
+            suppliers.forEach(s => { suppliersById[s.id] = s; });
+
+            const select = document.getElementById('form-supplier');
+            select.innerHTML = suppliers.length
+                ? suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('')
+                : '<option value="">No suppliers available</option>';
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function loadCategories() {
@@ -158,15 +218,57 @@
         categories.forEach(c => {
             select.innerHTML += `<option value="${c.id}" data-slug="${c.slug}">${c.name}</option>`;
         });
+        renderCategoryNav();
+    }
+
+    function renderCategoryNav() {
+        const nav = document.getElementById('category-filter');
+        nav.innerHTML = '';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'd-inline-flex flex-wrap gap-2';
+
+        const allBtn = document.createElement('button');
+        allBtn.className = `btn btn-sm ${currentCategory ? 'btn-outline-secondary' : 'btn-primary'} rounded-pill px-3`;
+        allBtn.textContent = 'All Categories';
+        allBtn.onclick = () => setCategoryFilter(null);
+        wrapper.appendChild(allBtn);
+
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            const active = currentCategory === cat.slug;
+            btn.className = `btn btn-sm ${active ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill px-3`;
+            btn.textContent = cat.name;
+            btn.onclick = () => setCategoryFilter(cat.slug);
+            wrapper.appendChild(btn);
+        });
+
+        nav.appendChild(wrapper);
+    }
+
+    function setCategoryFilter(slug) {
+        currentCategory = slug;
+        renderCategoryNav();
+        loadProducts();
+    }
+
+    function setSearchFilter(value) {
+        currentSearch = value.trim();
+        loadProducts();
     }
 
     async function loadProducts() {
-        const resp = await fetch('/api/products/');
+        const params = new URLSearchParams();
+        if (currentCategory) params.set('category', currentCategory);
+        if (currentSearch) params.set('search', currentSearch);
+        const url = `/api/products/${params.toString() ? `?${params.toString()}` : ''}`;
+        const resp = await fetch(url);
         const products = await resp.json();
         const list = document.getElementById('product-list');
         list.innerHTML = '';
         
         products.forEach(p => {
+            const supplier = suppliersById[p.supplier_id];
+            const supplierName = supplier ? supplier.name : (p.supplier_id ? `#${p.supplier_id}` : 'Unassigned');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="ps-4">
@@ -180,6 +282,7 @@
                 </td>
                 <td>${p.category}</td>
                 <td><span class="badge bg-light text-dark border">${p.product_type}</span></td>
+                <td>${supplierName}</td>
                 <td class="fw-bold text-primary">${new Intl.NumberFormat('vi-VN').format(p.price)}</td>
                 <td class="text-end pe-4">
                     <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal(${p.id})"><i class="fas fa-edit"></i></button>
@@ -237,6 +340,9 @@
         document.getElementById('edit-id').value = '';
         document.getElementById('productForm').reset();
         document.getElementById('dynamic-fields').innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
+        if (suppliers.length > 0) {
+            document.getElementById('form-supplier').value = suppliers[0].id;
+        }
         new bootstrap.Modal(document.getElementById('productModal')).show();
     }
 
@@ -250,6 +356,9 @@
         document.getElementById('form-description').value = p.description;
         document.getElementById('form-price').value = p.price;
         document.getElementById('form-image').value = p.image_url;
+        if (p.supplier_id) {
+            document.getElementById('form-supplier').value = p.supplier_id;
+        }
         
         const catSelect = document.getElementById('form-category');
         catSelect.value = p.category_id;
@@ -264,7 +373,11 @@
         const id = document.getElementById('edit-id').value;
         const select = document.getElementById('form-category');
         const category_id = select.value;
-        const product_type = select.options[select.selectedIndex].dataset.slug.replace(/s$/, ''); // singularize (laptops -> laptop)
+        const slug = select.options[select.selectedIndex].dataset.slug;
+        const product_type = CLOTHING_SLUGS.has(slug)
+            ? 'clothes'
+            : slug.replace(/s$/, ''); // singularize (laptops -> laptop)
+        const supplierValue = document.getElementById('form-supplier').value;
         
         const payload = {
             id: id || null,
@@ -274,7 +387,7 @@
             price: parseFloat(document.getElementById('form-price').value),
             description: document.getElementById('form-description').value,
             image_url: document.getElementById('form-image').value,
-            supplier_id: 1 // mock
+            supplier_id: supplierValue ? parseInt(supplierValue) : null
         };
 
         // Add dynamic attributes

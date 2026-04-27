@@ -12,14 +12,26 @@ from jwt_utils import jwt_required
 from .models import Supplier
 
 @require_http_methods(["GET"])
+@jwt_required(user_types=['staff'])
 def list_suppliers(request):
     """List all active suppliers (Staff only)"""
     try:
         only_active = request.GET.get('only_active', 'false').lower() == 'true'
+        search_query = request.GET.get('search')
         if only_active:
             suppliers = Supplier.objects.filter(is_active=True)
         else:
             suppliers = Supplier.objects.all()
+
+        if search_query:
+            from django.db.models import Q
+            suppliers = suppliers.filter(
+                Q(name__icontains=search_query) |
+                Q(contact_name__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(phone__icontains=search_query) |
+                Q(address__icontains=search_query)
+            )
         
         return JsonResponse({
             'success': True,

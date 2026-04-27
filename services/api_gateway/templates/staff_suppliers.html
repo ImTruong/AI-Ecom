@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "staff_base.html" %}
 
 {% block title %}Manage Suppliers - TruongShop{% endblock %}
 
@@ -75,7 +75,13 @@
 <div class="admin-card">
     <div class="page-header">
         <h1>🏭 Manage Suppliers</h1>
-        <button class="btn btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa fa-search"></i></span>
+                <input type="text" class="form-control" id="supplier-search" placeholder="Search suppliers..." oninput="setSupplierSearch(this.value)">
+            </div>
+            <button class="btn btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+        </div>
     </div>
 
     <table class="supplier-table">
@@ -133,9 +139,18 @@
 
 {% block extra_js %}
 <script>
+    let currentSearch = '';
+
     async function loadSuppliers() {
         try {
-            const resp = await fetch('/api/suppliers/', {
+            if (!isLoggedIn() || localStorage.getItem('user_role') !== 'staff') {
+                window.location.href = '/staff/login/';
+                return;
+            }
+            const params = new URLSearchParams();
+            if (currentSearch) params.set('search', currentSearch);
+            const url = `/api/suppliers/${params.toString() ? `?${params.toString()}` : ''}`;
+            const resp = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${getToken()}` }
             });
             const res = await resp.json();
@@ -163,6 +178,11 @@
             console.error(e);
             showAlert('Failed to load suppliers', 'error');
         }
+    }
+
+    function setSupplierSearch(value) {
+        currentSearch = value.trim();
+        loadSuppliers();
     }
 
     function openSupplierModal(sup = null) {

@@ -27,22 +27,46 @@ def fetch_products(retries=10, delay=5):
                 return []
 
 def format_product_text(p):
-    """Combine name, category, description, attributes, and variants into a single string"""
-    text = f"Product Name: {p['name']}. "
-    text += f"Category: {p['category']}. "
-    text += f"Type: {p['product_type']}. "
+    """Combine all product-relevant fields into a single descriptive string."""
+    parts = [
+        f"Product Name: {p.get('name', '')}",
+        f"Category: {p.get('category', '')}",
+        f"Type: {p.get('product_type', '')}",
+    ]
+
     if p.get('description'):
-        text += f"Description: {p['description']}. "
-    
-    if p.get('attributes'):
+        parts.append(f"Description: {p['description']}")
+
+    if p.get('attributes') and isinstance(p.get('attributes'), dict):
         attrs = ", ".join([f"{k}: {v}" for k, v in p['attributes'].items()])
-        text += f"Attributes: {attrs}. "
-    
-    if p.get('variants'):
-        variant_names = ", ".join([v['name'] for v in p['variants']])
-        text += f"Options: {variant_names}. "
-    
-    return text
+        if attrs:
+            parts.append(f"Attributes: {attrs}")
+
+    if p.get('variants') and isinstance(p.get('variants'), list):
+        variant_names = ", ".join([v.get('name', '') for v in p['variants'] if v.get('name')])
+        if variant_names:
+            parts.append(f"Options: {variant_names}")
+
+    skip_keys = {
+        'id', 'name', 'description', 'price', 'image_url', 'category',
+        'category_id', 'supplier_id', 'created_at', 'updated_at',
+        'product_type', 'attributes', 'variants'
+    }
+    for key in sorted(p.keys()):
+        if key in skip_keys:
+            continue
+        value = p.get(key)
+        if value in (None, '', [], {}):
+            continue
+        if isinstance(value, dict):
+            extra = ", ".join([f"{k}: {v}" for k, v in value.items()])
+            parts.append(f"{key}: {extra}")
+        elif isinstance(value, list):
+            parts.append(f"{key}: {', '.join([str(v) for v in value if v])}")
+        else:
+            parts.append(f"{key}: {value}")
+
+    return ". ".join([p for p in parts if p]) + "."
 
 def main():
     print("🚀 Starting Vector Service...")

@@ -237,6 +237,7 @@ services:
     volumes:
       - ./services/product_service:/app
       - ./shared:/shared
+      - ./seed_data.sql:/seed_data.sql
 
   # Auth Service
   auth-service:
@@ -555,6 +556,7 @@ services:
     container_name: recommendation-service
     environment:
       - TRACKING_SERVICE_URL=http://api-gateway:8000/api/tracking/
+      - PRODUCT_SERVICE_URL=http://product-service:8000/api/products/
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
     ports:
@@ -576,6 +578,9 @@ services:
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password123
+      - PRODUCT_DATABASE_URL=postgresql://product_user:product_pass@product_db:5432/product_db
+      - VOUCHER_DATABASE_URL=postgresql://voucher_user:voucher_pass@voucher_db:5432/voucher_db
+      - TRACKING_DATABASE_URL=postgresql://tracking_user:tracking_pass@tracking_db:5432/tracking_db
     ports:
       - "8105:8005"
     depends_on:
@@ -599,6 +604,7 @@ services:
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password123
+      - FREELLM_API_KEY=apf_kmpmifztgfycr8ei9z43rgld
     ports:
       - "8012:8000"
     depends_on:

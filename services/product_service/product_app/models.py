@@ -27,6 +27,8 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     image_url = models.CharField(max_length=500, blank=True)
     supplier_id = models.IntegerField(null=True, blank=True)
+    product_type = models.CharField(max_length=50, default='generic')
+    attributes = models.JSONField(default=dict, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -64,12 +66,15 @@ class Product(models.Model):
                 'supplier_id': self.supplier_id,
                 'created_at': self.created_at.isoformat() if self.created_at else None,
             }
-            
+
+            product_type = getattr(self, 'product_type', None)
+
             # Add specific fields based on subclass
             detail = self.detail
             if detail and detail != self:
                 subclass_name = detail.__class__.__name__.lower()
-                data['product_type'] = subclass_name
+                if not product_type or product_type == 'generic':
+                    product_type = subclass_name
                 
                 # Get fields belonging ONLY to the subclass (not the base Product)
                 base_field_names = {f.name for f in Product._meta.concrete_fields}
@@ -89,8 +94,16 @@ class Product(models.Model):
                                 data[field.name] = str(value)
                         except Exception:
                             pass
-            else:
-                data['product_type'] = 'generic'
+            if not product_type:
+                product_type = 'generic'
+
+            data['product_type'] = product_type
+
+            attributes = self.attributes or {}
+            if isinstance(attributes, dict):
+                for key, value in attributes.items():
+                    if key not in data:
+                        data[key] = value
                 
             return data
         except Exception as e:

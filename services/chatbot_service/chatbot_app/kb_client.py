@@ -40,7 +40,8 @@ class KBClient:
             WHERE p.id IN $product_ids
             OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category)
             RETURN p.id as id, p.name as name, COALESCE(c.name, 'Chưa phân loại') as category, 
-                   p.price as price, p.description as description, COALESCE(p.rating, 5.0) as rating
+                   p.price as price, p.description as description, COALESCE(p.rating, 5.0) as rating,
+                   COALESCE(p.product_type, 'generic') as product_type, COALESCE(p.image_url, '') as image_url
             """
             result = session.run(query, product_ids=product_ids)
             return [dict(record) for record in result]
@@ -53,8 +54,22 @@ class KBClient:
             MATCH (p:Product)
             OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category)
             RETURN p.id as id, p.name as name, COALESCE(c.name, 'Chưa phân loại') as category, 
-                   p.price as price, COALESCE(p.rating, 0.0) as rating
+                   p.price as price, COALESCE(p.rating, 0.0) as rating,
+                   COALESCE(p.product_type, 'generic') as product_type, COALESCE(p.image_url, '') as image_url
             ORDER BY rating DESC LIMIT $limit
+            """
+            result = session.run(query, limit=limit)
+            return [dict(record) for record in result]
+
+    def get_active_vouchers(self, limit=5):
+        if not self.driver: return []
+        with self.driver.session() as session:
+            query = """
+            MATCH (v:Voucher)
+            WHERE v.is_active = true
+            RETURN v.id as id, v.code as code, v.name as name, v.description as description,
+                   v.discount_type as discount_type, v.discount_value as discount_value
+            ORDER BY v.discount_value DESC LIMIT $limit
             """
             result = session.run(query, limit=limit)
             return [dict(record) for record in result]

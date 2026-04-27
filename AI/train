@@ -1,0 +1,209 @@
+# ========================= nguyen khac truong b22dccn884
+# 1. IMPORT
+# =========================
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import *
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# =========================
+# 2. LOAD DATA
+# =========================
+df = pd.read_csv('data_user500.csv')
+df = df.sort_values(by=['user_id', 'timestamp'])
+
+# =========================
+# 3. DISTRIBUTION
+# =========================
+plt.figure()
+df['action'].value_counts().plot(kind='bar')
+plt.title("Action Distribution")
+plt.show()
+
+# =========================
+# 4. ENCODE
+# =========================
+action_enc = LabelEncoder()
+product_enc = LabelEncoder()
+
+df['action_id'] = action_enc.fit_transform(df['action'])
+df['product_id_enc'] = product_enc.fit_transform(df['product_id'])
+
+num_actions = len(action_enc.classes_)
+num_products = len(product_enc.classes_)
+
+# =========================
+# 5. BUILD SEQUENCE
+# =========================
+seq_a, seq_p, labels = [], [], []
+
+for uid, g in df.groupby('user_id'):
+    a = g['action_id'].tolist()
+    p = g['product_id_enc'].tolist()
+
+    for i in range(1, len(a)):
+        seq_a.append(a[:i])
+        seq_p.append(p[:i])
+        labels.append(p[i])
+
+max_len = max(len(s) for s in seq_a)
+
+X_a = pad_sequences(seq_a, maxlen=max_len, padding='pre')
+X_p = pad_sequences(seq_p, maxlen=max_len, padding='pre')
+y = np.array(labels)
+
+# =========================
+# 6. SPLIT
+# =========================
+X_a_train, X_a_temp, X_p_train, X_p_temp, y_train, y_temp = train_test_split(
+    X_a, X_p, y, test_size=0.3, random_state=42
+)
+
+X_a_val, X_a_test, X_p_val, X_p_test, y_val, y_test = train_test_split(
+    X_a_temp, X_p_temp, y_temp, test_size=0.5, random_state=42
+)
+
+# =========================
+# 7. ATTENTION FIX (QUAN TRỌNG)
+# =========================
+def attention(x):
+    score = Dense(1, activation='tanh')(x)
+    weights = Softmax(axis=1)(score)
+    context = Multiply()([x, weights])
+    context = Lambda(lambda t: tf.reduce_sum(t, axis=1))(context)
+    return context
+
+# =========================
+# 8. MODEL
+# =========================
+def build_model(type_model):
+    a_in = Input(shape=(max_len,))
+    p_in = Input(shape=(max_len,))
+
+    a_emb = Embedding(num_actions+1, 8)(a_in)
+    p_emb = Embedding(num_products+1, 16)(p_in)
+
+    x = Concatenate()([a_emb, p_emb])
+
+    if type_model == "RNN":
+        x = SimpleRNN(64, return_sequences=True)(x)
+    elif type_model == "LSTM":
+        x = LSTM(64, return_sequences=True)(x)
+    else:
+        x = Bidirectional(LSTM(64, return_sequences=True))(x)
+
+    x = attention(x)
+
+    x = Dense(64, activation='relu')(x)
+    out = Dense(num_products, activation='softmax')(x)
+
+    model = Model([a_in, p_in], out)
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
+    return model
+
+# =========================
+# 9. TRAIN
+# =========================
+model_names = ["RNN", "LSTM", "BiLSTM"]
+model_objs = []
+histories = {}
+results = {}
+
+for name in model_names:
+    print("\nTraining", name)
+    m = build_model(name)
+
+    h = m.fit(
+        [X_a_train, X_p_train], y_train,
+        validation_data=([X_a_val, X_p_val], y_val),
+        epochs=10,
+        batch_size=32,
+        verbose=1
+    )
+
+    loss, acc = m.evaluate([X_a_test, X_p_test], y_test, verbose=0)
+
+    model_objs.append(m)
+    histories[name] = h
+    results[name] = acc
+
+# =========================
+# 10. TOP-K
+# =========================
+def top_k(model, k=5):
+    pred = model.predict([X_a_test, X_p_test])
+    topk = np.argsort(pred, axis=1)[:, -k:]
+    return np.mean([y_test[i] in topk[i] for i in range(len(y_test))])
+
+topk_scores = [top_k(m) for m in model_objs]
+
+# =========================
+# 11. BAR CHART
+# =========================
+plt.figure()
+plt.bar(model_names, list(results.values()))
+plt.title("Accuracy Comparison")
+plt.show()
+
+plt.figure()
+plt.bar(model_names, topk_scores)
+plt.title("Top-5 Accuracy")
+plt.show()
+
+# =========================
+# 12. OVERFITTING
+# =========================
+for name, h in histories.items():
+    plt.figure()
+    plt.plot(h.history['accuracy'], label='train')
+    plt.plot(h.history['val_accuracy'], label='val')
+    plt.title(name)
+    plt.legend()
+    plt.show()
+
+# =========================
+# 13. BEST MODEL
+# =========================
+best_idx = np.argmax(list(results.values()))
+best_model = model_objs[best_idx]
+
+print("\nResults:")
+for k,v in results.items():
+    print(k, v)
+
+print("Top-5:", topk_scores)
+print("Best:", model_names[best_idx])
+
+# =========================
+# 14. CONFUSION MATRIX
+# =========================
+y_pred = np.argmax(best_model.predict([X_a_test, X_p_test]), axis=1)
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure()
+plt.imshow(cm)
+plt.title("Confusion Matrix")
+plt.colorbar()
+plt.show()
+
+# =========================
+# 15. METRICS
+# =========================
+print("\nPrecision:", precision_score(y_test, y_pred, average='weighted'))
+print("Recall:", recall_score(y_test, y_pred, average='weighted'))
+print("F1:", f1_score(y_test, y_pred, average='weighted'))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))

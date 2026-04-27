@@ -3,3 +3,4 @@ uvicorn
 neo4j
 pandas
 python-dotenv
+psycopg2-binary

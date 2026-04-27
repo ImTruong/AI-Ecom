@@ -60,6 +60,10 @@ def staff_suppliers(request):
     """Staff Supplier management page"""
     return render(request, 'staff_suppliers.html')
 
+def staff_users(request):
+    """Staff User management page"""
+    return render(request, 'staff_users.html')
+
 def product_detail(request, product_id):
     """Product detail page"""
     return render(request, 'product_detail.html', {

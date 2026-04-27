@@ -506,11 +506,11 @@ INSERT INTO customers (id, email, password_hash, full_name, is_active, created_a
 INSERT INTO customers (id, email, password_hash, full_name, is_active, created_at, updated_at) VALUES (599, 'user599@example.com', 'pbkdf2_sha256', 'Sample User 599', true, NOW(), NOW()) ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO customers (id, email, password_hash, full_name, is_active, created_at, updated_at)
-VALUES (1, 'customer@truongshop.com', 'pbkdf2_sha256$600000$randomsalt123$abcdefghijklmnopqrstuvwxyz1234567890', 'Nguyễn Văn Khách', true, NOW(), NOW())
+VALUES (1, 'client@example.com', 'pbkdf2_sha256$600000$seedclient$EiBp9+vA2SHAvKPki/xkmmepggNo+GAT8MlQz2LZC14=', 'Client Demo', true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO staff (id, email, password_hash, full_name, role, is_active, created_at, updated_at)
-VALUES (1, 'staff@truongshop.com', 'pbkdf2_sha256$600000$randomsalt456$abcdefghijklmnopqrstuvwxyz0987654321', 'Trần Thị Nhân Viên', 'admin', true, NOW(), NOW())
+VALUES (1, 'staff@example.com', 'pbkdf2_sha256$600000$seedstaff$J9uoAuAAxVICp3DYxqx9l5RtS37xi5vWZ/YqgaufZjY=', 'Staff Demo', 'staff', true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. SUPPLIER SERVICE (supplier_db)

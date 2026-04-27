@@ -212,6 +212,9 @@
     .btn-clear:hover {
         background: #ff3838;
     }
+
+    .hover-lift { transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+    .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
 </style>
 {% endblock %}
 
@@ -228,6 +231,17 @@
     <div class="cart-actions" id="cartActions" style="display: none;">
         <button onclick="clearCart()" class="btn-clear">Clear Cart</button>
         <a href="/" class="btn-continue">Continue Shopping</a>
+    </div>
+
+    <div id="cartRecommendations" class="mt-5" style="display: none;">
+        <div class="d-flex align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0 me-3"><i class="fa fa-wand-magic-sparkles text-primary me-2"></i>Recommended For You</h2>
+            <div class="flex-grow-1 border-bottom" style="height: 1px; opacity: 0.1;"></div>
+            <span class="badge bg-primary-subtle text-primary ms-3 rounded-pill px-3">AI Powered</span>
+        </div>
+        <div class="row g-4" id="cart-recommendation-grid">
+            <!-- Dynamic AI content -->
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -260,6 +274,7 @@
                 if (data.success) {
                     cartData = data.data;
                     displayCart();
+                    loadCartRecommendations();
                 }
             } else if (response.status === 401) {
                 clearToken();
@@ -432,8 +447,128 @@
         window.location.href = '/checkout/';
     }
 
+    async function loadCartRecommendations() {
+        const userId = localStorage.getItem('user_id');
+        const root = document.getElementById('cartRecommendations');
+        const grid = document.getElementById('cart-recommendation-grid');
+
+        if (!userId) {
+            root.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/recommendations/${userId}?limit=4`);
+            const data = await res.json();
+            if (data.success && data.recommendations && data.recommendations.length > 0) {
+                root.style.display = 'block';
+                renderCartRecs(data.recommendations, grid);
+            } else {
+                root.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('Recommendations error:', e);
+            root.style.display = 'none';
+        }
+    }
+
+    function renderCartRecs(recs, container) {
+        container.innerHTML = '';
+        recs.forEach(r => {
+            const p = r.payload || {};
+            const trueId = p.id || r.id;
+            const price = p.price || 0;
+            const col = document.createElement('div');
+            col.className = 'col-6 col-lg-3';
+            col.innerHTML = `
+                <div class="glass-card h-100 p-0 overflow-hidden border-0 bg-white shadow-sm hover-lift position-relative">
+                    <div class="position-absolute top-0 start-0 m-2 z-1">
+                        <span class="badge bg-white text-primary rounded-pill shadow-sm px-3 py-2 fw-bold">
+                            <i class="fa fa-${TYPE_ICONS[p.product_type] || 'cube'} me-1"></i>${p.product_type || 'product'}
+                        </span>
+                    </div>
+                    <a href="/product/detail/${trueId}/" class="text-decoration-none">
+                        <div class="p-3 text-center" style="height: 150px;">
+                            <img src="${p.image_url || 'https://via.placeholder.com/200'}" class="img-fluid h-100" style="object-fit: contain;">
+                        </div>
+                    </a>
+                    <div class="p-3 border-top">
+                        <a href="/product/detail/${trueId}/" class="text-decoration-none">
+                            <h6 class="fw-bold text-dark text-truncate mb-1">${p.name || 'Product'}</h6>
+                        </a>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(price)}đ</span>
+                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCartFromRec('${p.product_type}', ${trueId}, ${price}, '${(p.name || '').replace(/'/g, "\\'")}', '${p.image_url || ''}')">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    }
+
+    async function addToCartFromRec(type, id, price, name, img) {
+        const token = getToken();
+        if (!token) {
+            showAlert('Please login to add to cart', 'warning');
+            window.location.href = '/login/';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/cart/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    product_type: type,
+                    product_id: id,
+                    quantity: 1,
+                    price: price,
+                    product_name: name,
+                    image_url: img
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showAlert('Added to cart!');
+                loadCart();
+                updateCartBadge();
+                await logTracking('log-cart', {
+                    product_id: id,
+                    product_type: type,
+                    action_type: 'add',
+                    price: price,
+                    quantity: 1
+                });
+            } else {
+                showAlert(data.message || 'Error adding to cart', 'danger');
+            }
+        } catch (e) {
+            showAlert('Communication error with cart service', 'danger');
+        }
+    }
+
+    async function logTracking(endpoint, data) {
+        const userId = localStorage.getItem('user_id');
+        try {
+            return fetch(`/api/tracking/${endpoint}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, customer_id: userId })
+            }).catch(e => console.warn('Tracking failed:', e));
+        } catch (e) {
+            return null;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         loadCart();
+        loadCartRecommendations();
     });
 </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 echo ">>> Knowledge Service Starting..."
 echo ">>> Waiting for Neo4j (15s)..."
 sleep 15

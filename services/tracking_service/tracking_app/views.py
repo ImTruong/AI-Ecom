@@ -134,12 +134,14 @@ class GetUserHistoryView(APIView):
         views = ProductView.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
         carts = CartAction.objects.filter(customer_id=customer_id, action_type='add').order_by('-timestamp')[:50]
         purchases = PurchaseAction.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
+        searches = SearchHistory.objects.filter(customer_id=customer_id).order_by('-timestamp')[:50]
         
         return Response({
             'success': True,
             'data': {
                 'views': [v.to_dict() for v in views],
                 'carts': [c.to_dict() for c in carts],
-                'purchases': [p.to_dict() for p in purchases]
+                'purchases': [p.to_dict() for p in purchases],
+                'searches': [s.to_dict() for s in searches]
             }
         })

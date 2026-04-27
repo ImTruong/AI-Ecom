@@ -50,11 +50,25 @@ class AIEngine:
         except Exception as e:
             print(f">>> Error loading model: {e}")
 
+    def _normalize_action(self, action):
+        a = str(action).strip().lower()
+        if 'view' in a:
+            return 'view'
+        if 'add_to_cart' in a or 'cart' in a:
+            return 'add_to_cart'
+        if 'search' in a:
+            return 'search'
+        if 'click' in a:
+            return 'click'
+        if 'purchase' in a or 'bought' in a:
+            return 'purchase'
+        return a
+
     def predict_next_product(self, action_history, product_history):
         if not self.model: return None
         
         # Preprocessing
-        act_seq = [self.action_to_idx.get(str(a).upper(), 0) for i, a in enumerate(action_history)]
+        act_seq = [self.action_to_idx.get(self._normalize_action(a), 0) for i, a in enumerate(action_history)]
         prod_seq = [self.product_to_idx.get(int(p), 0) for i, p in enumerate(product_history)]
         
         # Pad sequences
