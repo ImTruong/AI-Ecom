@@ -1,0 +1,392 @@
+# Recommand & AI Flow (TruongShop / AI‑Ecom)
+
+Tài liệu này mô tả **toàn bộ luồng Recommendation + AI** trong project (từ dữ liệu tracking → vector search/Qdrant → recommend-service, và từ dữ liệu/KB Neo4j → chatbot RAG + model dự đoán), bao gồm cả các thành phần: **Neo4j**, **data_user500.csv**, **Qdrant**, **Knowledge Base (KB)**, **recommendation_service**, **tracking_service**, **vector_service**, **chatbot_service**, và folder **AI/** (model + train).
+
+---
+
+## 1) Bức tranh tổng quan
+
+Hệ thống có 2 nhánh AI chính chạy song song:
+
+1. **Vector-based Recommendation / Semantic Search (Qdrant)**
+   - Dữ liệu sản phẩm từ **product-service** được vector hóa (embedding) bởi **vector-service** và lưu vào **Qdrant**.
+   - Lịch sử hành vi người dùng được lưu bởi **tracking-service** (PostgreSQL).
+   - **recommendation-service** lấy lịch sử từ tracking-service → “tóm tắt hành vi” thành văn bản → embedding → search trong Qdrant → trả về sản phẩm gợi ý.
+
+2. **Knowledge Graph + Chatbot RAG (Neo4j + LSTM + LLM)**
+   - **knowledge-service** xây “Knowledge Base” trong **Neo4j** bằng cách:
+     - Import tương tác mẫu từ `data_user500.csv`.
+     - Import **Products/Categories** từ product DB.
+     - Import **Vouchers** từ voucher DB.
+     - Import **Tracking events** từ tracking DB.
+   - **chatbot-service** truy vấn Neo4j để:
+     - lấy lịch sử user (VIEW/CART/SEARCH),
+     - search sản phẩm theo keyword,
+     - lấy top-rated products,
+     - lấy voucher active,
+     - và (tuỳ trường hợp) dùng **AI model (best_model.h5)** để dự đoán “next product”.
+   - Chatbot có thể gọi LLM ngoài (**FreeLLM**) để tạo câu trả lời tự nhiên; nếu không có key thì fallback sang template nội bộ.
+
+> **API Gateway** là điểm vào chính: nó forward các route `/api/recommendations/*`, `/api/tracking/*`, `/api/chatbot/*` tới đúng service.
+
+---
+
+## 2) Các thành phần & vai trò (Where/What/Why)
+
+### 2.1. Tracking Service (Django + Postgres)
+- **Vị trí**: `services/tracking_service/`
+- **DB**: `tracking_db` (PostgreSQL, cấu hình trong `docker-compose.yml`)
+- **Mục đích**: ghi nhận hành vi người dùng để phục vụ gợi ý.
+- **Các event chính (model/table):**
+  - `SearchHistory` → bảng `search_history`
+  - `ProductView` → bảng `product_views`
+  - `CartAction` → bảng `cart_actions`
+  - `PurchaseAction` → bảng `purchase_actions`
+- **API quan trọng (qua gateway)**: 
+  - `POST /api/tracking/log-search/`
+  - `POST /api/tracking/log-view/`
+  - `POST /api/tracking/log-cart/`
+  - `POST /api/tracking/log-purchase/`
+  - `GET  /api/tracking/user-history/<customer_id>/`  
+    → trả về `{views, carts, purchases, searches}` (mỗi loại lấy gần nhất ~20 items)
+
+**Liên kết:**
+- recommendation-service gọi `GET /api/tracking/user-history/<user_id>/` để lấy history.
+- knowledge-service có thể import tracking events từ `TRACKING_DATABASE_URL` sang Neo4j.
+
+---
+
+### 2.2. Vector Service (Manual sync → Qdrant)
+- **Vị trí**: `services/vector_service/main.py`
+- **Chạy theo profile**: `vector-service` trong `docker-compose.yml` có `profiles: ["manual"]`.
+- **Mục đích**: tạo/cập nhật **vector index** cho sản phẩm trong Qdrant.
+- **Nguồn dữ liệu**: gọi `GET PRODUCT_SERVICE_URL` (mặc định `/api/products/`) lấy list products.
+- **Embedding model**: `SentenceTransformer('all-MiniLM-L6-v2')` (vector size = 384)
+- **Qdrant collection**: `products`
+- **Payload được lưu** (tối thiểu): `id, name, category, product_type, price, image_url, raw_text`
+  - `raw_text` là text tổng hợp từ name/category/type/description/attributes/variants…
+
+**Luồng vận hành**:
+1. Fetch toàn bộ sản phẩm từ product-service.
+2. Với mỗi product: build `raw_text` → embed → upsert vào Qdrant (id = product.id).
+
+**Liên kết:**
+- recommendation-service đọc trực tiếp collection `products` trong Qdrant để search.
+
+---
+
+### 2.3. Qdrant (Vector Database)
+- **Khai báo**: service `qdrant` trong `docker-compose.yml` (port `6333`).
+- **Mục đích**: lưu vector embedding và hỗ trợ `search` theo cosine similarity.
+- **Dữ liệu**: collection `products` do vector-service tạo.
+
+**Tác dụng**:
+- Cho phép **semantic search** (tìm theo ngữ nghĩa, không chỉ keyword).
+- Cho phép recommend dựa trên “vector của hành vi user” (context embedding).
+
+---
+
+### 2.4. Recommendation Service (FastAPI)
+- **Vị trí**: `services/recommendation_service/main.py`
+- **Port (container)**: `8001` (map ra host `8101:8001` theo compose)
+- **Mục đích**:
+  - `/api/recommendations/search` → semantic search theo query text.
+  - `/api/recommendations/{user_id}` → personalized recommendations dựa trên tracking history.
+
+**Cấu hình chính (env)**:
+- `TRACKING_SERVICE_URL` (compose set: `http://api-gateway:8000/api/tracking/`)
+- `PRODUCT_SERVICE_URL` (compose set: `http://product-service:8000/api/products/`)
+- `QDRANT_HOST`, `QDRANT_PORT`
+- `COLLECTION_NAME = "products"`
+- `EMBEDDING_MODEL = all-MiniLM-L6-v2`
+
+**Thuật toán chính (runtime):**
+- Lấy history từ tracking-service: `views, carts, purchases, searches`.
+- Gán trọng số hành vi (ACTION_WEIGHTS):
+  - view = 1
+  - cart = 2
+  - purchase = 3
+- Build `context_text` bằng cách lặp các dòng “Viewed/Added to cart/Purchased/Search” theo trọng số.
+- Embed `context_text` → query Qdrant → lấy danh sách products tương tự.
+- Loại bỏ các product user đã tương tác (seen_ids).
+- Sort theo score giảm dần.
+- Fallback:
+  - Nếu Qdrant lỗi/không có dữ liệu: scroll vài items trong Qdrant.
+  - Nếu Qdrant trống: fallback sang product-service keyword search.
+
+**Liên kết:**
+- Phụ thuộc: Qdrant + tracking-service.
+- Được expose qua API Gateway theo route `/api/recommendations/`.
+
+---
+
+### 2.5. Neo4j (Graph DB) & Knowledge Base
+- **Khai báo**: service `neo4j` trong `docker-compose.yml` (HTTP `7474`, Bolt `7687`).
+- **Mục đích**: lưu **Knowledge Graph** kết hợp:
+  - Entities: User, Product, Category, Voucher, Search
+  - Relations: VIEWED, SEARCHED, ADDED_TO_CART, BOUGHT, BELONGS_TO, …
+
+> Repo có file `queryneo4j.txt` chứa các Cypher query minh hoạ để render graph/truy vấn.
+
+---
+
+### 2.6. Knowledge Service (FastAPI + Importer)
+- **Vị trí**: `services/knowledge_service/`
+  - API: `main.py`
+  - Importer: `importer.py`
+  - Entrypoint: `start.sh`
+- **Mục đích**:
+  1. **Build/refresh Knowledge Graph** trong Neo4j (từ CSV + các DB dịch vụ).
+  2. Cung cấp vài endpoint graph-based recommendation.
+
+**Cách build KB (importer.py):**
+- `clear_database()` → `MATCH (n) DETACH DELETE n` (xoá sạch đồ thị)
+- `create_constraints()` tạo unique constraint cho User/Product/Category/Voucher.
+- `import_data('/data_user500.csv')`
+  - đọc `data_user500.csv` và tạo:
+    - (User)-[:VIEWED|:SEARCHED|:ADDED_TO_CART]->(Product)
+    - (User)-[:SEARCHED]->(Search {query}) đối với search không có product_id
+- `import_products_from_db(PRODUCT_DATABASE_URL)`:
+  - tạo `(:Category)` và `(:Product)` + `(:Product)-[:BELONGS_TO]->(:Category)`
+  - lưu thêm thuộc tính: price, image_url, product_type, attributes (JSON)
+- `import_vouchers_from_db(VOUCHER_DATABASE_URL)`:
+  - tạo `(:Voucher)` và thuộc tính discount/active…
+- `import_tracking_from_db(TRACKING_DATABASE_URL)`:
+  - map event từ tracking_db sang quan hệ graph:
+    - view → `:VIEWED`
+    - add cart → `:ADDED_TO_CART`
+    - purchase → `:BOUGHT`
+    - search → `(:User)-[:SEARCHED]->(:Search)`
+
+**API graph-based recommendation (main.py):**
+- `GET /recommendations/{user_id}`:
+  - “People also bought”:
+    - User u bought Product p
+    - Other users bought same p
+    - Recommend product reco mà u chưa bought
+- `GET /path/{user_id}/{product_id}`:
+  - tìm `shortestPath` (demo explainability)
+
+**Liên kết:**
+- Neo4j là “Knowledge Base” dùng chung.
+- Chatbot-service truy cập Neo4j trực tiếp (không bắt buộc đi qua knowledge-service).
+
+---
+
+### 2.7. data_user500.csv
+- **Vị trí**: repo root `data_user500.csv` (được mount vào knowledge-service & chatbot-service)
+- **Ý nghĩa**: dataset tương tác mẫu (user_id, product_id, action, query, timestamp).
+- **Vai trò**:
+  1. Là **training data** cho model sequence (LSTM/RNN) trong folder `AI/`.
+  2. Là **seed interactions** để importer đẩy vào Neo4j tạo graph quan hệ user↔product/search.
+
+---
+
+### 2.8. Folder AI/ (Model + Train)
+- **Vị trí**: `AI/`
+  - `AI/best_model.h5`: model TensorFlow/Keras đã train sẵn.
+  - `AI/train`: script train (file không có đuôi) đọc `data_user500.csv`.
+
+**Train script làm gì (AI/train):**
+- Đọc `data_user500.csv` → sort theo `user_id, timestamp`.
+- Encode:
+  - `action` → `action_id` (LabelEncoder)
+  - `product_id` → `product_id_enc` (LabelEncoder)
+- Tạo sequences cho bài toán **next-item prediction**:
+  - input: lịch sử hành vi (action seq + product seq)
+  - label: product tiếp theo
+- Build 3 model so sánh: `RNN`, `LSTM`, `BiLSTM` + attention.
+- Train/val/test và chọn model tốt nhất theo accuracy.
+
+> Lưu ý: script `AI/train` hiện **chưa có đoạn `model.save(...)`**. File `AI/best_model.h5` đang tồn tại sẵn trong repo, nên có thể được export thủ công (hoặc từ notebook/phiên bản khác).
+
+---
+
+### 2.9. Chatbot Service (FastAPI + Neo4j + LSTM + LLM)
+- **Vị trí**: `services/chatbot_service/`
+  - Entrypoint: `services/chatbot_service/main.py`
+  - Neo4j client: `chatbot_app/kb_client.py`
+  - AI engine (load model): `chatbot_app/ai_engine.py`
+  - LLM client: `chatbot_app/freellm_client.py`
+  - Fallback templates: `chatbot_app/local_brain.py`
+
+**Đầu vào chính**:
+- `POST /api/chatbot/ask` với payload kiểu:
+  ```json
+  {
+    "user_id": 123,
+    "message": "mình muốn mua iphone giá rẻ",
+    "trigger": "chat|view|cart|search",
+    "product_id": 11
+  }
+  ```
+
+**Luồng xử lý chính (services/chatbot_service/main.py):**
+1. (Optional) **Ghi nhận action** vào Neo4j nếu `trigger in [view, cart, search]` và có `product_id`:
+   - map trigger → VIEW/CART/SEARCH
+   - `KBClient.record_user_action()` tạo relationship `VIEWED/ADDED_TO_CART/SEARCHED`.
+2. Detect “buying intent” (từ keyword) → nếu true:
+   - `kb.search_products(message)` tìm product theo name/category trong Neo4j.
+   - Nếu có kết quả: trả về “KB Search” + list products.
+   - Nếu không: fallback `kb.get_top_rated_products()`.
+3. Nếu không buying intent:
+   - `kb.get_user_history(user_id)` lấy ~10 hành vi gần nhất (Neo4j).
+   - `AIEngine.predict_next_product(actions, product_ids)`:
+     - load model từ `/app/ai_model/best_model.h5`
+     - encoder mapping dựa trên `data_user500.csv` mount ở `/data_user500.csv`
+     - trả `top_3` product ids
+   - `kb.get_product_details(top_3)` để lấy thông tin hiển thị.
+4. Xây `context_data` và tạo câu trả lời:
+   - ưu tiên gọi `FreeLLMClient.chat_with_context()` nếu có `FREELLM_API_KEY`.
+   - nếu lỗi/không có key → fallback `LocalBrain.synthesize()`.
+
+**Điểm quan trọng:**
+- Chatbot đang “RAG-like” theo hướng **retrieval có cấu trúc từ Neo4j** (history/top/voucher/search) rồi “generation” bằng LLM/template.
+- File `chatbot_app/vector_database.py` hiện **đang rỗng** (0 bytes) → chatbot hiện không dùng Qdrant.
+
+---
+
+## 3) Luồng end-to-end (E2E) theo thời gian
+
+### 3.1. Bootstrapping lần đầu (theo `quick_start.sh`)
+1. `docker compose up -d --build` chạy toàn bộ stack.
+2. Migrate DB cho các Django services.
+3. Seed products/vouchers/users/roles.
+4. **Build vector index**:
+   - `docker compose --profile manual run --rm --build vector-service`
+   - tạo collection `products` trong Qdrant và upsert vectors.
+5. **Populate Neo4j KB**:
+   - `docker compose exec -T knowledge-service python importer.py`
+   - clear graph → import CSV + import từ DB.
+
+### 3.2. User tương tác trong app (runtime)
+- Frontend gọi gateway:
+  - xem sản phẩm → `POST /api/tracking/log-view/`
+  - search → `POST /api/tracking/log-search/`
+  - add cart → `POST /api/tracking/log-cart/`
+  - mua → `POST /api/tracking/log-purchase/`
+- Các event này vào `tracking_db`.
+
+### 3.3. Personalized recommendations (vector-based)
+1. Frontend gọi `GET /api/recommendations/<user_id>` (qua gateway).
+2. recommendation-service gọi tracking-service lấy user history.
+3. Build `context_text` và embed.
+4. Query Qdrant → trả về products gần nhất theo cosine.
+
+### 3.4. Chatbot (KB + model + LLM)
+1. Frontend gọi `POST /api/chatbot/ask`.
+2. Chatbot:
+   - nếu “mua/tìm sản phẩm”: search Neo4j (KB) và trả list.
+   - nếu chat thường: lấy history Neo4j + predict next product (LSTM) + top products + vouchers.
+   - generate câu trả lời bằng FreeLLM hoặc template.
+
+### 3.5. Refresh Knowledge Graph (batch)
+- Khi cần đồng bộ Neo4j với DB mới:
+  - chạy lại `python importer.py` trong knowledge-service.
+- `quick_update.sh` đã có bước refresh KB:
+  - `docker compose exec -T knowledge-service python importer.py`
+
+---
+
+## 4) Schema/quan hệ chính trong Neo4j (KB)
+
+### 4.1. Node labels
+- `(:User {id})`
+- `(:Product {id, name, price, image_url, product_type, attributes, ...})`
+- `(:Category {id, name, ...})`
+- `(:Voucher {id, code, discount_value, is_active, ...})`
+- `(:Search {query})`
+
+### 4.2. Relationship types
+- `(:User)-[:VIEWED {timestamp}]->(:Product)`
+- `(:User)-[:ADDED_TO_CART {timestamp}]->(:Product)`
+- `(:User)-[:BOUGHT {timestamp}]->(:Product)`
+- `(:User)-[:SEARCHED {timestamp}]->(:Product)` hoặc `(:Search)`
+- `(:Product)-[:BELONGS_TO]->(:Category)`
+
+### 4.3. Query minh hoạ
+- Lấy recent actions:
+  ```cypher
+  MATCH (u:User)-[r]->(target)
+  RETURN u.id, type(r), labels(target)[0], coalesce(target.name, target.text, target.code), r.timestamp
+  ORDER BY r.timestamp DESC
+  LIMIT 20;
+  ```
+
+- Graph recommendation (“people also bought”) (knowledge-service):
+  ```cypher
+  MATCH (u:User {id: $uid})-[:BOUGHT]->(p:Product)<-[:BOUGHT]-(other:User)-[:BOUGHT]->(reco:Product)
+  WHERE NOT (u)-[:BOUGHT]->(reco) AND reco <> p
+  RETURN reco.id as id, count(*) as weight
+  ORDER BY weight DESC
+  LIMIT 5;
+  ```
+
+> Lưu ý: `queryneo4j.txt` có thêm các quan hệ như `USED_VOUCHER`, `APPLICABLE_TO`, `FREQUENTLY_BOUGHT_WITH` để minh hoạ graph “đẹp”. Các quan hệ này **chưa thấy được importer.py tạo ra** (có thể là phần mở rộng/ý tưởng).
+
+---
+
+## 5) Qdrant collection (products)
+
+- **Vector size**: 384
+- **Distance**: Cosine
+- **Upsert key**: `PointStruct.id = product.id`
+- **Payload**:
+  - dùng để hiển thị ngay kết quả recommend/search mà không cần gọi ngược product-service.
+  - có `raw_text` giúp debug và cũng có thể dùng làm input tóm tắt.
+
+---
+
+## 6) Liên kết qua API Gateway
+
+API Gateway dùng `RoutingMiddleware` để forward theo prefix:
+- `/api/recommendations/` → `recommendation-service`
+- `/api/chatbot/` → `chatbot-service`
+- `/api/tracking/` → `tracking-service`
+- `/api/products/` → `product-service`
+
+=> Frontend chỉ cần gọi gateway (host `:8000`) thay vì gọi trực tiếp từng service.
+
+---
+
+## 7) Ghi chú vận hành / pitfalls
+
+1. **Vector index cần được build** trước khi recommendation-service hoạt động tốt.
+   - Nếu Qdrant chưa có collection/points → recommend-service sẽ fallback.
+
+2. **Knowledge-service importer sẽ xoá sạch Neo4j mỗi lần chạy** (`DETACH DELETE`).
+   - Đây là “refresh” kiểu rebuild; không phù hợp production nếu muốn giữ lịch sử lâu dài.
+
+3. **Đường dẫn model cho chatbot**
+   - `AIEngine` load model từ: `/app/ai_model/best_model.h5`.
+   - `docker-compose.yml` hiện mount: `../AI/model:/app/ai_model`.
+   - Trong repo lại có `AI/best_model.h5`.
+   - Vì vậy khi chạy compose, cần đảm bảo thư mục `../AI/model` (ngoài repo) có `best_model.h5`, hoặc chỉnh volume mount cho đúng.
+
+4. **Encoder consistency**
+   - Train dùng `LabelEncoder` (scikit-learn).
+   - Inference trong `AIEngine` tạo mapping từ `df['action'].unique()` và `df['product_id'].unique()`.
+   - Muốn kết quả ổn định: nên đảm bảo inference dùng đúng mapping giống lúc train (hiện hệ thống giả định dựa vào cùng CSV).
+
+---
+
+## 8) Checklist nhanh để demo AI
+
+- Start stack: `./quick_start.sh`
+- Build vectors: (đã có trong quick_start) `docker compose --profile manual run --rm --build vector-service`
+- Build KB graph: (đã có trong quick_start) `docker compose exec -T knowledge-service python importer.py`
+- Test endpoints qua gateway:
+  - Tracking stats: `GET http://localhost:8000/api/tracking/stats/`
+  - Recommendations: `GET http://localhost:8000/api/recommendations/102?limit=6`
+  - Search semantic: `GET http://localhost:8000/api/recommendations/search?query=iphone&limit=12`
+  - Chatbot: `POST http://localhost:8000/api/chatbot/ask`
+
+---
+
+## 9) Tóm tắt “cái này là gì”
+
+- **tracking-service**: nơi “đo” hành vi user (nguồn tín hiệu).
+- **vector-service + qdrant**: nơi “mã hoá” sản phẩm thành vector để semantic search & recommend.
+- **recommendation-service**: engine gợi ý dựa trên vector similarity giữa “context user” và “vector product”.
+- **knowledge-service + neo4j**: Knowledge Base dạng graph, gom sản phẩm + category + voucher + tương tác (CSV + DB) để truy vấn quan hệ và hỗ trợ explainability.
+- **chatbot-service**: trợ lý mua sắm (RAG) dùng Neo4j để retrieve + dùng model LSTM để dự đoán + dùng FreeLLM/template để generate hội thoại.

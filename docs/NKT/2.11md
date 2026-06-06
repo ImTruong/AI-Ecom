@@ -1,0 +1,334 @@
+# 2.11. Sequence Diagram (PlantUML) – các luồng chính
+
+> Ghi chú: Các endpoint/luồng dưới đây bám theo code hiện có trong dự án (API Gateway `services/api_gateway/gateway/middleware.py`, templates JS ở `services/api_gateway/templates/*`, và các microservice trong `services/*`).
+
+---
+
+## 1) Luồng xem sản phẩm và Thêm vào giỏ hàng (Product View & Cart Flow)
+
+@startuml
+actor User
+participant "Browser\n(product_detail.html + base.html JS)" as Browser
+participant "API Gateway\n(gateway.views + RoutingMiddleware)" as Gateway
+participant "Product Service\nproduct_app.views" as ProdSvc
+participant "Tracking Service\ntracking_app.views" as TrackSvc
+participant "Cart Service\ncart_app.views" as CartSvc
+participant "Recommendation Service\nFastAPI main.py" as RecoSvc
+database "Tracking DB" as TrackDB
+database "Cart DB" as CartDB
+database "Qdrant" as Qdrant
+
+== Open product detail page ==
+User -> Browser: open /product/detail/{product_id}/
+Browser -> Gateway: GET /product/detail/{product_id}/\n(render product_detail.html)
+Gateway --> Browser: 200 HTML
+
+== Load product detail from Product Service ==
+Browser -> Gateway: GET /api/products/{product_id}/
+activate Gateway
+Gateway -> ProdSvc: forward GET /api/products/{product_id}/
+activate ProdSvc
+ProdSvc --> Gateway: 200 JSON Product.to_dict()
+deactivate ProdSvc
+Gateway --> Browser: 200 JSON
+deactivate Gateway
+
+== Tracking: product view ==
+Browser -> Gateway: POST /api/tracking/log-view/\nbody: {customer_id, product_id, product_type}
+Gateway -> TrackSvc: forward POST /api/tracking/log-view/
+activate TrackSvc
+TrackSvc -> TrackDB: INSERT product_views
+TrackSvc --> Gateway: 201 {success:true}
+deactivate TrackSvc
+Gateway --> Browser: 201
+
+== AI Chatbot trigger (view) ==
+Browser -> Gateway: POST /api/chatbot/ask\nbody:{user_id, trigger:'view', product_id, message:''}
+Gateway --> Browser: 200 {success:true, reply, recommendations}
+
+== Add to cart from product detail ==
+User -> Browser: click "Add to Shopping Bag"
+Browser -> Gateway: POST /api/cart/add/\nAuthorization: Bearer ...\nbody:{product_type, product_id, quantity, price, product_name, image_url}
+activate Gateway
+Gateway -> CartSvc: forward POST /api/cart/add/
+activate CartSvc
+CartSvc -> CartDB: get_or_create Cart(customer_id)\nget_or_create CartItem(...)\nupdate quantity/price
+CartSvc --> Gateway: 200/201 {success:true, data:cart.to_dict()}
+deactivate CartSvc
+Gateway --> Browser: 200/201
+deactivate Gateway
+
+== Tracking: cart action ==
+Browser -> Gateway: POST /api/tracking/log-cart/\nbody:{customer_id, product_id, product_type, action_type:'add', quantity, price}
+Gateway -> TrackSvc: forward POST /api/tracking/log-cart/
+activate TrackSvc
+TrackSvc -> TrackDB: INSERT cart_actions
+TrackSvc --> Gateway: 201 {success:true}
+deactivate TrackSvc
+Gateway --> Browser: 201
+
+== Refresh recommendations on homepage / badge update ==
+Browser -> Gateway: GET /api/cart/\nAuthorization: Bearer ...
+Gateway -> CartSvc: forward GET /api/cart/
+CartSvc --> Gateway: 200 {success:true, data:cart.to_dict()}
+Gateway --> Browser: 200
+
+Browser -> Gateway: GET /api/recommendations/{user_id}
+activate Gateway
+Gateway -> RecoSvc: forward GET /api/recommendations/{user_id}
+activate RecoSvc
+RecoSvc -> TrackSvc: GET /api/tracking/user-history/{user_id}/
+TrackSvc -> TrackDB: SELECT recent views/carts/purchases/searches
+TrackSvc --> RecoSvc: 200 history
+RecoSvc -> Qdrant: retrieve(ids=user_actions)\nsearch(similarity, limit)
+RecoSvc --> Gateway: 200 {success:true, recommendations:[...]}
+deactivate RecoSvc
+Gateway --> Browser: 200 JSON
+deactivate Gateway
+
+Browser --> User: show toast + update cart badge + render recs
+@enduml
+
+---
+
+## 2) Luồng mua sắm và Thanh toán (Purchase & Checkout Flow)
+
+@startuml
+actor User
+participant "Browser\n(checkout.html JS)" as Browser
+participant "API Gateway\nRoutingMiddleware" as Gateway
+participant "Customer Service" as CustSvc
+participant "Cart Service" as CartSvc
+participant "Voucher Service" as VoucherSvc
+participant "Order Service\norder_app.views.place_order" as OrderSvc
+participant "Product Service\nproduct_app.views.update_stock" as ProdSvc
+participant "Tracking Service\ntracking_app.views.LogPurchaseView" as TrackSvc
+database "Order DB\n(orders, order_items)" as OrderDB
+database "Cart DB\n(carts, cart_items)" as CartDB
+
+== Open checkout ==
+User -> Browser: open /checkout/
+Browser -> Gateway: GET /checkout/\n(render checkout.html)
+Gateway --> Browser: 200 HTML
+
+== Init checkout page ==
+Browser -> Gateway: GET /api/customer/address/\nAuthorization: Bearer ...
+Gateway -> CustSvc: forward GET /api/customer/address/
+CustSvc --> Gateway: 200 {success:true, data:[...]}
+Gateway --> Browser: 200
+
+Browser -> Gateway: GET /api/cart/\nAuthorization: Bearer ...
+Gateway -> CartSvc: forward GET /api/cart/
+CartSvc -> CartDB: get_or_create Cart(customer_id)\nSELECT items
+CartSvc --> Gateway: 200 {success:true, data:cart.to_dict()}
+Gateway --> Browser: 200
+
+opt Apply voucher (UI)
+  Browser -> Gateway: POST /api/vouchers/validate/\nAuthorization: Bearer ...\nbody:{code, order_amount}
+  Gateway -> VoucherSvc: forward POST /api/vouchers/validate/
+  VoucherSvc --> Gateway: 200/400 {success, data/error}
+  Gateway --> Browser: 200/400
+end
+
+== Place order ==
+User -> Browser: click "Place Order Now"
+Browser -> Gateway: POST /api/orders/place/\nAuthorization: Bearer ...\nbody:{address_id, payment_method, voucher_code}
+activate Gateway
+Gateway -> OrderSvc: forward POST /api/orders/place/
+activate OrderSvc
+
+OrderSvc -> CartSvc: GET /api/cart/\n(Authorization forwarded)
+CartSvc -> CartDB: SELECT cart + items
+CartSvc --> OrderSvc: 200 cart_json
+
+OrderSvc -> CustSvc: GET /api/customer/address/\n(Authorization forwarded)
+CustSvc --> OrderSvc: 200 addresses
+
+opt Voucher code provided
+  OrderSvc -> VoucherSvc: POST /api/vouchers/validate/\n(Authorization forwarded)
+  VoucherSvc --> OrderSvc: 200 voucher_data
+end
+
+OrderSvc -> OrderDB: INSERT orders\nINSERT order_items (transaction)
+
+loop Each cart item
+  OrderSvc -> ProdSvc: POST /api/products/update-stock/\nbody:{variant_id: item.product_id, quantity: -item.quantity}
+  ProdSvc --> OrderSvc: 200 {success:true/false}
+end
+
+OrderSvc -> TrackSvc: POST /api/tracking/log-purchase/\nbody:{customer_id, order_id, items:[...]}
+TrackSvc --> OrderSvc: 201 {success:true}
+
+OrderSvc -> CartSvc: DELETE /api/cart/clear/\n(Authorization forwarded)
+CartSvc -> CartDB: DELETE cart_items by cart
+CartSvc --> OrderSvc: 200 {success:true}
+
+OrderSvc --> Gateway: 201 {success:true, data:order.to_dict()}
+deactivate OrderSvc
+Gateway --> Browser: 201
+deactivate Gateway
+
+Browser --> User: redirect /orders/?success=true
+@enduml
+
+---
+
+## 3) Hệ thống tư vấn thông minh (AI Chatbot Flow)
+
+@startuml
+actor User
+participant "Browser\n(base.html JS triggerAI)" as Browser
+participant "API Gateway\nRoutingMiddleware" as Gateway
+participant "Chatbot Service\nFastAPI /api/chatbot/ask" as ChatSvc
+database "Neo4j\n(KBClient)" as Neo4j
+participant "AI Engine\n(LSTM predict_next_product)" as AIEngine
+participant "FreeLLM API\n(apifreellm.com)" as FreeLLM
+participant "Local Brain\n(fallback)" as LocalBrain
+
+== Trigger chatbot (chat/view/cart/search) ==
+User -> Browser: open chat / send message / implicit trigger
+Browser -> Gateway: POST /api/chatbot/ask\nbody:{user_id, message, trigger, product_id?}
+activate Gateway
+Gateway -> ChatSvc: forward POST /api/chatbot/ask
+activate ChatSvc
+
+opt record action when trigger in {view, cart, search} and product_id present
+  ChatSvc -> Neo4j: MERGE (User)\nMATCH (Product)\nMERGE (u)-[:VIEWED|:SEARCHED|:ADDED_TO_CART]->(p)
+end
+
+ChatSvc -> Neo4j: get_user_history(user_id)\n(last actions)
+Neo4j --> ChatSvc: history[]
+
+opt buying/search intent detected (keyword-based)
+  ChatSvc -> Neo4j: search_products(keyword, limit=5)\n(or get_top_rated_products)
+  Neo4j --> ChatSvc: products[]
+else use AI-based recommendation
+  ChatSvc -> AIEngine: predict_next_product(actions, product_ids)
+  AIEngine --> ChatSvc: top_3 ids
+  ChatSvc -> Neo4j: get_product_details(top_3)\nget_top_rated_products()\nget_active_vouchers()
+  Neo4j --> ChatSvc: details + top + vouchers
+end
+
+opt FREELLM_API_KEY configured
+  ChatSvc -> FreeLLM: POST /api/v1/chat\n(prompt includes context)
+  FreeLLM --> ChatSvc: 200 response
+else
+  ChatSvc -> LocalBrain: synthesize(message, context, trigger)
+  LocalBrain --> ChatSvc: response
+end
+
+ChatSvc --> Gateway: 200 {success:true, reply, recommendations}
+deactivate ChatSvc
+Gateway --> Browser: 200 JSON
+deactivate Gateway
+
+Browser --> User: render bot reply + clickable recommendations
+@enduml
+
+---
+
+## 4) Theo dõi hành vi và Gợi ý (Behavior Tracking Flow)
+
+@startuml
+actor User
+participant "Browser\n(homepage.html/product_detail.html JS)" as Browser
+participant "API Gateway\nRoutingMiddleware" as Gateway
+participant "Tracking Service\ntracking_app.views" as TrackSvc
+participant "Order Service\norder_app.views.place_order" as OrderSvc
+participant "Recommendation Service\nFastAPI main.py" as RecoSvc
+database "Tracking DB" as TrackDB
+database "Qdrant" as Qdrant
+participant "Product Service" as ProdSvc
+
+== Behavior events ==
+opt Search event (when implemented by UI)
+  Browser -> Gateway: POST /api/tracking/log-search/\nbody:{customer_id, query}
+  Gateway -> TrackSvc: forward POST /api/tracking/log-search/
+  TrackSvc -> TrackDB: INSERT search_history
+  TrackSvc --> Gateway: 201 {success:true}
+  Gateway --> Browser: 201
+end
+
+Browser -> Gateway: POST /api/tracking/log-view/\nbody:{customer_id, product_id, product_type}
+Gateway -> TrackSvc: forward POST /api/tracking/log-view/
+TrackSvc -> TrackDB: INSERT product_views
+TrackSvc --> Gateway: 201
+Gateway --> Browser: 201
+
+Browser -> Gateway: POST /api/tracking/log-cart/\nbody:{customer_id, product_id, product_type, action_type, quantity, price}
+Gateway -> TrackSvc: forward POST /api/tracking/log-cart/
+TrackSvc -> TrackDB: INSERT cart_actions
+TrackSvc --> Gateway: 201
+Gateway --> Browser: 201
+
+== Purchase event from Order Service ==
+OrderSvc -> TrackSvc: POST /api/tracking/log-purchase/\nbody:{customer_id, order_id, items:[...]}
+TrackSvc -> TrackDB: INSERT purchase_actions (per item)
+TrackSvc --> OrderSvc: 201 {success:true}
+
+== Generate recommendations ==
+User -> Browser: open homepage (logged-in)
+Browser -> Gateway: GET /api/recommendations/{user_id}
+Gateway -> RecoSvc: forward GET /api/recommendations/{user_id}
+RecoSvc -> TrackSvc: GET /api/tracking/user-history/{user_id}/
+TrackSvc -> TrackDB: SELECT recent events
+TrackSvc --> RecoSvc: 200 history
+RecoSvc -> Qdrant: retrieve(payloads)\nsearch(similarity)
+alt Qdrant/Tracking failure
+  RecoSvc -> ProdSvc: GET /api/products/\n(fallback products)
+  ProdSvc --> RecoSvc: 200 products[]
+end
+RecoSvc --> Gateway: 200 recommendations[]
+Gateway --> Browser: 200
+Browser --> User: render "Recommended For You"
+@enduml
+
+---
+
+## 5) Quản lý Đánh giá và Bình luận (Product Review Flow)
+
+@startuml
+actor User
+participant "Browser\n(orders.html JS)" as Browser
+participant "API Gateway\nRoutingMiddleware" as Gateway
+participant "Order Service\norder_app.views.get_order_detail" as OrderSvc
+participant "Rating Service\nrating_app.views" as RatingSvc
+database "Rating DB\n(ratings)" as RatingDB
+
+== Load orders ==
+User -> Browser: open /orders/
+Browser -> Gateway: GET /orders/\n(render orders.html)
+Gateway --> Browser: 200 HTML
+
+Browser -> Gateway: GET /api/orders/mine/\nAuthorization: Bearer ...
+Gateway -> OrderSvc: forward GET /api/orders/mine/
+OrderSvc --> Gateway: 200 {success:true, data:[orders...]}
+Gateway --> Browser: 200
+
+== Check which items are already rated ==
+loop each delivered order
+  Browser -> Gateway: GET /api/ratings/order/{order_id}/\nAuthorization: Bearer ...
+  Gateway -> RatingSvc: forward GET /api/ratings/order/{order_id}/
+  RatingSvc --> Gateway: 200 {success:true, data:[ratings...]}
+  Gateway --> Browser: 200
+end
+
+== Submit rating (includes comment) ==
+User -> Browser: click ⭐ Rate -> Submit
+Browser -> Gateway: POST /api/ratings/add/\nAuthorization: Bearer ...\nbody:{order_id, product_type, product_id, product_name, stars, comment}
+activate Gateway
+Gateway -> RatingSvc: forward POST /api/ratings/add/
+activate RatingSvc
+
+RatingSvc -> OrderSvc: GET /api/orders/{order_id}/\nAuthorization: Bearer ...\n(verify delivered + owner + item exists)
+OrderSvc --> RatingSvc: 200 {success:true, data:order}
+
+RatingSvc -> RatingDB: check unique(order_id, product_type, product_id)\nINSERT ratings
+RatingSvc --> Gateway: 200 {success:true, data:rating.to_dict()}
+deactivate RatingSvc
+Gateway --> Browser: 200
+deactivate Gateway
+
+Browser --> User: update UI "Rated ✅"
+@enduml
+
