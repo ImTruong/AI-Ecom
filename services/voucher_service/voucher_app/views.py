@@ -10,21 +10,22 @@ import os
 # Add shared to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
 from jwt_utils import jwt_required
+from .application.use_cases import VoucherUseCases
+from .domain.exceptions import VoucherValidationError
+from .infrastructure.repositories import DjangoVoucherRepository
+from .presentation.serializers import voucher_to_dict, voucher_validation_to_dict
+
+
+voucher_use_cases = VoucherUseCases(DjangoVoucherRepository())
 
 @csrf_exempt
 @require_http_methods(["GET"])
 def list_active_vouchers(request):
     """List all currently active global vouchers"""
-    now = timezone.now()
-    vouchers = Voucher.objects.filter(
-        is_active=True,
-        is_global=True,
-        start_date__lte=now,
-        end_date__gte=now
-    )
+    vouchers = voucher_use_cases.list_active()
     return JsonResponse({
         'success': True,
-        'data': [v.to_dict() for v in vouchers]
+        'data': [voucher_to_dict(v) for v in vouchers]
     })
 
 @csrf_exempt
@@ -40,31 +41,16 @@ def validate_voucher(request):
         if not code:
             return JsonResponse({'success': False, 'error': 'Voucher code required'}, status=400)
             
-        try:
-            voucher = Voucher.objects.get(code=str(code).strip().upper())
-        except Voucher.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Invalid voucher code'}, status=404)
-            
-        if not voucher.is_valid(float(order_amount)):
-            return JsonResponse({'success': False, 'error': 'Voucher is not valid for this order amount'}, status=400)
-            
-        # Check if user already used this non-global voucher
-        if not voucher.is_global:
-            if VoucherUsage.objects.filter(voucher=voucher, customer_id=request.user_id).exists():
-                return JsonResponse({'success': False, 'error': 'You have already used this voucher'}, status=400)
-                
-        discount = voucher.calculate_discount(float(order_amount))
+        voucher, discount = voucher_use_cases.validate(request.user_id, code, order_amount)
         
         return JsonResponse({
             'success': True,
-            'data': {
-                'id': voucher.id,
-                'code': voucher.code,
-                'discount_applied': float(discount),
-                'new_total': float(order_amount) - float(discount)
-            }
+            'data': voucher_validation_to_dict(voucher, order_amount, discount)
         })
-        
+    except Voucher.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Invalid voucher code'}, status=404)
+    except VoucherValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -75,23 +61,11 @@ def create_voucher(request):
     """Staff only: Create a new voucher"""
     try:
         data = json.loads(request.body)
-        voucher = Voucher.objects.create(
-            code=data.get('code').upper(),
-            name=data.get('name'),
-            description=data.get('description', ''),
-            discount_type=data.get('discount_type'),
-            discount_value=data.get('discount_value'),
-            min_order_value=data.get('min_order_value', 0),
-            max_discount=data.get('max_discount'),
-            start_date=data.get('start_date', timezone.now()),
-            end_date=data.get('end_date'),
-            usage_limit=data.get('usage_limit'),
-            is_global=data.get('is_global', True)
-        )
+        voucher = voucher_use_cases.create(data)
         return JsonResponse({
             'success': True,
             'message': 'Voucher created',
-            'data': voucher.to_dict()
+            'data': voucher_to_dict(voucher)
         }, status=201)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

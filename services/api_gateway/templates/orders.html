@@ -327,7 +327,7 @@
                                     <div style="display: flex; align-items: center; gap: 20px;">
                                         <div style="font-weight: 700; color: #444;">$${(item.price * item.quantity).toFixed(2)}</div>
                                         ${order.status === 'delivered' ? `
-                                            <button class="btn-rate" id="rate-btn-${order.id}-${item.product_id}" onclick="openRatingModal(${order.id}, '${item.product_type}', ${item.product_id}, '${item.product_name}')">
+                                            <button class="btn-rate" id="rate-btn-${order.id}-${item.id}" onclick="openRatingModal(${order.id}, ${item.id}, '${item.product_type}', ${item.product_id}, ${item.variant_id || 'null'}, '${item.product_name}')">
                                                 ⭐ Rate
                                             </button>
                                         ` : ''}
@@ -370,8 +370,8 @@
 
     let currentRatingData = null;
 
-    function openRatingModal(orderId, productType, productId, productName) {
-        currentRatingData = { orderId, productType, productId, productName };
+    function openRatingModal(orderId, orderItemId, productType, productId, variantId, productName) {
+        currentRatingData = { orderId, orderItemId, productType, productId, variantId, productName };
         document.getElementById('ratingItemName').innerText = `Rate: ${productName}`;
         document.getElementById('ratingModal').style.display = 'flex';
         document.getElementById('ratingComment').value = '';
@@ -407,8 +407,10 @@
                 },
                 body: JSON.stringify({
                     order_id: currentRatingData.orderId,
+                    order_item_id: currentRatingData.orderItemId,
                     product_type: currentRatingData.productType,
                     product_id: currentRatingData.productId,
+                    product_variant_id: currentRatingData.variantId,
                     product_name: currentRatingData.productName,
                     stars: starsInput.value,
                     comment: document.getElementById('ratingComment').value
@@ -422,7 +424,7 @@
             if (data.success) {
                 showAlert('Rating submitted! Thank you.', 'success');
                 // Update UI BEFORE closing modal (as closing modal clears currentRatingData)
-                const btnId = `rate-btn-${currentRatingData.orderId}-${currentRatingData.productId}`;
+                const btnId = `rate-btn-${currentRatingData.orderId}-${currentRatingData.orderItemId}`;
                 const btnRate = document.getElementById(btnId);
                 if (btnRate) {
                     btnRate.classList.add('rated');
@@ -449,7 +451,7 @@
             const data = await resp.json();
             if (data.success) {
                 data.data.forEach(rating => {
-                    const btn = document.getElementById(`rate-btn-${orderId}-${rating.product_id}`);
+                    const btn = document.getElementById(`rate-btn-${orderId}-${rating.order_item_id || rating.product_id}`);
                     if (btn) {
                         btn.classList.add('rated');
                         btn.innerText = 'Rated ✅';

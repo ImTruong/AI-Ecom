@@ -1,0 +1,3 @@
+class CartValidationError(ValueError):
+    pass
+

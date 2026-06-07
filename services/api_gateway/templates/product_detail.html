@@ -38,6 +38,11 @@
             </div>
         </div>
 
+        <div class="glass-card p-4 mb-4 bg-white border" id="variantPanel" style="display: none;">
+            <h5 class="fw-bold mb-3 text-dark">Choose Variant</h5>
+            <div class="d-flex flex-column gap-3" id="variantOptions"></div>
+        </div>
+
         <div class="d-flex gap-3 align-items-center">
             <div class="btn-group border rounded-pill p-1 bg-white shadow-sm" style="width: 140px;">
                 <button class="btn btn-link text-dark text-decoration-none px-3" onclick="stepQty(-1)"><i class="fa fa-minus"></i></button>
@@ -54,6 +59,7 @@
 <script>
     const pId = "{{ product_id }}";
     let pData = null;
+    let selectedVariant = null;
     const BLACKLIST = ['id', 'name', 'description', 'price', 'image_url', 'category', 'category_id', 'product_type', 'created_at', 'updated_at', 'supplier_id'];
 
     async function fetchData() {
@@ -71,13 +77,15 @@
 
             const specs = document.getElementById('specs');
             Object.keys(pData).forEach(k => {
-                if(!BLACKLIST.includes(k) && pData[k]) {
+                if(!BLACKLIST.includes(k) && !['variants', 'attributes'].includes(k) && pData[k]) {
                     const div = document.createElement('div');
                     div.className = 'col-6';
                     div.innerHTML = `<p class="mb-0 text-muted small text-uppercase fw-bold">${k.replace(/_/g, ' ')}</p><p class="mb-0 fw-bold text-dark">${pData[k]}</p>`;
                     specs.appendChild(div);
                 }
             });
+
+            renderVariants(pData.variants || []);
 
             // AI tracking: log-view
             logTracking('log-view', { product_id: pId, product_type: pData.product_type });
@@ -88,6 +96,41 @@
         } catch (e) {
             showAlert("Error loading product", "danger");
             window.location.href = "/";
+        }
+    }
+
+    function renderVariants(variants) {
+        if (!variants.length) return;
+        selectedVariant = variants[0];
+        const panel = document.getElementById('variantPanel');
+        const options = document.getElementById('variantOptions');
+        panel.style.display = 'block';
+        options.innerHTML = variants.map(v => {
+            const label = (v.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || v.name;
+            const stockLabel = Number(v.stock || 0) > 0 ? `${v.stock} available` : 'Out of stock';
+            return `
+                <label class="d-flex align-items-center justify-content-between border rounded-3 p-3 ${v.id === selectedVariant.id ? 'border-primary' : ''}" style="cursor:pointer;">
+                    <span>
+                        <input type="radio" name="variant" value="${v.id}" ${v.id === selectedVariant.id ? 'checked' : ''} onchange="selectVariant(${v.id})">
+                        <span class="ms-2 fw-bold">${label}</span>
+                    </span>
+                    <span class="text-muted small">${stockLabel}</span>
+                </label>
+            `;
+        }).join('');
+        applyVariantPrice();
+    }
+
+    function selectVariant(variantId) {
+        selectedVariant = (pData.variants || []).find(v => Number(v.id) === Number(variantId));
+        renderVariants(pData.variants || []);
+    }
+
+    function applyVariantPrice() {
+        if (!selectedVariant) return;
+        document.getElementById('price').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedVariant.price || pData.price);
+        if (selectedVariant.image_url) {
+            document.getElementById('product-img').src = selectedVariant.image_url;
         }
     }
 
@@ -119,6 +162,10 @@
         }
 
         const qty = parseInt(document.getElementById('qty').value);
+        if (!selectedVariant) {
+            showAlert("Please choose a product variant", "warning");
+            return;
+        }
         try {
             const res = await fetch('/api/cart/add/', {
                 method: 'POST',
@@ -129,10 +176,12 @@
                 body: JSON.stringify({ 
                     product_type: pData.product_type, 
                     product_id: pId, 
+                    variant_id: selectedVariant.id,
                     quantity: qty,
-                    price: pData.price,
+                    price: selectedVariant.price || pData.price,
                     product_name: pData.name,
-                    image_url: pData.image_url
+                    variant_name: (selectedVariant.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || selectedVariant.name,
+                    image_url: selectedVariant.image_url || pData.image_url
                 })
             });
             const back = await res.json();
@@ -146,9 +195,10 @@
                 // AI tracking: log-cart
                 logTracking('log-cart', {
                     product_id: pId,
+                    product_variant_id: selectedVariant.id,
                     product_type: pData.product_type,
                     action_type: 'add',
-                    price: pData.price,
+                    price: selectedVariant.price || pData.price,
                     quantity: qty
                 });
             } else {

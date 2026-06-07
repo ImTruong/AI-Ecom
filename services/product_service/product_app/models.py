@@ -112,6 +112,7 @@ class Product(models.Model):
                         'id': v.id,
                         'name': v.name,
                         'price_override': float(v.price_override) if v.price_override else None,
+                        'price': float(v.price_override if v.price_override is not None else self.price),
                         'stock': v.stock,
                         'sku': v.sku,
                         'image_url': v.image_url,
@@ -268,8 +269,8 @@ class ProductVariant(models.Model):
     class Meta:
         db_table = 'product_variants'
         indexes = [
-            models.Index(fields=['product']),
-            models.Index(fields=['sku']),
+            models.Index(fields=['product'], name='product_var_product_idx'),
+            models.Index(fields=['sku'], name='product_var_sku_idx'),
         ]
 
     def __str__(self):

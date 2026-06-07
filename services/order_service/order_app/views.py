@@ -6,15 +6,20 @@ import requests
 import os
 import sys
 from django.db import transaction
-from .models import Order, OrderItem
+from .models import Order, OrderItem, ShipmentTracking
+from .application.use_cases import OrderUseCases
+from .domain.exceptions import OrderValidationError
+from .infrastructure.repositories import DjangoOrderRepository
+from .presentation.serializers import order_to_dict, tracking_to_dict
 
 # Add shared to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
 from jwt_utils import jwt_required
 
 CART_SERVICE_URL = os.getenv('CART_SERVICE_URL', 'http://cart-service:8000')
-CUSTOMER_SERVICE_URL = os.getenv('CUSTOMER_SERVICE_URL', 'http://customer-service:8000')
+CUSTOMER_SERVICE_URL = os.getenv('CUSTOMER_SERVICE_URL', 'http://user-service:8000')
 VOUCHER_SERVICE_URL = os.getenv('VOUCHER_SERVICE_URL', 'http://voucher-service:8000')
+order_use_cases = OrderUseCases(DjangoOrderRepository())
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -29,6 +34,7 @@ def place_order(request):
         
         if not address_id:
             return JsonResponse({'success': False, 'error': 'Shipping address required'}, status=400)
+        address_id = int(address_id)
             
         # 1. Get Cart
         auth_header = {'Authorization': request.headers.get('Authorization')}
@@ -53,45 +59,24 @@ def place_order(request):
         if not shipping_addr:
             return JsonResponse({'success': False, 'error': 'Invalid shipping address'}, status=400)
             
-        # 3. Calculate Totals
-        total_amount = sum(float(item['price']) * int(item['quantity']) for item in cart_items)
         discount_amount = 0
         
         # 4. Handle Voucher
         if voucher_code:
             v_resp = requests.post(f"{VOUCHER_SERVICE_URL}/api/vouchers/validate/", 
                                  headers=auth_header, 
-                                 json={'code': voucher_code, 'order_amount': float(total_amount)})
+                                 json={'code': voucher_code, 'order_amount': sum(float(item['price']) * int(item['quantity']) for item in cart_items)})
             if v_resp.ok:
                 v_data = v_resp.json().get('data', {})
                 discount_amount = v_data.get('discount_applied', 0)
-                
-        final_amount = float(total_amount) - float(discount_amount)
-        
-        # 5. Create Order
-        with transaction.atomic():
-            order = Order.objects.create(
-                customer_id=request.user_id,
-                total_amount=total_amount,
-                discount_amount=discount_amount,
-                final_amount=final_amount,
-                voucher_code=voucher_code,
-                payment_method=payment_method,
-                shipping_address_id=address_id,
-                shipping_full_name=shipping_addr['full_name'],
-                shipping_phone=shipping_addr['phone'],
-                shipping_address_line=shipping_addr['address_line']
-            )
-            
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product_type=item['product_type'],
-                    product_id=item['product_id'],
-                    product_name=item.get('name', f"{item['product_type']} #{item['product_id']}"),
-                    price=float(item['price']),
-                    quantity=int(item['quantity'])
-                )
+        order = order_use_cases.create_order_from_cart(
+            customer_id=request.user_id,
+            cart_items=cart_items,
+            shipping_address=shipping_addr,
+            payment_method=payment_method,
+            voucher_code=voucher_code,
+            discount_amount=discount_amount,
+        )
         
         # 6. Deduct Stock from unified product service
         PRODUCT_SERVICE_URL = os.getenv('PRODUCT_SERVICE_URL', 'http://product-service:8000')
@@ -99,9 +84,10 @@ def place_order(request):
         
         for item in cart_items:
             try:
+                variant_id = item.get('variant_id') or item.get('product_id')
                 # Use negative quantity to subtract from stock
                 requests.post(f"{PRODUCT_SERVICE_URL}/api/products/update-stock/", json={
-                    'variant_id': item['product_id'],
+                    'variant_id': variant_id,
                     'quantity': -int(item['quantity'])
                 })
             except Exception as se:
@@ -114,6 +100,7 @@ def place_order(request):
                 'order_id': order.id,
                 'items': [
                     {'product_id': item['product_id'], 'product_type': item['product_type'], 'price': item['price'], 'quantity': item['quantity']}
+                    | ({'variant_id': item.get('variant_id')} if item.get('variant_id') else {})
                     for item in cart_items
                 ]
             })
@@ -126,21 +113,63 @@ def place_order(request):
         return JsonResponse({
             'success': True,
             'message': 'Order placed successfully and stock updated',
-            'data': order.to_dict()
+            'data': order_to_dict(order)
         }, status=201)
-        
+    except OrderValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@jwt_required(user_types=['staff'])
+def add_shipment_tracking(request):
+    """Add shipping tracking event. Staff and admin can update shipment progress."""
+    try:
+        data = json.loads(request.body)
+        order_id = data.get('order_id')
+        status_value = data.get('status')
+        if not order_id or not status_value:
+            return JsonResponse({'success': False, 'error': 'order_id and status required'}, status=400)
+
+        event = order_use_cases.add_tracking(
+            order_id,
+            data,
+            actor_id=getattr(request, 'user_id', None),
+            actor_type=getattr(request, 'user_type', ''),
+        )
+        return JsonResponse({'success': True, 'data': tracking_to_dict(event)})
+    except Order.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+@jwt_required(user_types=['customer', 'staff'])
+def list_shipment_tracking(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        if request.user_type == 'customer' and order.customer_id != request.user_id:
+            return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+        events = order.shipping_events.all().order_by('-event_time', '-created_at')
+        return JsonResponse({'success': True, 'data': [tracking_to_dict(event) for event in events]})
+    except Order.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
 
 @csrf_exempt
 @require_http_methods(["GET"])
 @jwt_required(user_types=['customer'])
 def list_my_orders(request):
     """List orders for current customer"""
-    orders = Order.objects.filter(customer_id=request.user_id).order_by('-created_at')
+    orders = order_use_cases.list_my_orders(request.user_id)
     return JsonResponse({
         'success': True,
-        'data': [o.to_dict() for o in orders]
+        'data': [order_to_dict(o) for o in orders]
     })
 
 @csrf_exempt
@@ -149,10 +178,10 @@ def list_my_orders(request):
 def get_order_detail(request, order_id):
     """Get order details"""
     try:
-        order = Order.objects.get(id=order_id, customer_id=request.user_id)
+        order = order_use_cases.get_my_order(order_id, request.user_id)
         return JsonResponse({
             'success': True,
-            'data': order.to_dict()
+            'data': order_to_dict(order)
         })
     except Order.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
@@ -162,10 +191,10 @@ def get_order_detail(request, order_id):
 @jwt_required(user_types=['staff'])
 def list_all_orders(request):
     """List all orders for staff"""
-    orders = Order.objects.all().order_by('-created_at')
+    orders = order_use_cases.list_all_orders()
     return JsonResponse({
         'success': True,
-        'data': [o.to_dict() for o in orders]
+        'data': [order_to_dict(o) for o in orders]
     })
 
 @csrf_exempt
@@ -201,16 +230,16 @@ def update_order_status(request):
         if not order_id or not new_status:
             return JsonResponse({'success': False, 'error': 'Order ID and status required'}, status=400)
             
-        order = Order.objects.get(id=order_id)
-        order.status = new_status
-        order.save()
+        order = order_use_cases.update_status(order_id, new_status)
         
         return JsonResponse({
             'success': True,
             'message': f'Order #{order_id} status updated to {new_status}',
-            'data': order.to_dict()
+            'data': order_to_dict(order)
         })
     except Order.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+    except OrderValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

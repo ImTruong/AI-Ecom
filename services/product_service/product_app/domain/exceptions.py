@@ -1,0 +1,3 @@
+class VariantValidationError(ValueError):
+    pass
+

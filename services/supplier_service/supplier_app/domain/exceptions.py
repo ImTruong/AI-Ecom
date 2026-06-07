@@ -1,0 +1,3 @@
+class SupplierValidationError(ValueError):
+    pass
+

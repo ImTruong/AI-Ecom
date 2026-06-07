@@ -10,6 +10,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..
 
 from jwt_utils import jwt_required
 from .models import Supplier
+from .application.use_cases import SupplierUseCases
+from .domain.exceptions import SupplierValidationError
+from .infrastructure.repositories import DjangoSupplierRepository
+from .presentation.serializers import supplier_to_dict
+
+
+supplier_use_cases = SupplierUseCases(DjangoSupplierRepository())
 
 @require_http_methods(["GET"])
 @jwt_required(user_types=['staff', 'admin'])
@@ -18,24 +25,11 @@ def list_suppliers(request):
     try:
         only_active = request.GET.get('only_active', 'false').lower() == 'true'
         search_query = request.GET.get('search')
-        if only_active:
-            suppliers = Supplier.objects.filter(is_active=True)
-        else:
-            suppliers = Supplier.objects.all()
-
-        if search_query:
-            from django.db.models import Q
-            suppliers = suppliers.filter(
-                Q(name__icontains=search_query) |
-                Q(contact_name__icontains=search_query) |
-                Q(email__icontains=search_query) |
-                Q(phone__icontains=search_query) |
-                Q(address__icontains=search_query)
-            )
+        suppliers = supplier_use_cases.list_suppliers(only_active=only_active, search_query=search_query)
         
         return JsonResponse({
             'success': True,
-            'data': [s.to_dict() for s in suppliers]
+            'data': [supplier_to_dict(s) for s in suppliers]
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -45,10 +39,10 @@ def list_suppliers(request):
 def get_supplier(request, supplier_id):
     """Get supplier details"""
     try:
-        supplier = Supplier.objects.get(id=supplier_id)
+        supplier = supplier_use_cases.get_supplier(supplier_id)
         return JsonResponse({
             'success': True,
-            'data': supplier.to_dict()
+            'data': supplier_to_dict(supplier)
         })
     except Supplier.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Supplier not found'}, status=404)
@@ -62,27 +56,15 @@ def create_supplier(request):
     """Create a new supplier"""
     try:
         data = json.loads(request.body)
-        name = data.get('name')
-        email = data.get('email')
-        phone = data.get('phone')
-        address = data.get('address')
-        
-        if not name or not email or not phone or not address:
-            return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
-            
-        supplier = Supplier.objects.create(
-            name=name,
-            contact_name=data.get('contact_name', ''),
-            email=email,
-            phone=phone,
-            address=address
-        )
+        supplier = supplier_use_cases.create_supplier(data)
         
         return JsonResponse({
             'success': True,
             'message': 'Supplier created successfully',
-            'data': supplier.to_dict()
+            'data': supplier_to_dict(supplier)
         }, status=201)
+    except SupplierValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -92,19 +74,12 @@ def create_supplier(request):
 def update_supplier(request, supplier_id):
     """Update supplier info"""
     try:
-        supplier = Supplier.objects.get(id=supplier_id)
         data = json.loads(request.body)
-        
-        fields = ['name', 'contact_name', 'email', 'phone', 'address', 'is_active']
-        for field in fields:
-            if field in data:
-                setattr(supplier, field, data[field])
-        
-        supplier.save()
+        supplier = supplier_use_cases.update_supplier(supplier_id, data)
         return JsonResponse({
             'success': True,
             'message': 'Supplier updated successfully',
-            'data': supplier.to_dict()
+            'data': supplier_to_dict(supplier)
         })
     except Supplier.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Supplier not found'}, status=404)
@@ -117,11 +92,7 @@ def update_supplier(request, supplier_id):
 def delete_supplier(request, supplier_id):
     """Delete a supplier"""
     try:
-        supplier = Supplier.objects.get(id=supplier_id)
-        # Maybe do a soft delete?
-        supplier.is_active = False
-        supplier.save()
-        # supplier.delete() # Or hard delete
+        supplier_use_cases.deactivate_supplier(supplier_id)
         return JsonResponse({
             'success': True,
             'message': 'Supplier deactivated successfully'

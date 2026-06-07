@@ -96,6 +96,15 @@ class JWTManager:
         return None
 
 
+def _is_user_type_allowed(actual_user_type: str, allowed_user_types: list = None) -> bool:
+    if not allowed_user_types:
+        return True
+    if actual_user_type in allowed_user_types:
+        return True
+    # Admin inherits every staff permission in this system.
+    return actual_user_type == 'admin' and 'staff' in allowed_user_types
+
+
 def jwt_required(user_types: list = None):
     """
     Decorator to require JWT authentication
@@ -131,7 +140,7 @@ def jwt_required(user_types: list = None):
                 return JsonResponse({'error': 'Invalid or expired token'}, status=401)
             
             # Check user type if specified
-            if user_types and payload.get('user_type') not in user_types:
+            if not _is_user_type_allowed(payload.get('user_type'), user_types):
                 return JsonResponse({'error': 'Unauthorized user type'}, status=403)
             
             # Attach user info to request

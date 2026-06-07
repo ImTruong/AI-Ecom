@@ -1,0 +1,10 @@
+from product_app.application.dto import product_input_from_payload
+from product_app.domain.exceptions import VariantValidationError
+from product_app.domain.services import effective_variant_price, validate_variant_combinations
+from product_app.infrastructure.repositories import DjangoProductRepository
+
+
+def save_product_from_payload(payload):
+    product_input = product_input_from_payload(payload)
+    validate_variant_combinations(product_input.variants)
+    return DjangoProductRepository().save(product_input)

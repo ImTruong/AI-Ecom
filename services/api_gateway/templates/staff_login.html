@@ -187,8 +187,8 @@
         }
     }
 
-    // Check if already logged in as staff
-    if (isLoggedIn() && localStorage.getItem('user_role') === 'staff') {
+    // Check if already logged in as staff/admin
+    if (isLoggedIn() && ['staff', 'admin'].includes(localStorage.getItem('user_role'))) {
         window.location.href = '/staff/dashboard/';
     }
 </script>

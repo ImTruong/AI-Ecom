@@ -91,6 +91,10 @@
             }
 
             products.forEach(p => {
+                const firstVariant = (p.variants || [])[0] || {};
+                const variantId = firstVariant.id || null;
+                const variantName = (firstVariant.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || firstVariant.name || '';
+                const displayPrice = firstVariant.price || p.price;
                 const col = document.createElement('div');
                 col.className = 'col-12 col-md-6 col-lg-4 col-xl-3 product-col mb-4';
                 col.innerHTML = `
@@ -109,12 +113,12 @@
                             <p class="text-muted small mb-3" style="height: 40px; overflow: hidden;">${p.description}</p>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="fs-4 fw-bold text-primary">
-                                    ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                                    ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
                                 </span>
                             </div>
                             <div class="d-flex gap-2">
                                 <a href="/product/detail/${p.id}/" class="btn btn-outline-secondary rounded-pill flex-grow-1">Detail</a>
-                                <button class="btn btn-vibrant rounded-pill px-4" onclick="addToCart('${p.product_type}', ${p.id}, ${p.price}, '${p.name}', '${p.image_url}')">
+                                <button class="btn btn-vibrant rounded-pill px-4" onclick="addToCart('${p.product_type}', ${p.id}, ${displayPrice}, '${p.name}', '${p.image_url}', ${variantId}, '${variantName.replace(/'/g, "\\'")}')">
                                     <i class="fa fa-cart-plus"></i>
                                 </button>
                             </div>
@@ -139,11 +143,15 @@
         loadProducts(slug);
     }
 
-    async function addToCart(type, id, price, name, img) {
+    async function addToCart(type, id, price, name, img, variantId = null, variantName = '') {
         const token = localStorage.getItem('access_token');
         if (!token) {
             showAlert('Please login to add to cart', 'warning');
             window.location.href = '/login/';
+            return;
+        }
+        if (!variantId) {
+            showAlert('Please open product detail and choose a variant', 'warning');
             return;
         }
 
@@ -157,9 +165,11 @@
                 body: JSON.stringify({ 
                     product_type: type, 
                     product_id: id, 
+                    variant_id: variantId,
                     quantity: 1,
                     price: price,
                     product_name: name,
+                    variant_name: variantName,
                     image_url: img
                 })
             });
@@ -169,6 +179,7 @@
                 refreshCartBadge();
                 await logTracking('log-cart', {
                     product_id: id,
+                    product_variant_id: variantId,
                     product_type: type,
                     action_type: 'add',
                     price: price,
@@ -250,7 +261,7 @@
                         </a>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(price)}đ</span>
-                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${price}, '${p.name.replace(/'/g, "\\'")}', '${p.image_url}')">
+                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${price}, '${p.name.replace(/'/g, "\\'")}', '${p.image_url}', ${p.variant_id || p.product_variant_id || 'null'}, '')">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>

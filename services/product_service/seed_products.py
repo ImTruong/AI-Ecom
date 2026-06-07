@@ -4,6 +4,7 @@ import json
 import django
 from decimal import Decimal
 from django.utils import timezone
+from django.db import connection
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', '..'))
@@ -12,7 +13,9 @@ sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'product_service_config.settings')
 django.setup()
 
-from product_app.models import Category, Product  # noqa: E402
+from product_app.models import Attribute, AttributeValue, Product, ProductVariant, ProductVariantOption  # noqa: E402
+from product_app.models import Category  # noqa: E402
+from django.utils.text import slugify
 
 DEFAULT_SEED_FILE = os.path.join(REPO_ROOT, 'seed_data.sql')
 CONTAINER_SEED_FILE = '/seed_data.sql'
@@ -25,6 +28,19 @@ ICON_MAP = {
     'Hoodie': 'shirt',
     'Accessories': 'tag',
 }
+
+REQUIRED_PRODUCT_TYPES = [
+    ('electronic', 'Electronic Demo', 'Electronic product sample', 'bolt', Decimal('1500000')),
+    ('clothes', 'Clothes Demo', 'Clothes product sample', 'shirt', Decimal('299000')),
+    ('book', 'Book Demo', 'Book product sample', 'book', Decimal('180000')),
+    ('furniture', 'Furniture Demo', 'Furniture product sample', 'chair', Decimal('2500000')),
+    ('cosmetic', 'Cosmetic Demo', 'Cosmetic product sample', 'spa', Decimal('220000')),
+    ('food', 'Food Demo', 'Food product sample', 'utensils', Decimal('99000')),
+    ('toy', 'Toy Demo', 'Toy product sample', 'puzzle-piece', Decimal('149000')),
+    ('sport_equipment', 'Sport Equipment Demo', 'Sport equipment sample', 'dumbbell', Decimal('450000')),
+    ('shoes', 'Shoes Demo', 'Shoes product sample', 'shoe-prints', Decimal('650000')),
+    ('accessory', 'Accessory Demo', 'Accessory product sample', 'gem', Decimal('129000')),
+]
 
 
 def _parse_value(raw):
@@ -199,6 +215,105 @@ def seed_products(values_block):
         )
 
 
+def seed_default_variants():
+    color = get_or_create_attribute('Color')
+    size = get_or_create_attribute('Size')
+    black, _ = AttributeValue.objects.get_or_create(attribute=color, value='Black')
+    red, _ = AttributeValue.objects.get_or_create(attribute=color, value='Red')
+    xl, _ = AttributeValue.objects.get_or_create(attribute=size, value='XL')
+    xxl, _ = AttributeValue.objects.get_or_create(attribute=size, value='XXL')
+
+    product = Product.objects.filter(product_type='clothes').order_by('id').first()
+    if not product:
+        return
+
+    combinations = [
+        ('Black / XL', black, xl, 20),
+        ('Black / XXL', black, xxl, 12),
+        ('Red / XL', red, xl, 15),
+        ('Red / XXL', red, xxl, 8),
+    ]
+    for name, color_value, size_value, stock in combinations:
+        variant, _ = ProductVariant.objects.update_or_create(
+            product=product,
+            sku=f'{product.id}-{color_value.value.upper()}-{size_value.value.upper()}',
+            defaults={
+                'name': name,
+                'price_override': product.price,
+                'stock': stock,
+                'image_url': product.image_url,
+                'options': {'Color': color_value.value, 'Size': size_value.value},
+            }
+        )
+        ProductVariantOption.objects.get_or_create(variant=variant, attribute_value=color_value)
+        ProductVariantOption.objects.get_or_create(variant=variant, attribute_value=size_value)
+
+
+def get_or_create_attribute(name):
+    slug = slugify(name)
+    attribute = Attribute.objects.filter(slug=slug).first() or Attribute.objects.filter(name__iexact=name).first()
+    if attribute:
+        return attribute
+    return Attribute.objects.create(name=name)
+
+
+def seed_required_product_types():
+    for index, (product_type, name, description, icon, price) in enumerate(REQUIRED_PRODUCT_TYPES, start=9001):
+        category, _ = Category.objects.get_or_create(
+            name=name.replace(' Demo', ''),
+            defaults={'description': description, 'icon': icon},
+        )
+        Product.objects.get_or_create(
+            product_type=product_type,
+            name=name,
+            defaults={
+                'description': description,
+                'price': price,
+                'category': category,
+                'image_url': '',
+                'supplier_id': 1,
+                'attributes': {'seed_type': product_type},
+                'is_active': True,
+            },
+        )
+
+
+def reset_primary_key_sequences():
+    tables = ['categories', 'products', 'attributes', 'attribute_values', 'product_variants', 'product_variant_options']
+    with connection.cursor() as cursor:
+        for table in tables:
+            cursor.execute(
+                """
+                SELECT setval(
+                    pg_get_serial_sequence(%s, 'id'),
+                    COALESCE((SELECT MAX(id) FROM %s), 1),
+                    true
+                )
+                """ % ("%s", table),
+                [table],
+            )
+
+
+def seed_fallback_variants_for_all_products():
+    default_attr, _ = Attribute.objects.get_or_create(name='Default')
+    default_value, _ = AttributeValue.objects.get_or_create(attribute=default_attr, value='Standard')
+    for product in Product.objects.filter(is_active=True):
+        if product.variants.exists():
+            continue
+        variant, _ = ProductVariant.objects.get_or_create(
+            product=product,
+            sku=f'{product.id}-STANDARD',
+            defaults={
+                'name': 'Standard',
+                'price_override': product.price,
+                'stock': 50,
+                'image_url': product.image_url,
+                'options': {'Default': 'Standard'},
+            },
+        )
+        ProductVariantOption.objects.get_or_create(variant=variant, attribute_value=default_value)
+
+
 def main():
     seed_path = SEED_FILE
     if not os.path.exists(seed_path) and os.path.exists(CONTAINER_SEED_FILE):
@@ -220,6 +335,10 @@ def main():
     seed_categories(category_blocks[0])
     for block in product_blocks:
         seed_products(block)
+    reset_primary_key_sequences()
+    seed_required_product_types()
+    seed_default_variants()
+    seed_fallback_variants_for_all_products()
     print("[Seed] Product seeding complete.")
 
 

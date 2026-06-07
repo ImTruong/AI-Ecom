@@ -44,6 +44,18 @@ def seed_permissions():
         # Supplier management
         {'name': 'View Suppliers', 'codename': 'view_suppliers', 'description': 'Can view suppliers'},
         {'name': 'Manage Suppliers', 'codename': 'manage_suppliers', 'description': 'Can manage suppliers'},
+
+        # Voucher management
+        {'name': 'View Vouchers', 'codename': 'view_vouchers', 'description': 'Can view vouchers'},
+        {'name': 'Manage Vouchers', 'codename': 'manage_vouchers', 'description': 'Can manage vouchers'},
+
+        # Shipping management
+        {'name': 'View Shipping', 'codename': 'view_shipping', 'description': 'Can view shipping tracking'},
+        {'name': 'Manage Shipping', 'codename': 'manage_shipping', 'description': 'Can update shipping tracking'},
+
+        # AI knowledgebase management (pending feature)
+        {'name': 'View Knowledgebase', 'codename': 'view_knowledgebase', 'description': 'Can view AI knowledgebase'},
+        {'name': 'Manage Knowledgebase', 'codename': 'manage_knowledgebase', 'description': 'Can manage AI knowledgebase'},
     ]
     
     created_count = 0
@@ -62,12 +74,21 @@ def seed_permissions():
 
 def seed_roles():
     """Create default roles with permissions"""
+    customer_role, created = Role.objects.get_or_create(
+        name='Customer',
+        defaults={
+            'description': 'Customer role for storefront users',
+            'is_active': True
+        }
+    )
+    if created:
+        print(f"  Created role: {customer_role.name}")
     
     # Super Admin - has all permissions
     admin_role, created = Role.objects.get_or_create(
-        name='super_admin',
+        name='Admin',
         defaults={
-            'description': 'Super Administrator with full access',
+            'description': 'Administrator with full access',
             'is_active': True
         }
     )
@@ -84,7 +105,7 @@ def seed_roles():
     
     # Staff role - limited permissions
     staff_role, created = Role.objects.get_or_create(
-        name='staff',
+        name='Staff',
         defaults={
             'description': 'Regular staff member',
             'is_active': True
@@ -99,7 +120,10 @@ def seed_roles():
     staff_permissions = [
         'view_products', 'create_product', 'edit_product',
         'view_orders', 'manage_orders',
-        'view_suppliers'
+        'view_suppliers', 'manage_suppliers',
+        'view_vouchers', 'manage_vouchers',
+        'view_shipping', 'manage_shipping',
+        'view_knowledgebase', 'manage_knowledgebase'
     ]
     for perm_codename in staff_permissions:
         try:
@@ -107,6 +131,23 @@ def seed_roles():
             RolePermission.objects.get_or_create(role=staff_role, permission=perm)
         except Permission.DoesNotExist:
             print(f"  Warning: Permission {perm_codename} not found")
+
+    legacy_admin_role, _ = Role.objects.get_or_create(
+        name='super_admin',
+        defaults={'description': 'Legacy admin role alias', 'is_active': True}
+    )
+    legacy_staff_role, _ = Role.objects.get_or_create(
+        name='staff',
+        defaults={'description': 'Legacy staff role alias', 'is_active': True}
+    )
+    for perm in all_perms:
+        RolePermission.objects.get_or_create(role=legacy_admin_role, permission=perm)
+    for perm_codename in staff_permissions:
+        try:
+            perm = Permission.objects.get(codename=perm_codename)
+            RolePermission.objects.get_or_create(role=legacy_staff_role, permission=perm)
+        except Permission.DoesNotExist:
+            pass
     
     # Manager role
     manager_role, created = Role.objects.get_or_create(
@@ -126,6 +167,9 @@ def seed_roles():
         'view_products', 'create_product', 'edit_product', 'delete_product',
         'view_orders', 'manage_orders',
         'view_suppliers', 'manage_suppliers',
+        'view_vouchers', 'manage_vouchers',
+        'view_shipping', 'manage_shipping',
+        'view_knowledgebase', 'manage_knowledgebase',
         'view_analytics'
     ]
     for perm_codename in manager_permissions:

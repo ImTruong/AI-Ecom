@@ -292,9 +292,10 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3">
                         <li><h6 class="dropdown-header text-uppercase small fw-bold">${role} Mode</h6></li>
-                        ${role === 'staff' ? `
+                        ${['staff', 'admin'].includes(role) ? `
                             <li><a class="dropdown-item py-2" href="/staff/dashboard/"><i class="fa fa-chart-line me-2"></i>Dashboard</a></li>
                             <li><a class="dropdown-item py-2" href="/staff/products/"><i class="fa fa-box-open me-2"></i>Products</a></li>
+                            ${role === 'admin' ? `<li><a class="dropdown-item py-2" href="/staff/users/"><i class="fa fa-users me-2"></i>Users</a></li>` : ``}
                         ` : `
                             <li><a class="dropdown-item py-2" href="/profile/"><i class="fa fa-user me-2"></i>Profile</a></li>
                             <li><a class="dropdown-item py-2" href="/orders/"><i class="fa fa-history me-2"></i>My Orders</a></li>

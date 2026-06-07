@@ -9,4 +9,6 @@ urlpatterns = [
     path('staff/all/', views.list_all_orders, name='list_all_orders'),
     path('staff/stats/', views.get_order_stats, name='get_order_stats'),
     path('staff/update-status/', views.update_order_status, name='update_order_status'),
+    path('staff/shipping/tracking/', views.add_shipment_tracking, name='add_shipment_tracking'),
+    path('<int:order_id>/shipping/tracking/', views.list_shipment_tracking, name='list_shipment_tracking'),
 ]

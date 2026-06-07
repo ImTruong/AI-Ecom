@@ -6,7 +6,15 @@ from .models import (
     Camera, Headphone, Watch, Shoe, Furniture,
     Attribute, AttributeValue, ProductVariant, ProductVariantOption
 )
-from django.db import transaction
+from .services import VariantValidationError, save_product_from_payload
+from .application.use_cases import ProductUseCases
+from .infrastructure.repositories import DjangoProductRepository
+from .presentation.serializers import (
+    attribute_to_dict,
+    category_to_dict,
+    product_to_dict,
+    variant_stock_to_dict,
+)
 import json
 import sys
 import os
@@ -33,36 +41,25 @@ TYPE_MODEL_MAP = {
     'furniture': Furniture,
 }
 
+
+product_use_cases = ProductUseCases(DjangoProductRepository())
+
 def product_list(request):
     category_slug = request.GET.get('category')
     search_query = request.GET.get('search')
-    
-    products = Product.objects.filter(is_active=True)
-    if category_slug:
-        products = products.filter(category__slug=category_slug)
-    
-    if search_query:
-        from django.db.models import Q
-        products = products.filter(
-            Q(name__icontains=search_query) | 
-            Q(description__icontains=search_query)
-        )
-    
-    return JsonResponse([p.to_dict() for p in products], safe=False)
+    products = product_use_cases.list_products(category_slug=category_slug, search_query=search_query)
+    return JsonResponse([product_to_dict(product) for product in products], safe=False)
 
 def product_detail(request, pk):
     try:
-        product = Product.objects.get(pk=pk, is_active=True)
-        return JsonResponse(product.to_dict())
+        product = product_use_cases.get_product(pk)
+        return JsonResponse(product_to_dict(product))
     except Product.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
 
 def category_list(request):
     categories = Category.objects.all()
-    return JsonResponse([
-        {'id': c.id, 'name': c.name, 'slug': c.slug, 'description': c.description, 'icon': c.icon} 
-        for c in categories
-    ], safe=False)
+    return JsonResponse([category_to_dict(category) for category in categories], safe=False)
 
 @csrf_exempt
 @jwt_required(user_types=['staff', 'admin'])
@@ -72,78 +69,11 @@ def manage_product(request):
     
     try:
         data = json.loads(request.body)
-        pid = data.get('id')
-        product_type = data.get('product_type', '').lower()
-        variants_payload = data.get('variants', [])
-
-        model_class = Product
-
-        with transaction.atomic():
-            if pid:
-                product = model_class.objects.get(pk=pid)
-            else:
-                product = model_class()
-            
-            # Base fields
-            product.name = data.get('name')
-            product.description = data.get('description')
-            product.price = data.get('price')
-            product.category_id = data.get('category_id')
-            supplier_id = data.get('supplier_id')
-            if supplier_id in [None, '']:
-                supplier_id = 1
-            product.supplier_id = supplier_id
-            product.image_url = data.get('image_url', '')
-            product.product_type = product_type or 'generic'
-
-            reserved_keys = {
-                'id', 'name', 'description', 'price', 'category_id', 'supplier_id',
-                'image_url', 'product_type', 'attributes', 'variants'
-            }
-            attributes = data.get('attributes')
-            if not isinstance(attributes, dict):
-                attributes = {k: v for k, v in data.items() if k not in reserved_keys}
-            product.attributes = attributes
-            
-            product.save()
-
-            # Handle variants
-            if isinstance(variants_payload, list):
-                # Delete existing variants
-                product.variants.all().delete()
-                for variant in variants_payload:
-                    if not isinstance(variant, dict):
-                        continue
-                    variant_obj = ProductVariant.objects.create(
-                        product=product,
-                        name=variant.get('name') or product.name,
-                        price_override=variant.get('price_override'),
-                        stock=variant.get('stock', 0),
-                        sku=variant.get('sku', ''),
-                        options=variant.get('options', {}) if isinstance(variant.get('options'), dict) else {},
-                    )
-
-                    option_values = variant.get('option_values', [])
-                    if not isinstance(option_values, list):
-                        continue
-                    for opt in option_values:
-                        if not isinstance(opt, dict):
-                            continue
-                        attr_name = opt.get('attribute')
-                        value = opt.get('value')
-                        if not attr_name or value is None:
-                            continue
-                        attribute, _ = Attribute.objects.get_or_create(name=str(attr_name))
-                        attr_value, _ = AttributeValue.objects.get_or_create(
-                            attribute=attribute,
-                            value=str(value)
-                        )
-                        ProductVariantOption.objects.get_or_create(
-                            variant=variant_obj,
-                            attribute_value=attr_value
-                        )
+        product = product_use_cases.save_product(data)
             
         return JsonResponse({'success': True, 'id': product.id})
+    except VariantValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -155,8 +85,7 @@ def delete_product_manage(request, pk):
     if request.method != 'DELETE':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     try:
-        product = Product.objects.get(pk=pk)
-        product.delete()
+        product_use_cases.delete_product(pk)
         return JsonResponse({'success': True})
     except Product.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
@@ -174,14 +103,12 @@ def update_stock(request):
         if variant_id is None or quantity is None:
             return JsonResponse({'success': False, 'error': 'variant_id and quantity required'}, status=400)
 
-        variant = ProductVariant.objects.get(id=int(variant_id))
-        variant.stock = int(variant.stock) + int(quantity)
-        if variant.stock < 0:
-            variant.stock = 0
-        variant.save()
-        return JsonResponse({'success': True, 'data': {'variant_id': variant.id, 'stock': variant.stock}})
+        variant = product_use_cases.update_stock(int(variant_id), int(quantity))
+        return JsonResponse({'success': True, 'data': variant_stock_to_dict(variant)})
     except ProductVariant.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Variant not found'}, status=404)
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
@@ -193,18 +120,7 @@ def list_attributes(request):
     """List all attributes with their values"""
     try:
         attributes = Attribute.objects.prefetch_related('values').all()
-        data = []
-        for attr in attributes:
-            data.append({
-                'id': attr.id,
-                'name': attr.name,
-                'slug': attr.slug,
-                'values': [
-                    {'id': v.id, 'value': v.value, 'slug': v.slug}
-                    for v in attr.values.all()
-                ]
-            })
-        return JsonResponse({'success': True, 'attributes': data})
+        return JsonResponse({'success': True, 'attributes': [attribute_to_dict(attr) for attr in attributes]})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 

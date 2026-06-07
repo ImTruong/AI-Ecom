@@ -1,0 +1,3 @@
+class VoucherValidationError(ValueError):
+    pass
+

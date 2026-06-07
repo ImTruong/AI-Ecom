@@ -1,0 +1,3 @@
+class OrderValidationError(ValueError):
+    pass
+

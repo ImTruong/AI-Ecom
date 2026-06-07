@@ -8,6 +8,17 @@ urlpatterns = [
     path('staff/login/', views.staff_login, name='staff_login'),
     path('token/refresh/', views.token_refresh, name='token_refresh'),
     path('token/verify/', views.token_verify, name='token_verify'),
+
+    # Unified customer/user APIs kept under /api/customer/* for FE compatibility.
+    path('profile/', views.customer_profile, name='customer_profile'),
+    path('profile/update/', views.update_customer_profile, name='update_customer_profile'),
+    path('address/', views.list_addresses, name='list_addresses'),
+    path('address/add/', views.add_address, name='add_address'),
+    path('address/delete/<int:address_id>/', views.delete_address, name='delete_address'),
+    path('address/set-default/<int:address_id>/', views.set_default_address, name='set_default_address'),
+    path('staff/stats/', views.customer_stats, name='customer_stats'),
+    path('staff/toggle-status/<int:user_id>/', views.admin_toggle_customer_status_compat, name='admin_toggle_customer_status_compat'),
+    path('<int:user_id>/', views.admin_customer_detail_compat, name='admin_customer_detail_compat'),
     
     # Admin user management APIs
     path('admin/users/', views.admin_list_users, name='admin_list_users'),

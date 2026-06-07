@@ -4,11 +4,15 @@ from django.views.decorators.http import require_http_methods
 import json
 import os
 import sys
-from .models import Payment
+from .models import Payment, PaymentLog, PaymentMethod
+from .application.use_cases import PaymentUseCases
+from .infrastructure.repositories import DjangoPaymentRepository
+from .presentation.serializers import payment_log_to_dict, payment_method_to_dict, payment_to_dict
 
 # Add shared to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
 from jwt_utils import jwt_required
+payment_use_cases = PaymentUseCases(DjangoPaymentRepository())
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -24,26 +28,12 @@ def process_payment(request):
         if not order_id or not amount:
             return JsonResponse({'success': False, 'error': 'Order ID and amount required'}, status=400)
             
-        # In a real app, integrate with gateway (Stripe/PayPal) here
-        
-        # Simulate local success for COD or Banking
-        status = Payment.PaymentStatus.COMPLETED
-        if payment_method == 'cod':
-            # COD is pending until physical delivery, but we record it
-            status = Payment.PaymentStatus.PENDING
-            
-        payment = Payment.objects.create(
-            order_id=order_id,
-            amount=amount,
-            payment_method=payment_method,
-            status=status,
-            transaction_id=f"TXN-{order_id}-{int(os.times()[4])}"
-        )
+        payment = payment_use_cases.process_payment(data)
         
         return JsonResponse({
             'success': True,
             'message': 'Payment record created',
-            'data': payment.to_dict()
+            'data': payment_to_dict(payment)
         }, status=201)
         
     except Exception as e:
@@ -55,10 +45,26 @@ def process_payment(request):
 def get_payment_status(request, order_id):
     """Get status of a payment"""
     try:
-        payment = Payment.objects.get(order_id=order_id)
+        payment = payment_use_cases.get_payment_status(order_id)
         return JsonResponse({
             'success': True,
-            'data': payment.to_dict()
+            'data': payment_to_dict(payment)
         })
     except Payment.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Payment not found'}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+@jwt_required(user_types=['customer', 'staff'])
+def list_payment_methods(request):
+    methods = payment_use_cases.list_payment_methods()
+    return JsonResponse({'success': True, 'data': [payment_method_to_dict(method) for method in methods]})
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+@jwt_required(user_types=['staff'])
+def list_payment_logs(request, payment_id):
+    logs = payment_use_cases.list_payment_logs(payment_id)
+    return JsonResponse({'success': True, 'data': [payment_log_to_dict(log) for log in logs]})

@@ -4,6 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import SearchHistory, ProductView, CartAction, PurchaseAction
 import json
+from .application.use_cases import TrackingUseCases
+from .domain.exceptions import TrackingValidationError
+from .infrastructure.repositories import DjangoTrackingRepository
+from .presentation.serializers import tracking_event_to_dict
+
+
+tracking_use_cases = TrackingUseCases(DjangoTrackingRepository())
 
 class LogSearchView(APIView):
     def post(self, request):
@@ -46,7 +53,15 @@ class LogProductView(APIView):
                 product_id=product_id,
                 product_type=product_type
             )
-            return Response({'success': True}, status=status.HTTP_201_CREATED)
+            event = tracking_use_cases.record_event({
+                **request.data,
+                'event_type': 'ClickProduct',
+                'user_id': customer_id,
+                'product_id': product_id,
+            })
+            return Response({'success': True, 'event': tracking_event_to_dict(event)}, status=status.HTTP_201_CREATED)
+        except TrackingValidationError as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -83,7 +98,15 @@ class LogCartActionView(APIView):
                 quantity=quantity,
                 price=price
             )
-            return Response({'success': True}, status=status.HTTP_201_CREATED)
+            event = tracking_use_cases.record_event({
+                **request.data,
+                'event_type': 'AddToCart',
+                'user_id': customer_id,
+                'product_id': product_id,
+            })
+            return Response({'success': True, 'event': tracking_event_to_dict(event)}, status=status.HTTP_201_CREATED)
+        except TrackingValidationError as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -113,7 +136,32 @@ class LogPurchaseView(APIView):
                     price=item['price'],
                     quantity=item['quantity']
                 )
+                tracking_use_cases.record_event({
+                    'event_type': 'PlaceOrder',
+                    'user_id': customer_id,
+                    'product_id': item['product_id'],
+                    'product_variant_id': item.get('variant_id'),
+                    'metadata': {
+                        'order_id': order_id,
+                        'product_type': item.get('product_type'),
+                        'price': item.get('price'),
+                        'quantity': item.get('quantity'),
+                    },
+                })
             return Response({'success': True}, status=status.HTTP_201_CREATED)
+        except TrackingValidationError as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LogTrackingEventView(APIView):
+    def post(self, request):
+        try:
+            event = tracking_use_cases.record_event(request.data)
+            return Response({'success': True, 'data': tracking_event_to_dict(event)}, status=status.HTTP_201_CREATED)
+        except TrackingValidationError as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

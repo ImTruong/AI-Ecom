@@ -22,8 +22,8 @@ class RoutingMiddleware:
             'url': os.getenv('USER_SERVICE_URL', 'http://user-service:8000'),
         },
         '/api/customer/': {
-            'service': 'customer-service',
-            'url': os.getenv('CUSTOMER_SERVICE_URL', 'http://customer-service:8000'),
+            'service': 'user-service',
+            'url': os.getenv('USER_SERVICE_URL', 'http://user-service:8000'),
         },
         '/api/products/': {
             'service': 'product-service',
@@ -54,8 +54,8 @@ class RoutingMiddleware:
             'url': os.getenv('SUPPLIER_SERVICE_URL', 'http://supplier-service:8000'),
         },
         '/api/staff/': {
-            'service': 'customer-service',
-            'url': os.getenv('STAFF_SERVICE_URL', 'http://customer-service:8000'),
+            'service': 'user-service',
+            'url': os.getenv('USER_SERVICE_URL', 'http://user-service:8000'),
         },
         '/api/recommendations/': {
             'service': 'recommendation-service',

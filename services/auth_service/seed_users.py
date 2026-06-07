@@ -9,7 +9,7 @@ sys.path.append(os.path.join(BASE_DIR, '..', '..', 'shared'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auth_service.settings')
 django.setup()
 
-from authentication.models import Customer, Staff, Admin, Role, StaffRole  # noqa: E402
+from authentication.models import Address, Customer, Staff, Admin, Role, StaffRole  # noqa: E402
 from outbox.service import create_outbox_event_and_save  # noqa: E402
 from events.event_base import EventType  # noqa: E402
 
@@ -50,6 +50,20 @@ def seed_customer():
     else:
         print(f"[Seed] Customer already exists: {email}")
 
+    Address.objects.get_or_create(
+        customer=customer,
+        street_address='123 Demo Street, District 1',
+        defaults={
+            'full_name': customer.full_name,
+            'phone': customer.phone,
+            'city': 'Ho Chi Minh City',
+            'country': 'Vietnam',
+            'address_type': 'home',
+            'is_default': True,
+            'is_active': True,
+        }
+    )
+
 
 def seed_staff():
     """Create default staff account"""
@@ -72,10 +86,10 @@ def seed_staff():
         
         # Assign staff role
         try:
-            staff_role = Role.objects.get(name='staff')
+            staff_role = Role.objects.get(name='Staff')
             StaffRole.objects.get_or_create(staff=staff, role=staff_role)
         except Role.DoesNotExist:
-            print(f"[Seed] Warning: 'staff' role not found")
+            print(f"[Seed] Warning: 'Staff' role not found")
         
         create_outbox_event_and_save(
             event_type=EventType.STAFF_CREATED,
@@ -124,10 +138,10 @@ def seed_admin():
     
     # Assign admin role
     try:
-        admin_role = Role.objects.get(name='super_admin')
+        admin_role = Role.objects.get(name='Admin')
         StaffRole.objects.get_or_create(staff=admin, role=admin_role)
     except Role.DoesNotExist:
-        print(f"[Seed] Warning: 'super_admin' role not found")
+        print(f"[Seed] Warning: 'Admin' role not found")
     
     print(f"[Seed] Created admin: {email} / {password}")
 

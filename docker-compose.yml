@@ -21,36 +21,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # PostgreSQL for Customer Service
-  customer_db:
-    image: postgres:15-alpine
-    container_name: customer_db
-    environment:
-      POSTGRES_DB: customer_db
-      POSTGRES_USER: customer_user
-      POSTGRES_PASSWORD: customer_pass
-    ports:
-      - "5433:5432"
-    volumes:
-      - customer_db_data:/var/lib/postgresql/data
-    networks:
-      - microservices_network
-
-  # PostgreSQL for Staff Service
-  staff_db:
-    image: postgres:15-alpine
-    container_name: staff_db
-    environment:
-      POSTGRES_DB: staff_db
-      POSTGRES_USER: staff_user
-      POSTGRES_PASSWORD: staff_pass
-    ports:
-      - "5434:5432"
-    volumes:
-      - staff_db_data:/var/lib/postgresql/data
-    networks:
-      - microservices_network
-
   # PostgreSQL for Product Service
   product_db:
     image: postgres:15-alpine
@@ -273,54 +243,6 @@ services:
       - ./services/auth_service:/app
       - ./shared:/shared
 
-  # Customer Service
-  customer-service:
-    build:
-      context: .
-      dockerfile: services/customer_service/Dockerfile
-    container_name: customer-service
-    environment:
-      - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
-      - SECRET_KEY=your-secret-key-change-in-production
-      - USER_SERVICE_URL=http://user-service:8000
-      - DEBUG=True
-    ports:
-      - "8002:8000"
-    depends_on:
-      - customer_db
-      - rabbitmq
-      - user-service
-    networks:
-      - microservices_network
-    volumes:
-      - ./services/customer_service:/app
-      - ./shared:/shared
-
-  # Staff Service
-  staff-service:
-    build:
-      context: .
-      dockerfile: services/staff_service/Dockerfile
-    container_name: staff-service
-    environment:
-      - DATABASE_URL=postgresql://staff_user:staff_pass@staff_db:5432/staff_db
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
-      - SECRET_KEY=your-secret-key-change-in-production
-      - USER_SERVICE_URL=http://user-service:8000
-      - DEBUG=True
-    ports:
-      - "8003:8000"
-    depends_on:
-      - staff_db
-      - rabbitmq
-      - user-service
-    networks:
-      - microservices_network
-    volumes:
-      - ./services/staff_service:/app
-      - ./shared:/shared
-
   # API Gateway
   api-gateway:
     build:
@@ -329,8 +251,8 @@ services:
     container_name: api-gateway
     environment:
       - USER_SERVICE_URL=http://user-service:8000
-      - CUSTOMER_SERVICE_URL=http://customer-service:8000
-      - STAFF_SERVICE_URL=http://customer-service:8000
+      - CUSTOMER_SERVICE_URL=http://user-service:8000
+      - STAFF_SERVICE_URL=http://user-service:8000
       - ORDER_SERVICE_URL=http://order-service:8000
       - PAYMENT_SERVICE_URL=http://payment-service:8000
       - VOUCHER_SERVICE_URL=http://voucher-service:8000
@@ -340,8 +262,6 @@ services:
       - "8000:8000"
     depends_on:
       - user-service
-      - customer-service
-      - staff-service
       - product-service
       - tracking-service
       - cart-service
@@ -388,6 +308,7 @@ services:
       - DATABASE_URL=postgresql://order_user:order_pass@order_db:5432/order_db
       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
       - SECRET_KEY=your-secret-key-change-in-production
+      - CUSTOMER_SERVICE_URL=http://user-service:8000
       - DEBUG=True
     ports:
       - "8007:8000"
@@ -511,27 +432,6 @@ services:
       - microservices_network
     command: python publisher.py
 
-  customer-consumer:
-    build:
-      context: .
-      dockerfile: services/customer_service/Dockerfile
-    container_name: customer-consumer
-    volumes:
-      - ./services/customer_service:/app
-      - ./shared:/shared
-    environment:
-      - PYTHONPATH=/app:/shared
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
-      - DATABASE_URL=postgresql://customer_user:customer_pass@customer_db:5432/customer_db
-    depends_on:
-      rabbitmq:
-        condition: service_started
-      customer-service:
-        condition: service_started
-    networks:
-      - microservices_network
-    command: python consumer.py
-  
   # Qdrant Vector Database
   qdrant:
     image: qdrant/qdrant
@@ -655,8 +555,6 @@ networks:
 
 volumes:
   auth_db_data:
-  customer_db_data:
-  staff_db_data:
   product_db_data:
   tracking_db_data:
   cart_db_data:

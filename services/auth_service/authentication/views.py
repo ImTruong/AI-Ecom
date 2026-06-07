@@ -316,6 +316,160 @@ def token_verify(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def customer_profile(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    payload = jwt_manager.verify_token(auth_header.split(' ')[1], 'access')
+    if not payload or payload.get('user_type') != 'customer':
+        return JsonResponse({'error': 'Customer access required'}, status=403)
+
+    try:
+        customer = Customer.objects.get(id=payload.get('user_id'), is_active=True)
+        data = customer.to_dict()
+        data['role'] = 'customer'
+        data['addresses'] = [addr.to_dict() for addr in customer.addresses.filter(is_active=True)]
+        return JsonResponse({'success': True, 'data': data})
+    except Customer.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Customer not found'}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["PUT", "PATCH"])
+def update_customer_profile(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    payload = jwt_manager.verify_token(auth_header.split(' ')[1], 'access')
+    if not payload or payload.get('user_type') != 'customer':
+        return JsonResponse({'error': 'Customer access required'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        customer = Customer.objects.get(id=payload.get('user_id'), is_active=True)
+        for field in ['full_name', 'phone', 'address']:
+            if field in data:
+                setattr(customer, field, data[field])
+        customer.save()
+        return JsonResponse({'success': True, 'data': customer.to_dict(), 'message': 'Profile updated successfully'})
+    except Customer.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Customer not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+
+
+def _authenticated_customer(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return None, JsonResponse({'error': 'Authentication required'}, status=401)
+    payload = jwt_manager.verify_token(auth_header.split(' ')[1], 'access')
+    if not payload or payload.get('user_type') != 'customer':
+        return None, JsonResponse({'error': 'Customer access required'}, status=403)
+    try:
+        return Customer.objects.get(id=payload.get('user_id'), is_active=True), None
+    except Customer.DoesNotExist:
+        return None, JsonResponse({'success': False, 'error': 'Customer not found'}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def list_addresses(request):
+    customer, error = _authenticated_customer(request)
+    if error:
+        return error
+    addresses = customer.addresses.filter(is_active=True).order_by('-is_default', '-created_at')
+    return JsonResponse({'success': True, 'data': [address.to_dict() for address in addresses]})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_address(request):
+    customer, error = _authenticated_customer(request)
+    if error:
+        return error
+    try:
+        data = json.loads(request.body)
+        full_name = data.get('full_name')
+        phone = data.get('phone')
+        address_line = data.get('address_line') or data.get('street_address')
+        if not full_name or not phone or not address_line:
+            return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
+
+        is_default = bool(data.get('is_default', False))
+        if not customer.addresses.filter(is_active=True).exists():
+            is_default = True
+        if is_default:
+            customer.addresses.filter(is_default=True).update(is_default=False)
+
+        address = Address.objects.create(
+            customer=customer,
+            full_name=full_name,
+            phone=phone,
+            street_address=address_line,
+            city=data.get('city', 'Unknown'),
+            state=data.get('state'),
+            postal_code=data.get('postal_code'),
+            country=data.get('country', 'Vietnam'),
+            address_type=data.get('address_type', 'home'),
+            is_default=is_default,
+        )
+        return JsonResponse({'success': True, 'message': 'Address added successfully', 'data': address.to_dict()}, status=201)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_address(request, address_id):
+    customer, error = _authenticated_customer(request)
+    if error:
+        return error
+    try:
+        address = Address.objects.get(id=address_id, customer=customer, is_active=True)
+        was_default = address.is_default
+        address.is_active = False
+        address.is_default = False
+        address.save(update_fields=['is_active', 'is_default', 'updated_at'])
+        if was_default:
+            next_address = customer.addresses.filter(is_active=True).first()
+            if next_address:
+                next_address.is_default = True
+                next_address.save(update_fields=['is_default', 'updated_at'])
+        return JsonResponse({'success': True, 'message': 'Address deleted successfully'})
+    except Address.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Address not found'}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def set_default_address(request, address_id):
+    customer, error = _authenticated_customer(request)
+    if error:
+        return error
+    try:
+        address = Address.objects.get(id=address_id, customer=customer, is_active=True)
+        customer.addresses.filter(is_default=True).update(is_default=False)
+        address.is_default = True
+        address.save(update_fields=['is_default', 'updated_at'])
+        return JsonResponse({'success': True, 'message': 'Default address updated successfully', 'data': address.to_dict()})
+    except Address.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Address not found'}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def customer_stats(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    payload = jwt_manager.verify_token(auth_header.split(' ')[1], 'access')
+    if not payload or payload.get('user_type') not in ['staff', 'admin']:
+        return JsonResponse({'error': 'Staff access required'}, status=403)
+    return JsonResponse({'success': True, 'data': {'total_users': Customer.objects.count()}})
+
+
 # ==================== ADMIN USER MANAGEMENT APIs ====================
 
 def require_admin(view_func):
@@ -399,6 +553,7 @@ def admin_list_users(request):
         
         return JsonResponse({
             'success': True,
+            'data': users,
             'users': users,
             'total': len(users)
         })
@@ -447,6 +602,7 @@ def admin_get_user(request, user_id):
         
         return JsonResponse({
             'success': True,
+            'data': user_data,
             'user': user_data
         })
         
@@ -620,3 +776,28 @@ def admin_list_permissions(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+@require_admin
+def admin_customer_detail_compat(request, user_id):
+    customer = Customer.objects.filter(id=user_id).first()
+    if not customer:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+    data = customer.to_dict()
+    data['type'] = 'customer'
+    data['addresses'] = [address.to_dict() for address in customer.addresses.filter(is_active=True)]
+    return JsonResponse({'success': True, 'data': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@require_admin
+def admin_toggle_customer_status_compat(request, user_id):
+    customer = Customer.objects.filter(id=user_id).first()
+    if not customer:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+    customer.is_active = not customer.is_active
+    customer.save(update_fields=['is_active', 'updated_at'])
+    return JsonResponse({'success': True, 'data': customer.to_dict()})

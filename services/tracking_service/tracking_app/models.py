@@ -89,3 +89,37 @@ class PurchaseAction(models.Model):
             'quantity': self.quantity,
             'timestamp': self.timestamp.isoformat(),
         }
+
+
+class TrackingEvent(models.Model):
+    class EventType(models.TextChoices):
+        ADD_TO_CART = 'AddToCart', 'Add To Cart'
+        CLICK_PRODUCT = 'ClickProduct', 'Click Product'
+        PLACE_ORDER = 'PlaceOrder', 'Place Order'
+
+    user_id = models.IntegerField(null=True, blank=True, db_index=True)
+    session_id = models.CharField(max_length=255, null=True, blank=True)
+    event_type = models.CharField(max_length=50, choices=EventType.choices)
+    product_id = models.IntegerField(db_index=True)
+    product_variant_id = models.IntegerField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'tracking_events'
+        indexes = [
+            models.Index(fields=['event_type', 'created_at'], name='tracking_event_type_time_idx'),
+            models.Index(fields=['user_id', 'created_at'], name='tracking_event_user_time_idx'),
+        ]
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'session_id': self.session_id,
+            'event_type': self.event_type,
+            'product_id': self.product_id,
+            'product_variant_id': self.product_variant_id,
+            'metadata': self.metadata,
+            'created_at': self.created_at.isoformat(),
+        }

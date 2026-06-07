@@ -8,12 +8,20 @@ from django.db import transaction
 import json
 import sys
 import os
+import requests
 
 # Add shared to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'shared'))
 
 from jwt_utils import jwt_required
 from .models import Cart, CartItem
+from .application.use_cases import CartUseCases
+from .domain.exceptions import CartValidationError
+from .infrastructure.repositories import DjangoCartRepository
+from .presentation.serializers import cart_to_dict
+
+
+cart_use_cases = CartUseCases(DjangoCartRepository())
 
 
 @require_http_methods(["GET"])
@@ -24,12 +32,11 @@ def get_cart(request):
         # The jwt_required decorator attaches user_id to the request
         customer_id = request.user_id
         
-        # Get or create cart
-        cart, created = Cart.objects.get_or_create(customer_id=customer_id)
+        cart = cart_use_cases.get_cart(customer_id)
         
         return JsonResponse({
             'success': True,
-            'data': cart.to_dict()
+            'data': cart_to_dict(cart)
         })
     
     except Exception as e:
@@ -48,8 +55,7 @@ def add_to_cart(request):
         customer_id = request.user_id
         data = json.loads(request.body)
         
-        # Validate required fields
-        required_fields = ['product_type', 'product_id', 'price']
+        required_fields = ['product_type', 'product_id', 'variant_id', 'price']
         for field in required_fields:
             if field not in data:
                 return JsonResponse({
@@ -57,63 +63,25 @@ def add_to_cart(request):
                     'error': f'Missing required field: {field}'
                 }, status=400)
         
-        # Validate REQUIRED_TYPES
-        VALID_TYPES = ['laptop', 'phone', 'book', 'clothes', 'watch', 'camera', 'shoe', 'furniture', 'tablet', 'headphone']
-        if data['product_type'] not in VALID_TYPES:
-            # Try to sanitize (e.g., 'books' -> 'book')
-            sanitized = data['product_type'].rstrip('s')
-            if sanitized in VALID_TYPES:
-                data['product_type'] = sanitized
-            else:
-                return JsonResponse({
-                    'success': False,
-                    'error': f"Invalid product_type: {data['product_type']}. Must be one of {VALID_TYPES}"
-                }, status=400)
-        
         quantity = data.get('quantity', 1)
-        variant_id = data.get('variant_id')
-        variant_name = data.get('variant_name')
-        
-        if quantity < 1:
-            return JsonResponse({
-                'success': False,
-                'error': 'Quantity must be at least 1'
-            }, status=400)
-        
-        with transaction.atomic():
-            # Get or create cart
-            cart, created = Cart.objects.get_or_create(customer_id=customer_id)
-            
-            # Check if item already in cart
-            cart_item, item_created = CartItem.objects.get_or_create(
-                cart=cart,
-                product_type=data['product_type'],
-                product_id=data['product_id'],
-                variant_id=variant_id,
-                defaults={
-                    'price': data['price'],
-                    'product_name': data.get('product_name'),
-                    'variant_name': variant_name,
-                    'image_url': data.get('image_url'),
-                    'quantity': quantity
-                }
-            )
-            
-            if not item_created:
-                # Item exists, update quantity
-                cart_item.quantity += quantity
-                cart_item.price = data['price']
-                if data.get('product_name'): cart_item.product_name = data.get('product_name')
-                if variant_name: cart_item.variant_name = variant_name
-                if data.get('image_url'): cart_item.image_url = data.get('image_url')
-                cart_item.save()
-        
-        # Reload cart to get updated data
-        cart.refresh_from_db()
+        cart, item_created = cart_use_cases.add_to_cart(customer_id, data)
+        try:
+            tracking_url = os.getenv('TRACKING_SERVICE_URL', 'http://tracking-service:8000')
+            requests.post(f"{tracking_url}/api/tracking/add-to-cart/", json={
+                'customer_id': customer_id,
+                'product_id': data['product_id'],
+                'product_variant_id': data.get('variant_id'),
+                'product_type': data['product_type'],
+                'action_type': 'add',
+                'quantity': quantity,
+                'price': str(data['price']),
+            }, timeout=2)
+        except Exception:
+            pass
         
         return JsonResponse({
             'success': True,
-            'data': cart.to_dict(),
+            'data': cart_to_dict(cart),
             'message': 'Item added to cart'
         }, status=201 if item_created else 200)
     
@@ -122,7 +90,8 @@ def add_to_cart(request):
             'success': False,
             'error': 'Invalid JSON'
         }, status=400)
-    
+    except CartValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -139,8 +108,7 @@ def update_cart_item(request):
         customer_id = request.user_id
         data = json.loads(request.body)
         
-        # Validate required fields
-        required_fields = ['product_type', 'product_id', 'quantity']
+        required_fields = ['product_type', 'product_id', 'variant_id', 'quantity']
         for field in required_fields:
             if field not in data:
                 return JsonResponse({
@@ -148,33 +116,11 @@ def update_cart_item(request):
                     'error': f'Missing required field: {field}'
                 }, status=400)
         
-        quantity = data['quantity']
-        variant_id = data.get('variant_id')
-        
-        if quantity < 1:
-            return JsonResponse({
-                'success': False,
-                'error': 'Quantity must be at least 1'
-            }, status=400)
-        
-        with transaction.atomic():
-            cart = Cart.objects.get(customer_id=customer_id)
-            cart_item = CartItem.objects.get(
-                cart=cart,
-                product_type=data['product_type'],
-                product_id=data['product_id'],
-                variant_id=variant_id
-            )
-            
-            cart_item.quantity = quantity
-            cart_item.save()
-        
-        # Reload cart
-        cart.refresh_from_db()
+        cart = cart_use_cases.update_quantity(customer_id, data)
         
         return JsonResponse({
             'success': True,
-            'data': cart.to_dict(),
+            'data': cart_to_dict(cart),
             'message': 'Cart item updated'
         })
     
@@ -189,7 +135,8 @@ def update_cart_item(request):
             'success': False,
             'error': 'Cart item not found'
         }, status=404)
-    
+    except CartValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -205,24 +152,11 @@ def remove_from_cart(request, product_type, product_id):
     try:
         customer_id = request.user_id
         variant_id = request.GET.get('variant_id')
-        
-        with transaction.atomic():
-            cart = Cart.objects.get(customer_id=customer_id)
-            cart_item = CartItem.objects.get(
-                cart=cart,
-                product_type=product_type,
-                product_id=product_id,
-                variant_id=variant_id
-            )
-            
-            cart_item.delete()
-        
-        # Reload cart
-        cart.refresh_from_db()
+        cart = cart_use_cases.remove_from_cart(customer_id, product_type, product_id, variant_id)
         
         return JsonResponse({
             'success': True,
-            'data': cart.to_dict(),
+            'data': cart_to_dict(cart),
             'message': 'Item removed from cart'
         })
     
@@ -237,7 +171,8 @@ def remove_from_cart(request, product_type, product_id):
             'success': False,
             'error': 'Cart item not found'
         }, status=404)
-    
+    except CartValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -253,16 +188,11 @@ def clear_cart(request):
     try:
         customer_id = request.user_id
         
-        with transaction.atomic():
-            cart = Cart.objects.get(customer_id=customer_id)
-            cart.items.all().delete()
-        
-        # Reload cart
-        cart.refresh_from_db()
+        cart = cart_use_cases.clear_cart(customer_id)
         
         return JsonResponse({
             'success': True,
-            'data': cart.to_dict(),
+            'data': cart_to_dict(cart),
             'message': 'Cart cleared'
         })
     

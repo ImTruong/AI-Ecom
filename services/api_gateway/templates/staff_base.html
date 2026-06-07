@@ -60,7 +60,7 @@
                     <li class="nav-item"><a class="nav-link" href="/staff/orders/">Orders</a></li>
                     <li class="nav-item"><a class="nav-link" href="/staff/products/">Products</a></li>
                     <li class="nav-item"><a class="nav-link" href="/staff/suppliers/">Suppliers</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/staff/users/">Users</a></li>
+                    <li class="nav-item admin-only-nav" style="display:none;"><a class="nav-link" href="/staff/users/">Users</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
                     {% block staff_nav_extra %}{% endblock %}
@@ -92,6 +92,13 @@
         function setToken(t) { localStorage.setItem('access_token', t); }
         function clearToken() { localStorage.removeItem('access_token'); }
         function isLoggedIn() { return !!getToken(); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('user_role');
+            document.querySelectorAll('.admin-only-nav').forEach(el => {
+                el.style.display = role === 'admin' ? '' : 'none';
+            });
+        });
 
         function logout() {
             localStorage.clear();
