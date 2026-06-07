@@ -15,11 +15,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY services/supplier_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy shared modules
+COPY shared /shared
+
 # Copy the application code
-COPY . .
+COPY services/supplier_service /app/
 
 # Expose the port
 EXPOSE 8000
