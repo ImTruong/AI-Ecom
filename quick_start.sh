@@ -67,7 +67,7 @@ done
 
 # 2. Database Migrations
 echo -e "${YELLOW}Step 2: Running Database Migrations...${NC}"
-django_services=("user-service" "customer-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
+django_services=("user-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
 
 for service in "${django_services[@]}"; do
     echo "  - Migrating $service..."

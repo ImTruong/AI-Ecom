@@ -22,16 +22,16 @@ else
 fi
 
 # 1. Ensure all network, core infrastructure, and workers are up
-$DOCKER_CMD up -d rabbitmq auth_db customer_db staff_db product_db cart_db order_db payment_db voucher_db rating_db supplier_db tracking_db user-publisher customer-consumer
+$DOCKER_CMD up -d rabbitmq auth_db product_db cart_db order_db payment_db voucher_db rating_db supplier_db tracking_db chatbot_db user-publisher
 sleep 5
 
 # 2. Rebuild and restart all microservices
 echo "📦 Building and updating all microservices..."
-$DOCKER_CMD up -d --build api-gateway user-service customer-service product-service staff-service cart-service order-service payment-service voucher-service rating-service supplier-service tracking-service
+$DOCKER_CMD up -d --build api-gateway user-service product-service cart-service order-service payment-service voucher-service rating-service supplier-service tracking-service recommendation-service knowledge-service chatbot-service
 
 # 3. Always check for migrations and apply them in all services
 echo "📝 Checking for and applying database migrations..."
-services=("user-service" "customer-service" "product-service" "staff-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
+services=("user-service" "product-service" "cart-service" "order-service" "payment-service" "voucher-service" "rating-service" "supplier-service" "tracking-service")
 
 for service in "${services[@]}"; do
     if [ $($DOCKER_CMD ps -q $service) ]; then
