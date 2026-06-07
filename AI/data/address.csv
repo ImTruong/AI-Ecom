@@ -1,0 +1,51 @@
+id,customer_id,full_name,phone,street_address,city,state,postal_code,country,address_type,is_default,is_active,created_at,updated_at
+1,10009,Customer User 10009,0959251188,"Street Address 10009, District 7",Hanoi,,52569,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+2,100528,Customer User 100528,0947405107,"Street Address 100528, District 4",Ho Chi Minh City,,11698,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+3,1000084,Customer User 1000084,0934970946,"Street Address 1000084, District 8",Da Nang,,35361,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+4,1000222,Customer User 1000222,0985386435,"Street Address 1000222, District 2",Hanoi,,60788,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+5,1000228,Customer User 1000228,0944935501,"Street Address 1000228, District 12",Hanoi,,24062,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+6,1000313,Customer User 1000313,0992124765,"Street Address 1000313, District 5",Da Nang,,42191,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+7,1000335,Customer User 1000335,0936867482,"Street Address 1000335, District 2",Ho Chi Minh City,,65890,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+8,1000349,Customer User 1000349,0919939096,"Street Address 1000349, District 8",Ho Chi Minh City,,68895,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+9,1000636,Customer User 1000636,0969741812,"Street Address 1000636, District 2",Da Nang,,65412,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+10,1000723,Customer User 1000723,0952894344,"Street Address 1000723, District 11",Hanoi,,56500,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+11,1000792,Customer User 1000792,0918715975,"Street Address 1000792, District 9",Da Nang,,29029,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+12,1000877,Customer User 1000877,0950259503,"Street Address 1000877, District 3",Da Nang,,56501,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+13,1001145,Customer User 1001145,0995590648,"Street Address 1001145, District 3",Hanoi,,43341,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+14,1001199,Customer User 1001199,0940097200,"Street Address 1001199, District 2",Ho Chi Minh City,,61908,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+15,1001326,Customer User 1001326,0928639738,"Street Address 1001326, District 4",Hanoi,,11722,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+16,1001375,Customer User 1001375,0958438711,"Street Address 1001375, District 9",Da Nang,,34176,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+17,1001419,Customer User 1001419,0972734149,"Street Address 1001419, District 9",Ho Chi Minh City,,50104,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+18,1001466,Customer User 1001466,0921571646,"Street Address 1001466, District 2",Hanoi,,36093,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+19,1001472,Customer User 1001472,0974245343,"Street Address 1001472, District 9",Hanoi,,60407,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+20,1001566,Customer User 1001566,0964953237,"Street Address 1001566, District 10",Ho Chi Minh City,,18213,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+21,1001629,Customer User 1001629,0952550733,"Street Address 1001629, District 11",Ho Chi Minh City,,39489,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+22,1001915,Customer User 1001915,0972523073,"Street Address 1001915, District 11",Da Nang,,32578,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+23,1002042,Customer User 1002042,0927224779,"Street Address 1002042, District 9",Da Nang,,48521,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+24,1002185,Customer User 1002185,0934422678,"Street Address 1002185, District 3",Hanoi,,42955,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+25,1002307,Customer User 1002307,0917437386,"Street Address 1002307, District 2",Da Nang,,20028,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+26,1002526,Customer User 1002526,0950818905,"Street Address 1002526, District 3",Ho Chi Minh City,,31145,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+27,1002589,Customer User 1002589,0940262109,"Street Address 1002589, District 6",Da Nang,,68649,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+28,1002618,Customer User 1002618,0948124318,"Street Address 1002618, District 2",Hanoi,,22864,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+29,1002909,Customer User 1002909,0995235919,"Street Address 1002909, District 9",Hanoi,,18203,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+30,1002927,Customer User 1002927,0993889081,"Street Address 1002927, District 5",Da Nang,,44962,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+31,1003249,Customer User 1003249,0922539748,"Street Address 1003249, District 9",Da Nang,,21051,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+32,1003351,Customer User 1003351,0989431184,"Street Address 1003351, District 10",Ho Chi Minh City,,21219,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+33,1003656,Customer User 1003656,0998413629,"Street Address 1003656, District 10",Da Nang,,69113,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+34,1003716,Customer User 1003716,0991220369,"Street Address 1003716, District 6",Da Nang,,12699,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+35,1003724,Customer User 1003724,0913808225,"Street Address 1003724, District 2",Ho Chi Minh City,,52038,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+36,1003901,Customer User 1003901,0987412924,"Street Address 1003901, District 5",Da Nang,,23815,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+37,1004096,Customer User 1004096,0986790955,"Street Address 1004096, District 7",Da Nang,,51876,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+38,1004337,Customer User 1004337,0914064904,"Street Address 1004337, District 8",Da Nang,,45754,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+39,1004584,Customer User 1004584,0948879071,"Street Address 1004584, District 11",Hanoi,,41650,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+40,1004792,Customer User 1004792,0942866956,"Street Address 1004792, District 11",Hanoi,,29492,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+41,1004807,Customer User 1004807,0970873663,"Street Address 1004807, District 2",Da Nang,,13926,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+42,1005074,Customer User 1005074,0931217198,"Street Address 1005074, District 8",Hanoi,,41735,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+43,1005166,Customer User 1005166,0972336371,"Street Address 1005166, District 4",Hanoi,,49758,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+44,1005284,Customer User 1005284,0929282885,"Street Address 1005284, District 6",Da Nang,,30926,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+45,1005294,Customer User 1005294,0956354851,"Street Address 1005294, District 7",Ho Chi Minh City,,59850,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+46,1005498,Customer User 1005498,0959733063,"Street Address 1005498, District 9",Da Nang,,16958,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+47,1005616,Customer User 1005616,0952831009,"Street Address 1005616, District 4",Hanoi,,18029,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+48,1005649,Customer User 1005649,0945899440,"Street Address 1005649, District 8",Ho Chi Minh City,,19232,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+49,1005712,Customer User 1005712,0922993840,"Street Address 1005712, District 1",Hanoi,,35175,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55
+50,1005832,Customer User 1005832,0992594562,"Street Address 1005832, District 7",Ho Chi Minh City,,66708,Vietnam,home,True,True,2026-06-07 15:13:55,2026-06-07 15:13:55

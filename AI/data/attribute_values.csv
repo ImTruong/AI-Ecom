@@ -1,0 +1,11 @@
+id,attribute_id,value,slug
+1,1,Black,color-black
+2,1,White,color-white
+3,1,Blue,color-blue
+4,1,Silver,color-silver
+5,2,M,size-m
+6,2,L,size-l
+7,2,XL,size-xl
+8,2,Standard,size-standard
+9,3,Paperback,format-paperback
+10,3,Hardcover,format-hardcover

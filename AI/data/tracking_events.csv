@@ -1,0 +1,1001 @@
+id,user_id,session_id,event_type,product_id,product_variant_id,metadata,created_at
+1,1000636,session_1000636_419872,ClickProduct,2579386,699,"{""product_type"": ""food"", ""price"": 97.14}",2017-11-24 16:08:25
+2,1000084,session_1000084_419872,ClickProduct,4474837,1173,"{""product_type"": ""shoes"", ""price"": 119.33}",2017-11-24 16:58:59
+3,1005649,session_1005649_419877,ClickProduct,4415159,1161,"{""product_type"": ""book"", ""price"": 24.23}",2017-11-24 21:24:41
+4,1000349,session_1000349_419878,ClickProduct,2831190,792,"{""product_type"": ""furniture"", ""price"": 265.08}",2017-11-24 22:56:04
+5,1005712,session_1005712_419879,ClickProduct,2846720,799,"{""product_type"": ""sport_equipment"", ""price"": 15.03}",2017-11-24 23:03:08
+6,1005712,session_1005712_419879,ClickProduct,221387,52,"{""product_type"": ""toy"", ""price"": 40.67}",2017-11-24 23:04:25
+7,1003724,session_1003724_419879,ClickProduct,3012053,848,"{""product_type"": ""shoes"", ""price"": 146.4}",2017-11-24 23:05:24
+8,1003724,session_1003724_419879,PlaceOrder,2994876,839,"{""order_id"": 10001, ""product_type"": ""shoes"", ""price"": 128.47, ""quantity"": 1}",2017-11-24 23:06:49
+9,1000349,session_1000349_419879,ClickProduct,3523128,956,"{""product_type"": ""electronic"", ""price"": 202.86}",2017-11-24 23:07:48
+10,1003724,session_1003724_419879,AddToCart,3227505,894,"{""product_type"": ""clothes"", ""price"": 38.51, ""quantity"": 1}",2017-11-24 23:29:58
+11,1002909,session_1002909_419879,ClickProduct,832994,229,"{""product_type"": ""toy"", ""price"": 31.79}",2017-11-24 23:51:24
+12,1001566,session_1001566_419879,ClickProduct,1464478,406,"{""product_type"": ""furniture"", ""price"": 240.49}",2017-11-24 23:56:11
+13,1001566,session_1001566_419880,ClickProduct,1113979,302,"{""product_type"": ""furniture"", ""price"": 218.75}",2017-11-25 00:03:33
+14,1000222,session_1000222_419880,AddToCart,2707677,750,"{""product_type"": ""toy"", ""price"": 42.36, ""quantity"": 1}",2017-11-25 00:29:21
+15,1005498,session_1005498_419881,ClickProduct,4028523,1063,"{""product_type"": ""shoes"", ""price"": 90.61}",2017-11-25 01:01:02
+16,1005498,session_1005498_419881,AddToCart,4593774,1199,"{""product_type"": ""book"", ""price"": 25.64, ""quantity"": 1}",2017-11-25 01:13:34
+17,1001466,session_1001466_419881,ClickProduct,4275288,1125,"{""product_type"": ""cosmetic"", ""price"": 68.82}",2017-11-25 01:24:42
+18,1001466,session_1001466_419881,PlaceOrder,334615,79,"{""order_id"": 10002, ""product_type"": ""accessory"", ""price"": 76.04, ""quantity"": 1}",2017-11-25 01:28:51
+19,1005616,session_1005616_419881,ClickProduct,4895295,1283,"{""product_type"": ""book"", ""price"": 30.48}",2017-11-25 01:39:05
+20,1005616,session_1005616_419881,ClickProduct,3855288,1026,"{""product_type"": ""book"", ""price"": 15.47}",2017-11-25 01:40:03
+21,1005616,session_1005616_419881,ClickProduct,461740,114,"{""product_type"": ""book"", ""price"": 18.72}",2017-11-25 01:40:30
+22,1005616,session_1005616_419881,ClickProduct,455385,111,"{""product_type"": ""furniture"", ""price"": 306.0}",2017-11-25 01:41:04
+23,1005616,session_1005616_419881,ClickProduct,1152335,313,"{""product_type"": ""furniture"", ""price"": 376.98}",2017-11-25 01:41:31
+24,1000222,session_1000222_419881,ClickProduct,140359,28,"{""product_type"": ""cosmetic"", ""price"": 73.59}",2017-11-25 01:53:34
+25,10009,session_10009_419882,ClickProduct,349984,82,"{""product_type"": ""accessory"", ""price"": 79.46}",2017-11-25 02:02:03
+26,1002927,session_1002927_419882,ClickProduct,2256042,619,"{""product_type"": ""accessory"", ""price"": 26.13}",2017-11-25 02:08:38
+27,10009,session_10009_419882,PlaceOrder,1993958,544,"{""order_id"": 10003, ""product_type"": ""toy"", ""price"": 33.82, ""quantity"": 1}",2017-11-25 02:31:40
+28,1002526,session_1002526_419882,PlaceOrder,3172409,887,"{""order_id"": 10004, ""product_type"": ""electronic"", ""price"": 653.47, ""quantity"": 1}",2017-11-25 02:40:35
+29,1001419,session_1001419_419882,ClickProduct,816139,227,"{""product_type"": ""food"", ""price"": 92.73}",2017-11-25 02:44:17
+30,1001326,session_1001326_419882,PlaceOrder,1864005,505,"{""order_id"": 10005, ""product_type"": ""electronic"", ""price"": 967.96, ""quantity"": 1}",2017-11-25 02:44:50
+31,1005074,session_1005074_419882,ClickProduct,2737657,759,"{""product_type"": ""electronic"", ""price"": 667.41}",2017-11-25 02:56:55
+32,1003901,session_1003901_419883,AddToCart,1292667,347,"{""product_type"": ""shoes"", ""price"": 92.05, ""quantity"": 1}",2017-11-25 03:16:31
+33,1002927,session_1002927_419883,ClickProduct,4718062,1241,"{""product_type"": ""furniture"", ""price"": 347.72}",2017-11-25 03:19:25
+34,1002927,session_1002927_419883,ClickProduct,2410985,666,"{""product_type"": ""furniture"", ""price"": 211.78}",2017-11-25 03:23:14
+35,1002927,session_1002927_419883,ClickProduct,4333868,1135,"{""product_type"": ""food"", ""price"": 18.29}",2017-11-25 03:26:29
+36,1001466,session_1001466_419883,ClickProduct,2517919,687,"{""product_type"": ""accessory"", ""price"": 19.89}",2017-11-25 03:39:04
+37,1000792,session_1000792_419883,PlaceOrder,934383,260,"{""order_id"": 10006, ""product_type"": ""sport_equipment"", ""price"": 12.07, ""quantity"": 1}",2017-11-25 03:40:07
+38,1001466,session_1001466_419883,ClickProduct,5026955,1308,"{""product_type"": ""accessory"", ""price"": 45.48}",2017-11-25 03:41:05
+39,1004584,session_1004584_419883,PlaceOrder,3544246,964,"{""order_id"": 10007, ""product_type"": ""accessory"", ""price"": 13.94, ""quantity"": 1}",2017-11-25 03:45:52
+40,1002526,session_1002526_419883,ClickProduct,2930862,816,"{""product_type"": ""cosmetic"", ""price"": 63.36}",2017-11-25 03:46:23
+41,1001466,session_1001466_419883,AddToCart,5066336,1318,"{""product_type"": ""accessory"", ""price"": 8.98, ""quantity"": 1}",2017-11-25 03:46:53
+42,1002526,session_1002526_419883,ClickProduct,870595,240,"{""product_type"": ""book"", ""price"": 31.27}",2017-11-25 03:48:20
+43,1001466,session_1001466_419883,PlaceOrder,1257002,335,"{""order_id"": 10008, ""product_type"": ""accessory"", ""price"": 75.32, ""quantity"": 1}",2017-11-25 03:51:42
+44,1002927,session_1002927_419884,AddToCart,2961116,825,"{""product_type"": ""food"", ""price"": 79.13, ""quantity"": 1}",2017-11-25 04:20:53
+45,1001326,session_1001326_419885,ClickProduct,870086,239,"{""product_type"": ""furniture"", ""price"": 190.81}",2017-11-25 05:52:55
+46,1001326,session_1001326_419885,ClickProduct,2255678,618,"{""product_type"": ""furniture"", ""price"": 258.13}",2017-11-25 05:59:27
+47,1001326,session_1001326_419886,ClickProduct,4399600,1155,"{""product_type"": ""furniture"", ""price"": 223.19}",2017-11-25 06:01:23
+48,1000228,session_1000228_419886,ClickProduct,2730342,757,"{""product_type"": ""sport_equipment"", ""price"": 87.0}",2017-11-25 06:12:58
+49,1002185,session_1002185_419886,PlaceOrder,5108025,1328,"{""order_id"": 10009, ""product_type"": ""book"", ""price"": 13.28, ""quantity"": 1}",2017-11-25 06:42:58
+50,1000228,session_1000228_419886,PlaceOrder,2730342,757,"{""order_id"": 10010, ""product_type"": ""sport_equipment"", ""price"": 87.0, ""quantity"": 1}",2017-11-25 06:51:24
+51,1001145,session_1001145_419886,PlaceOrder,2659396,728,"{""order_id"": 10011, ""product_type"": ""sport_equipment"", ""price"": 9.1, ""quantity"": 1}",2017-11-25 06:54:43
+52,1003351,session_1003351_419886,ClickProduct,855191,235,"{""product_type"": ""cosmetic"", ""price"": 81.81}",2017-11-25 06:59:46
+53,1001145,session_1001145_419887,ClickProduct,1089711,296,"{""product_type"": ""sport_equipment"", ""price"": 31.19}",2017-11-25 07:00:36
+54,1002185,session_1002185_419887,ClickProduct,2192947,602,"{""product_type"": ""furniture"", ""price"": 180.5}",2017-11-25 07:02:52
+55,1001326,session_1001326_419887,AddToCart,931499,258,"{""product_type"": ""clothes"", ""price"": 50.9, ""quantity"": 1}",2017-11-25 07:04:49
+56,1002185,session_1002185_419887,ClickProduct,5134300,1340,"{""product_type"": ""furniture"", ""price"": 333.53}",2017-11-25 07:12:38
+57,1001326,session_1001326_419887,ClickProduct,873997,243,"{""product_type"": ""sport_equipment"", ""price"": 24.8}",2017-11-25 07:14:12
+58,1003351,session_1003351_419887,AddToCart,435998,101,"{""product_type"": ""book"", ""price"": 38.16, ""quantity"": 1}",2017-11-25 07:32:48
+59,1001326,session_1001326_419887,ClickProduct,116741,20,"{""product_type"": ""furniture"", ""price"": 372.52}",2017-11-25 07:34:00
+60,1005284,session_1005284_419887,PlaceOrder,1415285,390,"{""order_id"": 10012, ""product_type"": ""sport_equipment"", ""price"": 47.31, ""quantity"": 1}",2017-11-25 07:51:28
+61,1003724,session_1003724_419888,AddToCart,1447844,400,"{""product_type"": ""clothes"", ""price"": 32.39, ""quantity"": 1}",2017-11-25 08:15:44
+62,1002185,session_1002185_419888,ClickProduct,282801,59,"{""product_type"": ""furniture"", ""price"": 192.18}",2017-11-25 08:19:06
+63,1000349,session_1000349_419888,ClickProduct,4350284,1144,"{""product_type"": ""electronic"", ""price"": 811.7}",2017-11-25 08:24:36
+64,1002185,session_1002185_419888,ClickProduct,2604550,706,"{""product_type"": ""furniture"", ""price"": 442.03}",2017-11-25 08:50:14
+65,1002185,session_1002185_419888,ClickProduct,3152278,884,"{""product_type"": ""furniture"", ""price"": 384.45}",2017-11-25 08:50:22
+66,1002909,session_1002909_419889,ClickProduct,738249,200,"{""product_type"": ""toy"", ""price"": 10.37}",2017-11-25 09:18:45
+67,1002909,session_1002909_419889,AddToCart,1290730,344,"{""product_type"": ""book"", ""price"": 22.95, ""quantity"": 1}",2017-11-25 09:44:05
+68,1004337,session_1004337_419890,ClickProduct,3692127,991,"{""product_type"": ""cosmetic"", ""price"": 58.97}",2017-11-25 10:31:54
+69,1004584,session_1004584_419890,PlaceOrder,3771578,1010,"{""order_id"": 10013, ""product_type"": ""food"", ""price"": 25.22, ""quantity"": 1}",2017-11-25 10:59:49
+70,1005616,session_1005616_419891,PlaceOrder,3754986,1002,"{""order_id"": 10014, ""product_type"": ""food"", ""price"": 5.57, ""quantity"": 1}",2017-11-25 11:28:28
+71,1005616,session_1005616_419891,PlaceOrder,2457004,680,"{""order_id"": 10015, ""product_type"": ""sport_equipment"", ""price"": 17.32, ""quantity"": 1}",2017-11-25 11:29:47
+72,1000228,session_1000228_419891,AddToCart,2285833,625,"{""product_type"": ""book"", ""price"": 31.47, ""quantity"": 1}",2017-11-25 11:32:28
+73,1005616,session_1005616_419891,PlaceOrder,461740,114,"{""order_id"": 10016, ""product_type"": ""book"", ""price"": 18.72, ""quantity"": 1}",2017-11-25 11:42:26
+74,1000228,session_1000228_419892,ClickProduct,494417,126,"{""product_type"": ""clothes"", ""price"": 57.22}",2017-11-25 12:10:08
+75,1004096,session_1004096_419892,ClickProduct,1389713,385,"{""product_type"": ""clothes"", ""price"": 68.16}",2017-11-25 12:24:09
+76,1000636,session_1000636_419892,ClickProduct,632660,156,"{""product_type"": ""food"", ""price"": 73.0}",2017-11-25 12:30:43
+77,1004096,session_1004096_419892,ClickProduct,4350170,1143,"{""product_type"": ""sport_equipment"", ""price"": 57.54}",2017-11-25 12:44:13
+78,1005832,session_1005832_419892,AddToCart,4907953,1286,"{""product_type"": ""toy"", ""price"": 9.12, ""quantity"": 1}",2017-11-25 12:56:15
+79,1000228,session_1000228_419892,ClickProduct,1312452,353,"{""product_type"": ""furniture"", ""price"": 345.2}",2017-11-25 12:56:23
+80,1005832,session_1005832_419892,ClickProduct,4956419,1297,"{""product_type"": ""furniture"", ""price"": 194.48}",2017-11-25 12:58:25
+81,1000723,session_1000723_419893,PlaceOrder,1679779,443,"{""order_id"": 10017, ""product_type"": ""clothes"", ""price"": 26.63, ""quantity"": 1}",2017-11-25 13:03:11
+82,1000084,session_1000084_419893,AddToCart,3713574,994,"{""product_type"": ""food"", ""price"": 62.68, ""quantity"": 1}",2017-11-25 13:12:29
+83,1000084,session_1000084_419893,ClickProduct,2441285,673,"{""product_type"": ""toy"", ""price"": 48.43}",2017-11-25 13:20:30
+84,1003724,session_1003724_419893,PlaceOrder,4697569,1232,"{""order_id"": 10018, ""product_type"": ""accessory"", ""price"": 29.06, ""quantity"": 1}",2017-11-25 13:22:46
+85,1000228,session_1000228_419893,ClickProduct,765808,211,"{""product_type"": ""furniture"", ""price"": 96.65}",2017-11-25 13:28:02
+86,1000228,session_1000228_419893,AddToCart,2749663,767,"{""product_type"": ""furniture"", ""price"": 445.61, ""quantity"": 1}",2017-11-25 13:29:32
+87,1001472,session_1001472_419893,AddToCart,4762058,1245,"{""product_type"": ""sport_equipment"", ""price"": 61.09, ""quantity"": 1}",2017-11-25 13:29:53
+88,1000228,session_1000228_419893,ClickProduct,2452738,676,"{""product_type"": ""electronic"", ""price"": 659.75}",2017-11-25 13:31:53
+89,1000228,session_1000228_419893,AddToCart,4706681,1238,"{""product_type"": ""furniture"", ""price"": 179.57, ""quantity"": 1}",2017-11-25 13:53:12
+90,1003716,session_1003716_419894,ClickProduct,4650889,1215,"{""product_type"": ""electronic"", ""price"": 147.88}",2017-11-25 14:11:35
+91,1005498,session_1005498_419894,AddToCart,18309,3,"{""product_type"": ""toy"", ""price"": 74.71, ""quantity"": 1}",2017-11-25 14:12:52
+92,1005498,session_1005498_419894,AddToCart,4257870,1123,"{""product_type"": ""toy"", ""price"": 91.29, ""quantity"": 1}",2017-11-25 14:14:52
+93,1003716,session_1003716_419894,AddToCart,3664433,984,"{""product_type"": ""electronic"", ""price"": 193.14, ""quantity"": 1}",2017-11-25 14:17:01
+94,1005498,session_1005498_419894,AddToCart,3355149,923,"{""product_type"": ""toy"", ""price"": 60.35, ""quantity"": 1}",2017-11-25 14:26:38
+95,1005498,session_1005498_419894,AddToCart,1708839,453,"{""product_type"": ""toy"", ""price"": 49.21, ""quantity"": 1}",2017-11-25 14:27:52
+96,1005498,session_1005498_419894,ClickProduct,3355149,923,"{""product_type"": ""toy"", ""price"": 60.35}",2017-11-25 14:31:32
+97,1000228,session_1000228_419894,ClickProduct,2624906,711,"{""product_type"": ""furniture"", ""price"": 198.51}",2017-11-25 14:31:58
+98,1003716,session_1003716_419894,ClickProduct,542973,138,"{""product_type"": ""electronic"", ""price"": 908.75}",2017-11-25 14:41:40
+99,10009,session_10009_419894,AddToCart,4945859,1294,"{""product_type"": ""food"", ""price"": 31.89, ""quantity"": 1}",2017-11-25 14:46:49
+100,1003716,session_1003716_419894,ClickProduct,300430,65,"{""product_type"": ""electronic"", ""price"": 455.67}",2017-11-25 14:47:00
+101,1003716,session_1003716_419894,ClickProduct,2385268,659,"{""product_type"": ""electronic"", ""price"": 871.1}",2017-11-25 14:48:40
+102,1003716,session_1003716_419894,ClickProduct,786458,222,"{""product_type"": ""electronic"", ""price"": 108.37}",2017-11-25 14:50:43
+103,1003351,session_1003351_419894,PlaceOrder,855191,235,"{""order_id"": 10019, ""product_type"": ""cosmetic"", ""price"": 81.81, ""quantity"": 1}",2017-11-25 14:53:10
+104,1003716,session_1003716_419895,ClickProduct,2701204,747,"{""product_type"": ""electronic"", ""price"": 522.07}",2017-11-25 15:02:28
+105,1001915,session_1001915_419895,AddToCart,191098,43,"{""product_type"": ""sport_equipment"", ""price"": 83.41, ""quantity"": 1}",2017-11-25 15:10:06
+106,1002185,session_1002185_419895,AddToCart,1572510,427,"{""product_type"": ""furniture"", ""price"": 456.18, ""quantity"": 1}",2017-11-25 15:14:33
+107,1001915,session_1001915_419895,ClickProduct,2875418,807,"{""product_type"": ""sport_equipment"", ""price"": 78.16}",2017-11-25 15:16:17
+108,1000792,session_1000792_419896,PlaceOrder,174758,36,"{""order_id"": 10020, ""product_type"": ""sport_equipment"", ""price"": 11.54, ""quantity"": 1}",2017-11-25 16:17:47
+109,1000636,session_1000636_419896,ClickProduct,2633450,715,"{""product_type"": ""accessory"", ""price"": 86.33}",2017-11-25 16:30:59
+110,1002927,session_1002927_419896,ClickProduct,791770,224,"{""product_type"": ""furniture"", ""price"": 498.35}",2017-11-25 16:48:56
+111,1002927,session_1002927_419896,ClickProduct,500641,128,"{""product_type"": ""furniture"", ""price"": 149.19}",2017-11-25 16:50:25
+112,1002927,session_1002927_419896,AddToCart,1871881,508,"{""product_type"": ""furniture"", ""price"": 404.57, ""quantity"": 1}",2017-11-25 16:53:18
+113,1005712,session_1005712_419899,AddToCart,5045806,1312,"{""product_type"": ""food"", ""price"": 14.64, ""quantity"": 1}",2017-11-25 19:04:06
+114,1005712,session_1005712_419899,ClickProduct,4888516,1279,"{""product_type"": ""shoes"", ""price"": 92.64}",2017-11-25 19:07:01
+115,1005649,session_1005649_419899,ClickProduct,1582775,430,"{""product_type"": ""cosmetic"", ""price"": 50.65}",2017-11-25 19:55:01
+116,1005649,session_1005649_419900,ClickProduct,3979564,1051,"{""product_type"": ""accessory"", ""price"": 42.32}",2017-11-25 20:06:00
+117,1005649,session_1005649_419900,ClickProduct,644264,162,"{""product_type"": ""sport_equipment"", ""price"": 66.94}",2017-11-25 20:11:32
+118,1005649,session_1005649_419900,ClickProduct,4830088,1261,"{""product_type"": ""book"", ""price"": 35.2}",2017-11-25 20:16:49
+119,1005649,session_1005649_419900,ClickProduct,4771223,1246,"{""product_type"": ""cosmetic"", ""price"": 64.4}",2017-11-25 20:18:52
+120,1005649,session_1005649_419900,ClickProduct,4830088,1261,"{""product_type"": ""book"", ""price"": 35.2}",2017-11-25 20:19:02
+121,1005649,session_1005649_419900,ClickProduct,3702766,992,"{""product_type"": ""accessory"", ""price"": 84.44}",2017-11-25 20:27:46
+122,1002185,session_1002185_419902,ClickProduct,243523,53,"{""product_type"": ""furniture"", ""price"": 368.34}",2017-11-25 22:12:43
+123,1001472,session_1001472_419902,AddToCart,4384782,1151,"{""product_type"": ""book"", ""price"": 21.7, ""quantity"": 1}",2017-11-25 22:58:49
+124,1001472,session_1001472_419903,PlaceOrder,3485113,951,"{""order_id"": 10021, ""product_type"": ""toy"", ""price"": 40.81, ""quantity"": 1}",2017-11-25 23:25:57
+125,1001472,session_1001472_419903,PlaceOrder,1971928,535,"{""order_id"": 10022, ""product_type"": ""electronic"", ""price"": 721.92, ""quantity"": 1}",2017-11-25 23:25:57
+126,1001915,session_1001915_419903,AddToCart,1795671,483,"{""product_type"": ""sport_equipment"", ""price"": 23.64, ""quantity"": 1}",2017-11-25 23:34:59
+127,1000222,session_1000222_419904,PlaceOrder,2397544,662,"{""order_id"": 10023, ""product_type"": ""book"", ""price"": 17.65, ""quantity"": 1}",2017-11-26 00:25:05
+128,1000222,session_1000222_419904,AddToCart,1565910,425,"{""product_type"": ""book"", ""price"": 25.38, ""quantity"": 1}",2017-11-26 00:29:02
+129,1005616,session_1005616_419905,ClickProduct,3792683,1012,"{""product_type"": ""accessory"", ""price"": 39.78}",2017-11-26 01:16:05
+130,1001629,session_1001629_419905,ClickProduct,559088,142,"{""product_type"": ""shoes"", ""price"": 47.04}",2017-11-26 01:18:11
+131,1004584,session_1004584_419905,ClickProduct,3057370,862,"{""product_type"": ""toy"", ""price"": 49.32}",2017-11-26 01:28:09
+132,1004584,session_1004584_419905,ClickProduct,656911,168,"{""product_type"": ""toy"", ""price"": 14.25}",2017-11-26 01:29:02
+133,1001326,session_1001326_419905,AddToCart,783373,220,"{""product_type"": ""sport_equipment"", ""price"": 33.2, ""quantity"": 1}",2017-11-26 01:37:27
+134,1002909,session_1002909_419905,ClickProduct,206508,50,"{""product_type"": ""toy"", ""price"": 21.09}",2017-11-26 01:39:45
+135,1002909,session_1002909_419905,ClickProduct,738249,200,"{""product_type"": ""toy"", ""price"": 10.37}",2017-11-26 01:40:00
+136,1000723,session_1000723_419905,ClickProduct,2840297,794,"{""product_type"": ""furniture"", ""price"": 347.72}",2017-11-26 01:53:15
+137,1002185,session_1002185_419906,ClickProduct,2991276,836,"{""product_type"": ""furniture"", ""price"": 462.99}",2017-11-26 02:01:08
+138,1002909,session_1002909_419906,PlaceOrder,475913,120,"{""order_id"": 10024, ""product_type"": ""food"", ""price"": 27.51, ""quantity"": 1}",2017-11-26 02:27:12
+139,1002909,session_1002909_419906,ClickProduct,1831836,496,"{""product_type"": ""cosmetic"", ""price"": 39.83}",2017-11-26 02:32:23
+140,1001326,session_1001326_419906,ClickProduct,4637317,1209,"{""product_type"": ""clothes"", ""price"": 20.87}",2017-11-26 02:36:31
+141,1000084,session_1000084_419907,AddToCart,1659199,442,"{""product_type"": ""food"", ""price"": 45.29, ""quantity"": 1}",2017-11-26 03:03:19
+142,10009,session_10009_419907,ClickProduct,4496731,1180,"{""product_type"": ""book"", ""price"": 32.51}",2017-11-26 03:04:46
+143,1001326,session_1001326_419907,ClickProduct,3079068,863,"{""product_type"": ""toy"", ""price"": 88.12}",2017-11-26 03:12:11
+144,1005649,session_1005649_419907,ClickProduct,3343325,918,"{""product_type"": ""accessory"", ""price"": 28.56}",2017-11-26 03:18:35
+145,1005649,session_1005649_419907,ClickProduct,3030510,853,"{""product_type"": ""electronic"", ""price"": 211.11}",2017-11-26 03:26:05
+146,10009,session_10009_419907,PlaceOrder,37314,8,"{""order_id"": 10025, ""product_type"": ""shoes"", ""price"": 104.95, ""quantity"": 1}",2017-11-26 03:33:52
+147,10009,session_10009_419907,ClickProduct,1420923,391,"{""product_type"": ""book"", ""price"": 34.2}",2017-11-26 03:36:29
+148,1002909,session_1002909_419907,ClickProduct,1217213,326,"{""product_type"": ""sport_equipment"", ""price"": 34.07}",2017-11-26 03:52:55
+149,1002589,session_1002589_419907,PlaceOrder,2499287,684,"{""order_id"": 10026, ""product_type"": ""book"", ""price"": 38.19, ""quantity"": 1}",2017-11-26 03:54:19
+150,1004584,session_1004584_419908,AddToCart,3605657,971,"{""product_type"": ""sport_equipment"", ""price"": 13.76, ""quantity"": 1}",2017-11-26 04:09:00
+151,1001326,session_1001326_419908,AddToCart,1972955,538,"{""product_type"": ""electronic"", ""price"": 525.46, ""quantity"": 1}",2017-11-26 04:20:58
+152,1001326,session_1001326_419908,AddToCart,4702796,1235,"{""product_type"": ""electronic"", ""price"": 647.38, ""quantity"": 1}",2017-11-26 04:23:30
+153,1001326,session_1001326_419908,ClickProduct,2199692,605,"{""product_type"": ""book"", ""price"": 21.26}",2017-11-26 04:24:20
+154,1000222,session_1000222_419908,AddToCart,744823,205,"{""product_type"": ""sport_equipment"", ""price"": 12.53, ""quantity"": 1}",2017-11-26 04:50:11
+155,1003249,session_1003249_419908,ClickProduct,420144,98,"{""product_type"": ""toy"", ""price"": 5.31}",2017-11-26 04:54:40
+156,1003249,session_1003249_419908,AddToCart,1132150,305,"{""product_type"": ""toy"", ""price"": 8.6, ""quantity"": 1}",2017-11-26 04:58:04
+157,10009,session_10009_419908,ClickProduct,37314,8,"{""product_type"": ""shoes"", ""price"": 104.95}",2017-11-26 04:58:13
+158,1003249,session_1003249_419908,AddToCart,3769173,1007,"{""product_type"": ""toy"", ""price"": 64.52, ""quantity"": 1}",2017-11-26 04:59:29
+159,1002307,session_1002307_419909,AddToCart,4112244,1083,"{""product_type"": ""sport_equipment"", ""price"": 23.54, ""quantity"": 1}",2017-11-26 05:06:13
+160,1003351,session_1003351_419909,ClickProduct,961958,269,"{""product_type"": ""food"", ""price"": 69.11}",2017-11-26 05:12:49
+161,10009,session_10009_419909,ClickProduct,938062,262,"{""product_type"": ""furniture"", ""price"": 95.1}",2017-11-26 05:13:02
+162,1002307,session_1002307_419909,ClickProduct,3540376,962,"{""product_type"": ""sport_equipment"", ""price"": 43.9}",2017-11-26 05:13:54
+163,1003351,session_1003351_419909,ClickProduct,1077547,295,"{""product_type"": ""food"", ""price"": 23.15}",2017-11-26 05:14:46
+164,1000222,session_1000222_419909,AddToCart,3461725,946,"{""product_type"": ""sport_equipment"", ""price"": 35.28, ""quantity"": 1}",2017-11-26 05:19:22
+165,1002307,session_1002307_419909,ClickProduct,3631897,976,"{""product_type"": ""cosmetic"", ""price"": 10.64}",2017-11-26 05:37:20
+166,1001326,session_1001326_419910,ClickProduct,3044471,858,"{""product_type"": ""clothes"", ""price"": 67.63}",2017-11-26 06:11:07
+167,1001326,session_1001326_419910,ClickProduct,2651113,722,"{""product_type"": ""clothes"", ""price"": 70.65}",2017-11-26 06:11:46
+168,1005832,session_1005832_419911,ClickProduct,4828082,1260,"{""product_type"": ""cosmetic"", ""price"": 57.09}",2017-11-26 07:06:09
+169,1005832,session_1005832_419911,ClickProduct,3096889,869,"{""product_type"": ""clothes"", ""price"": 73.2}",2017-11-26 07:07:36
+170,1002909,session_1002909_419911,ClickProduct,3489801,954,"{""product_type"": ""toy"", ""price"": 52.52}",2017-11-26 07:14:29
+171,1003351,session_1003351_419911,ClickProduct,2364679,653,"{""product_type"": ""food"", ""price"": 22.06}",2017-11-26 07:24:36
+172,1001326,session_1001326_419911,ClickProduct,3367369,928,"{""product_type"": ""toy"", ""price"": 10.97}",2017-11-26 07:30:38
+173,1001326,session_1001326_419911,ClickProduct,693206,179,"{""product_type"": ""toy"", ""price"": 98.93}",2017-11-26 07:33:09
+174,10009,session_10009_419911,ClickProduct,4966509,1301,"{""product_type"": ""toy"", ""price"": 36.87}",2017-11-26 07:38:40
+175,1001326,session_1001326_419911,AddToCart,2393831,661,"{""product_type"": ""furniture"", ""price"": 252.48, ""quantity"": 1}",2017-11-26 07:39:00
+176,1002909,session_1002909_419911,ClickProduct,1217213,326,"{""product_type"": ""sport_equipment"", ""price"": 34.07}",2017-11-26 07:46:11
+177,1001326,session_1001326_419911,AddToCart,3011676,847,"{""product_type"": ""furniture"", ""price"": 362.58, ""quantity"": 1}",2017-11-26 07:46:27
+178,1001326,session_1001326_419912,AddToCart,2138013,585,"{""product_type"": ""furniture"", ""price"": 129.63, ""quantity"": 1}",2017-11-26 08:40:51
+179,10009,session_10009_419912,ClickProduct,4057657,1068,"{""product_type"": ""cosmetic"", ""price"": 27.87}",2017-11-26 08:44:26
+180,1002307,session_1002307_419913,PlaceOrder,743380,203,"{""order_id"": 10027, ""product_type"": ""accessory"", ""price"": 19.8, ""quantity"": 1}",2017-11-26 09:08:59
+181,1005498,session_1005498_419913,AddToCart,3125830,879,"{""product_type"": ""clothes"", ""price"": 39.87, ""quantity"": 1}",2017-11-26 09:25:37
+182,1005616,session_1005616_419913,PlaceOrder,2553889,696,"{""order_id"": 10028, ""product_type"": ""accessory"", ""price"": 32.43, ""quantity"": 1}",2017-11-26 09:59:35
+183,1001915,session_1001915_419914,ClickProduct,203244,49,"{""product_type"": ""furniture"", ""price"": 109.92}",2017-11-26 10:00:45
+184,1001915,session_1001915_419914,ClickProduct,779670,219,"{""product_type"": ""toy"", ""price"": 17.3}",2017-11-26 10:01:03
+185,1000349,session_1000349_419916,AddToCart,2731813,758,"{""product_type"": ""sport_equipment"", ""price"": 63.04, ""quantity"": 1}",2017-11-26 12:12:30
+186,1001199,session_1001199_419916,PlaceOrder,1053132,293,"{""order_id"": 10029, ""product_type"": ""shoes"", ""price"": 64.52, ""quantity"": 1}",2017-11-26 12:15:39
+187,1003716,session_1003716_419916,ClickProduct,4727640,1242,"{""product_type"": ""furniture"", ""price"": 271.53}",2017-11-26 12:18:04
+188,1005616,session_1005616_419916,ClickProduct,455385,111,"{""product_type"": ""furniture"", ""price"": 306.0}",2017-11-26 12:28:01
+189,1005616,session_1005616_419916,PlaceOrder,455385,111,"{""order_id"": 10030, ""product_type"": ""furniture"", ""price"": 306.0, ""quantity"": 1}",2017-11-26 12:29:05
+190,1002185,session_1002185_419916,AddToCart,162442,31,"{""product_type"": ""electronic"", ""price"": 845.63, ""quantity"": 1}",2017-11-26 12:33:06
+191,1005616,session_1005616_419917,ClickProduct,4833855,1264,"{""product_type"": ""electronic"", ""price"": 328.03}",2017-11-26 13:05:39
+192,1005616,session_1005616_419917,AddToCart,2193689,603,"{""product_type"": ""electronic"", ""price"": 167.48, ""quantity"": 1}",2017-11-26 13:10:13
+193,1001419,session_1001419_419917,ClickProduct,4252236,1122,"{""product_type"": ""furniture"", ""price"": 146.51}",2017-11-26 13:10:39
+194,1001419,session_1001419_419917,AddToCart,4095210,1077,"{""product_type"": ""electronic"", ""price"": 274.32, ""quantity"": 1}",2017-11-26 13:13:01
+195,1001419,session_1001419_419917,AddToCart,2160688,589,"{""product_type"": ""book"", ""price"": 17.92, ""quantity"": 1}",2017-11-26 13:13:53
+196,1005616,session_1005616_419917,ClickProduct,2332631,644,"{""product_type"": ""furniture"", ""price"": 498.82}",2017-11-26 13:15:42
+197,1005616,session_1005616_419917,ClickProduct,2137370,584,"{""product_type"": ""furniture"", ""price"": 115.69}",2017-11-26 13:17:35
+198,1004807,session_1004807_419917,AddToCart,1188838,321,"{""product_type"": ""accessory"", ""price"": 63.58, ""quantity"": 1}",2017-11-26 13:24:23
+199,1001915,session_1001915_419917,AddToCart,697305,180,"{""product_type"": ""accessory"", ""price"": 96.09, ""quantity"": 1}",2017-11-26 13:25:56
+200,1002909,session_1002909_419917,ClickProduct,3846692,1025,"{""product_type"": ""cosmetic"", ""price"": 46.55}",2017-11-26 13:27:52
+201,1002307,session_1002307_419917,ClickProduct,4153860,1098,"{""product_type"": ""toy"", ""price"": 52.69}",2017-11-26 13:41:49
+202,1005712,session_1005712_419917,ClickProduct,2204051,607,"{""product_type"": ""food"", ""price"": 60.82}",2017-11-26 13:56:11
+203,1005712,session_1005712_419917,ClickProduct,4091349,1073,"{""product_type"": ""clothes"", ""price"": 36.32}",2017-11-26 13:59:00
+204,1004584,session_1004584_419918,PlaceOrder,1168346,316,"{""order_id"": 10031, ""product_type"": ""electronic"", ""price"": 717.48, ""quantity"": 1}",2017-11-26 14:05:27
+205,1000228,session_1000228_419918,ClickProduct,38891,10,"{""product_type"": ""sport_equipment"", ""price"": 7.8}",2017-11-26 14:08:35
+206,1002307,session_1002307_419918,ClickProduct,4863008,1271,"{""product_type"": ""furniture"", ""price"": 397.05}",2017-11-26 14:14:21
+207,1002307,session_1002307_419918,ClickProduct,4863008,1271,"{""product_type"": ""furniture"", ""price"": 397.05}",2017-11-26 14:15:37
+208,1001566,session_1001566_419918,PlaceOrder,2667082,729,"{""order_id"": 10032, ""product_type"": ""cosmetic"", ""price"": 49.46, ""quantity"": 1}",2017-11-26 14:18:25
+209,1002909,session_1002909_419918,ClickProduct,771558,215,"{""product_type"": ""accessory"", ""price"": 92.86}",2017-11-26 14:20:40
+210,1002307,session_1002307_419918,AddToCart,2028434,551,"{""product_type"": ""toy"", ""price"": 22.4, ""quantity"": 1}",2017-11-26 14:22:24
+211,1000228,session_1000228_419918,ClickProduct,2127636,577,"{""product_type"": ""sport_equipment"", ""price"": 15.72}",2017-11-26 14:24:19
+212,1002307,session_1002307_419918,ClickProduct,2993641,837,"{""product_type"": ""sport_equipment"", ""price"": 95.93}",2017-11-26 14:32:18
+213,1001199,session_1001199_419918,PlaceOrder,2250923,615,"{""order_id"": 10033, ""product_type"": ""clothes"", ""price"": 65.42, ""quantity"": 1}",2017-11-26 14:33:27
+214,1001199,session_1001199_419918,PlaceOrder,1443114,397,"{""order_id"": 10034, ""product_type"": ""clothes"", ""price"": 32.57, ""quantity"": 1}",2017-11-26 14:33:27
+215,1005166,session_1005166_419918,ClickProduct,4347375,1139,"{""product_type"": ""electronic"", ""price"": 215.93}",2017-11-26 14:33:38
+216,1000228,session_1000228_419918,ClickProduct,4837185,1266,"{""product_type"": ""sport_equipment"", ""price"": 38.57}",2017-11-26 14:42:41
+217,1002307,session_1002307_419918,ClickProduct,532443,137,"{""product_type"": ""toy"", ""price"": 66.09}",2017-11-26 14:45:52
+218,1000228,session_1000228_419918,AddToCart,2629212,712,"{""product_type"": ""sport_equipment"", ""price"": 83.72, ""quantity"": 1}",2017-11-26 14:46:20
+219,1004584,session_1004584_419919,ClickProduct,1955639,527,"{""product_type"": ""furniture"", ""price"": 477.24}",2017-11-26 15:03:57
+220,1004807,session_1004807_419919,ClickProduct,1188838,321,"{""product_type"": ""accessory"", ""price"": 63.58}",2017-11-26 15:56:54
+221,10009,session_10009_419920,ClickProduct,3283696,904,"{""product_type"": ""cosmetic"", ""price"": 96.28}",2017-11-26 16:21:22
+222,10009,session_10009_419921,ClickProduct,4790721,1250,"{""product_type"": ""book"", ""price"": 27.44}",2017-11-26 17:20:11
+223,10009,session_10009_419921,ClickProduct,4790721,1250,"{""product_type"": ""book"", ""price"": 27.44}",2017-11-26 17:29:23
+224,1001375,session_1001375_419922,ClickProduct,4163600,1100,"{""product_type"": ""furniture"", ""price"": 103.84}",2017-11-26 18:40:22
+225,1001375,session_1001375_419923,ClickProduct,372144,85,"{""product_type"": ""shoes"", ""price"": 81.98}",2017-11-26 19:03:17
+226,1001375,session_1001375_419923,PlaceOrder,130217,25,"{""order_id"": 10035, ""product_type"": ""sport_equipment"", ""price"": 14.09, ""quantity"": 1}",2017-11-26 19:05:22
+227,1005712,session_1005712_419924,ClickProduct,1335684,355,"{""product_type"": ""food"", ""price"": 68.24}",2017-11-26 20:20:43
+228,1003724,session_1003724_419926,AddToCart,4314127,1131,"{""product_type"": ""food"", ""price"": 95.65, ""quantity"": 1}",2017-11-26 22:12:58
+229,1003724,session_1003724_419926,AddToCart,1788471,477,"{""product_type"": ""clothes"", ""price"": 52.04, ""quantity"": 1}",2017-11-26 22:23:42
+230,1000222,session_1000222_419927,PlaceOrder,3461725,946,"{""order_id"": 10036, ""product_type"": ""sport_equipment"", ""price"": 35.28, ""quantity"": 1}",2017-11-26 23:37:25
+231,1000084,session_1000084_419928,ClickProduct,1659199,442,"{""product_type"": ""food"", ""price"": 45.29}",2017-11-27 00:03:44
+232,1000084,session_1000084_419928,ClickProduct,987677,278,"{""product_type"": ""food"", ""price"": 86.27}",2017-11-27 00:46:33
+233,1000349,session_1000349_419929,ClickProduct,4350284,1144,"{""product_type"": ""electronic"", ""price"": 811.7}",2017-11-27 01:10:38
+234,1003351,session_1003351_419929,ClickProduct,482929,122,"{""product_type"": ""furniture"", ""price"": 115.89}",2017-11-27 01:32:32
+235,1003351,session_1003351_419929,ClickProduct,725164,192,"{""product_type"": ""accessory"", ""price"": 67.22}",2017-11-27 01:58:11
+236,1002909,session_1002909_419930,ClickProduct,3018301,850,"{""product_type"": ""sport_equipment"", ""price"": 39.38}",2017-11-27 02:03:10
+237,1004096,session_1004096_419930,PlaceOrder,305698,70,"{""order_id"": 10037, ""product_type"": ""clothes"", ""price"": 50.93, ""quantity"": 1}",2017-11-27 02:33:24
+238,1000792,session_1000792_419930,ClickProduct,4891581,1281,"{""product_type"": ""clothes"", ""price"": 66.94}",2017-11-27 02:42:54
+239,1001566,session_1001566_419930,ClickProduct,646921,163,"{""product_type"": ""electronic"", ""price"": 480.8}",2017-11-27 02:51:46
+240,1001145,session_1001145_419931,ClickProduct,764670,210,"{""product_type"": ""furniture"", ""price"": 183.16}",2017-11-27 03:04:58
+241,1000792,session_1000792_419931,AddToCart,487347,123,"{""product_type"": ""sport_equipment"", ""price"": 81.71, ""quantity"": 1}",2017-11-27 03:09:21
+242,1001145,session_1001145_419931,AddToCart,1106837,299,"{""product_type"": ""furniture"", ""price"": 227.13, ""quantity"": 1}",2017-11-27 03:11:50
+243,1003724,session_1003724_419931,AddToCart,1358583,371,"{""product_type"": ""clothes"", ""price"": 72.13, ""quantity"": 1}",2017-11-27 03:15:16
+244,1001375,session_1001375_419931,AddToCart,1632783,439,"{""product_type"": ""furniture"", ""price"": 303.8, ""quantity"": 1}",2017-11-27 03:25:10
+245,1000084,session_1000084_419931,PlaceOrder,3350364,921,"{""order_id"": 10038, ""product_type"": ""furniture"", ""price"": 135.23, ""quantity"": 1}",2017-11-27 03:29:51
+246,1001915,session_1001915_419931,ClickProduct,2932138,817,"{""product_type"": ""shoes"", ""price"": 123.11}",2017-11-27 03:45:30
+247,1001915,session_1001915_419931,ClickProduct,2331370,642,"{""product_type"": ""clothes"", ""price"": 52.58}",2017-11-27 03:49:53
+248,1001915,session_1001915_419931,ClickProduct,2061909,563,"{""product_type"": ""clothes"", ""price"": 17.91}",2017-11-27 03:52:07
+249,1001915,session_1001915_419931,ClickProduct,4667522,1219,"{""product_type"": ""sport_equipment"", ""price"": 26.11}",2017-11-27 03:57:35
+250,1003249,session_1003249_419932,AddToCart,1140218,308,"{""product_type"": ""toy"", ""price"": 78.92, ""quantity"": 1}",2017-11-27 04:18:31
+251,1000228,session_1000228_419932,ClickProduct,1986867,543,"{""product_type"": ""sport_equipment"", ""price"": 71.07}",2017-11-27 04:58:00
+252,1000228,session_1000228_419933,ClickProduct,3730396,996,"{""product_type"": ""sport_equipment"", ""price"": 92.33}",2017-11-27 05:01:41
+253,1002909,session_1002909_419933,ClickProduct,2629948,713,"{""product_type"": ""accessory"", ""price"": 98.9}",2017-11-27 05:11:08
+254,1002909,session_1002909_419933,ClickProduct,460466,112,"{""product_type"": ""electronic"", ""price"": 925.73}",2017-11-27 05:24:24
+255,1002909,session_1002909_419933,AddToCart,3844686,1023,"{""product_type"": ""accessory"", ""price"": 44.86, ""quantity"": 1}",2017-11-27 05:25:19
+256,1002526,session_1002526_419934,PlaceOrder,4551045,1191,"{""order_id"": 10039, ""product_type"": ""toy"", ""price"": 52.27, ""quantity"": 1}",2017-11-27 06:12:04
+257,1002526,session_1002526_419934,AddToCart,682079,174,"{""product_type"": ""cosmetic"", ""price"": 44.66, ""quantity"": 1}",2017-11-27 06:20:38
+258,1001466,session_1001466_419934,ClickProduct,929641,256,"{""product_type"": ""food"", ""price"": 20.19}",2017-11-27 06:27:17
+259,1001466,session_1001466_419934,ClickProduct,1973512,540,"{""product_type"": ""toy"", ""price"": 37.31}",2017-11-27 06:28:21
+260,1000084,session_1000084_419934,ClickProduct,1659199,442,"{""product_type"": ""food"", ""price"": 45.29}",2017-11-27 06:30:46
+261,1001326,session_1001326_419934,ClickProduct,1804513,486,"{""product_type"": ""clothes"", ""price"": 30.54}",2017-11-27 06:34:13
+262,1001326,session_1001326_419934,ClickProduct,4605369,1204,"{""product_type"": ""clothes"", ""price"": 20.37}",2017-11-27 06:37:52
+263,1000084,session_1000084_419934,ClickProduct,987677,278,"{""product_type"": ""food"", ""price"": 86.27}",2017-11-27 06:41:12
+264,1005074,session_1005074_419934,AddToCart,4124021,1089,"{""product_type"": ""clothes"", ""price"": 58.59, ""quantity"": 1}",2017-11-27 06:50:44
+265,1001326,session_1001326_419934,ClickProduct,1870386,507,"{""product_type"": ""furniture"", ""price"": 338.07}",2017-11-27 06:53:21
+266,1002909,session_1002909_419934,ClickProduct,936197,261,"{""product_type"": ""sport_equipment"", ""price"": 89.97}",2017-11-27 06:55:38
+267,1000636,session_1000636_419934,AddToCart,1489724,408,"{""product_type"": ""shoes"", ""price"": 85.64, ""quantity"": 1}",2017-11-27 06:59:45
+268,1005074,session_1005074_419935,ClickProduct,1188579,320,"{""product_type"": ""furniture"", ""price"": 477.58}",2017-11-27 07:14:26
+269,1001199,session_1001199_419935,PlaceOrder,1589561,431,"{""order_id"": 10040, ""product_type"": ""electronic"", ""price"": 402.18, ""quantity"": 1}",2017-11-27 07:25:40
+270,1004337,session_1004337_419935,PlaceOrder,2187255,598,"{""order_id"": 10041, ""product_type"": ""book"", ""price"": 27.77, ""quantity"": 1}",2017-11-27 07:27:06
+271,1005649,session_1005649_419935,PlaceOrder,1526737,415,"{""order_id"": 10042, ""product_type"": ""book"", ""price"": 37.38, ""quantity"": 1}",2017-11-27 07:39:42
+272,1005074,session_1005074_419935,PlaceOrder,1188579,320,"{""order_id"": 10043, ""product_type"": ""furniture"", ""price"": 477.58, ""quantity"": 1}",2017-11-27 07:47:51
+273,1005649,session_1005649_419935,PlaceOrder,510660,131,"{""order_id"": 10044, ""product_type"": ""electronic"", ""price"": 966.96, ""quantity"": 1}",2017-11-27 07:51:58
+274,1005166,session_1005166_419936,ClickProduct,3649902,980,"{""product_type"": ""food"", ""price"": 87.12}",2017-11-27 08:19:19
+275,1002185,session_1002185_419937,ClickProduct,64810,14,"{""product_type"": ""sport_equipment"", ""price"": 72.31}",2017-11-27 09:22:34
+276,1005166,session_1005166_419939,ClickProduct,3528778,960,"{""product_type"": ""sport_equipment"", ""price"": 72.76}",2017-11-27 11:10:35
+277,1002042,session_1002042_419939,PlaceOrder,1972511,537,"{""order_id"": 10045, ""product_type"": ""sport_equipment"", ""price"": 67.41, ""quantity"": 1}",2017-11-27 11:15:50
+278,1000636,session_1000636_419939,ClickProduct,3616789,974,"{""product_type"": ""shoes"", ""price"": 129.29}",2017-11-27 11:30:24
+279,1000636,session_1000636_419939,ClickProduct,287835,60,"{""product_type"": ""shoes"", ""price"": 140.44}",2017-11-27 11:30:57
+280,1002042,session_1002042_419939,PlaceOrder,5105481,1327,"{""order_id"": 10046, ""product_type"": ""sport_equipment"", ""price"": 20.04, ""quantity"": 1}",2017-11-27 11:48:10
+281,1002042,session_1002042_419940,PlaceOrder,4737773,1243,"{""order_id"": 10047, ""product_type"": ""clothes"", ""price"": 68.55, ""quantity"": 1}",2017-11-27 12:14:33
+282,1004337,session_1004337_419940,ClickProduct,4390368,1154,"{""product_type"": ""toy"", ""price"": 21.94}",2017-11-27 12:33:14
+283,1002618,session_1002618_419940,PlaceOrder,3331681,914,"{""order_id"": 10048, ""product_type"": ""book"", ""price"": 32.66, ""quantity"": 1}",2017-11-27 12:41:10
+284,1002618,session_1002618_419940,AddToCart,2780673,773,"{""product_type"": ""clothes"", ""price"": 33.78, ""quantity"": 1}",2017-11-27 12:42:57
+285,1001566,session_1001566_419941,ClickProduct,4694270,1227,"{""product_type"": ""clothes"", ""price"": 63.57}",2017-11-27 13:26:09
+286,1005498,session_1005498_419941,AddToCart,127953,24,"{""product_type"": ""toy"", ""price"": 14.61, ""quantity"": 1}",2017-11-27 13:28:09
+287,1001566,session_1001566_419941,AddToCart,2708978,751,"{""product_type"": ""toy"", ""price"": 85.07, ""quantity"": 1}",2017-11-27 13:33:59
+288,1001566,session_1001566_419941,ClickProduct,818466,228,"{""product_type"": ""toy"", ""price"": 87.65}",2017-11-27 13:35:29
+289,1005498,session_1005498_419941,ClickProduct,4787032,1247,"{""product_type"": ""toy"", ""price"": 27.74}",2017-11-27 13:44:36
+290,1001145,session_1001145_419941,AddToCart,3104839,873,"{""product_type"": ""toy"", ""price"": 18.14, ""quantity"": 1}",2017-11-27 13:53:55
+291,1001145,session_1001145_419941,ClickProduct,2981221,834,"{""product_type"": ""toy"", ""price"": 54.9}",2017-11-27 13:59:34
+292,1000636,session_1000636_419942,AddToCart,1273440,338,"{""product_type"": ""shoes"", ""price"": 84.67, ""quantity"": 1}",2017-11-27 14:02:15
+293,1002909,session_1002909_419942,ClickProduct,206508,50,"{""product_type"": ""toy"", ""price"": 21.09}",2017-11-27 14:03:12
+294,1002909,session_1002909_419942,ClickProduct,206508,50,"{""product_type"": ""toy"", ""price"": 21.09}",2017-11-27 14:06:35
+295,1000335,session_1000335_419942,ClickProduct,4297249,1129,"{""product_type"": ""furniture"", ""price"": 241.97}",2017-11-27 14:08:13
+296,1000335,session_1000335_419942,AddToCart,773321,218,"{""product_type"": ""furniture"", ""price"": 180.01, ""quantity"": 1}",2017-11-27 14:11:59
+297,1000335,session_1000335_419942,ClickProduct,253040,56,"{""product_type"": ""furniture"", ""price"": 175.97}",2017-11-27 14:23:33
+298,1000335,session_1000335_419942,PlaceOrder,253040,56,"{""order_id"": 10049, ""product_type"": ""furniture"", ""price"": 175.97, ""quantity"": 1}",2017-11-27 14:24:05
+299,1001145,session_1001145_419942,ClickProduct,2825567,791,"{""product_type"": ""toy"", ""price"": 56.38}",2017-11-27 14:27:19
+300,1000228,session_1000228_419942,ClickProduct,1422728,393,"{""product_type"": ""shoes"", ""price"": 124.24}",2017-11-27 14:52:48
+301,1002307,session_1002307_419943,ClickProduct,177796,39,"{""product_type"": ""sport_equipment"", ""price"": 97.61}",2017-11-27 15:06:33
+302,1000084,session_1000084_419943,AddToCart,2958216,823,"{""product_type"": ""shoes"", ""price"": 111.1, ""quantity"": 1}",2017-11-27 15:24:51
+303,1000084,session_1000084_419943,AddToCart,1225298,327,"{""product_type"": ""shoes"", ""price"": 75.88, ""quantity"": 1}",2017-11-27 15:25:25
+304,10009,session_10009_419943,PlaceOrder,2794153,782,"{""order_id"": 10050, ""product_type"": ""food"", ""price"": 62.29, ""quantity"": 1}",2017-11-27 15:42:37
+305,1002927,session_1002927_419943,AddToCart,1762506,464,"{""product_type"": ""book"", ""price"": 13.57, ""quantity"": 1}",2017-11-27 15:57:21
+306,10009,session_10009_419944,ClickProduct,718985,189,"{""product_type"": ""toy"", ""price"": 31.81}",2017-11-27 16:07:47
+307,1003901,session_1003901_419944,ClickProduct,530474,134,"{""product_type"": ""furniture"", ""price"": 164.28}",2017-11-27 16:09:49
+308,1003901,session_1003901_419944,AddToCart,649676,165,"{""product_type"": ""electronic"", ""price"": 876.59, ""quantity"": 1}",2017-11-27 16:28:59
+309,1000636,session_1000636_419944,ClickProduct,2256962,621,"{""product_type"": ""cosmetic"", ""price"": 90.39}",2017-11-27 16:37:07
+310,1000636,session_1000636_419944,ClickProduct,4309979,1130,"{""product_type"": ""toy"", ""price"": 73.03}",2017-11-27 16:40:30
+311,1005649,session_1005649_419949,PlaceOrder,3741680,1001,"{""order_id"": 10051, ""product_type"": ""cosmetic"", ""price"": 91.62, ""quantity"": 1}",2017-11-27 21:12:46
+312,1003901,session_1003901_419949,AddToCart,2687493,738,"{""product_type"": ""electronic"", ""price"": 398.46, ""quantity"": 1}",2017-11-27 21:40:33
+313,1003901,session_1003901_419950,ClickProduct,451286,108,"{""product_type"": ""electronic"", ""price"": 647.46}",2017-11-27 22:14:52
+314,1003901,session_1003901_419950,AddToCart,2658989,726,"{""product_type"": ""electronic"", ""price"": 309.97, ""quantity"": 1}",2017-11-27 22:18:48
+315,1003901,session_1003901_419950,ClickProduct,1483161,407,"{""product_type"": ""cosmetic"", ""price"": 71.4}",2017-11-27 22:37:40
+316,1000349,session_1000349_419950,ClickProduct,1963858,532,"{""product_type"": ""toy"", ""price"": 79.54}",2017-11-27 22:47:00
+317,1002185,session_1002185_419951,AddToCart,4570068,1196,"{""product_type"": ""sport_equipment"", ""price"": 87.06, ""quantity"": 1}",2017-11-27 23:47:42
+318,1001629,session_1001629_419953,PlaceOrder,3216276,893,"{""order_id"": 10052, ""product_type"": ""furniture"", ""price"": 121.63, ""quantity"": 1}",2017-11-28 01:05:04
+319,1001629,session_1001629_419953,ClickProduct,81069,15,"{""product_type"": ""furniture"", ""price"": 308.33}",2017-11-28 01:10:05
+320,1005294,session_1005294_419953,PlaceOrder,84698,16,"{""order_id"": 10053, ""product_type"": ""food"", ""price"": 47.23, ""quantity"": 1}",2017-11-28 01:15:12
+321,1005074,session_1005074_419954,ClickProduct,2870935,803,"{""product_type"": ""sport_equipment"", ""price"": 32.75}",2017-11-28 02:04:57
+322,1004337,session_1004337_419954,PlaceOrder,325313,76,"{""order_id"": 10054, ""product_type"": ""clothes"", ""price"": 38.17, ""quantity"": 1}",2017-11-28 02:24:27
+323,1005074,session_1005074_419954,AddToCart,1200627,323,"{""product_type"": ""clothes"", ""price"": 69.27, ""quantity"": 1}",2017-11-28 02:39:03
+324,1002618,session_1002618_419955,AddToCart,2793892,780,"{""product_type"": ""clothes"", ""price"": 25.88, ""quantity"": 1}",2017-11-28 03:42:06
+325,1001915,session_1001915_419955,ClickProduct,3303693,910,"{""product_type"": ""furniture"", ""price"": 166.8}",2017-11-28 03:44:22
+326,1003716,session_1003716_419955,ClickProduct,4122831,1088,"{""product_type"": ""sport_equipment"", ""price"": 76.43}",2017-11-28 03:44:56
+327,1001915,session_1001915_419955,ClickProduct,3890502,1031,"{""product_type"": ""food"", ""price"": 68.78}",2017-11-28 03:45:20
+328,1000349,session_1000349_419955,AddToCart,3193857,889,"{""product_type"": ""book"", ""price"": 9.98, ""quantity"": 1}",2017-11-28 03:47:59
+329,1000349,session_1000349_419955,ClickProduct,1357688,369,"{""product_type"": ""book"", ""price"": 28.68}",2017-11-28 03:48:12
+330,1005832,session_1005832_419955,PlaceOrder,4174405,1105,"{""order_id"": 10055, ""product_type"": ""furniture"", ""price"": 312.26, ""quantity"": 1}",2017-11-28 03:58:55
+331,1005832,session_1005832_419956,AddToCart,2105259,575,"{""product_type"": ""furniture"", ""price"": 157.25, ""quantity"": 1}",2017-11-28 04:02:04
+332,1004584,session_1004584_419956,ClickProduct,920480,253,"{""product_type"": ""book"", ""price"": 9.11}",2017-11-28 04:06:05
+333,1005832,session_1005832_419956,PlaceOrder,5086624,1324,"{""order_id"": 10056, ""product_type"": ""furniture"", ""price"": 250.2, ""quantity"": 1}",2017-11-28 04:06:10
+334,1005649,session_1005649_419956,ClickProduct,4692148,1225,"{""product_type"": ""cosmetic"", ""price"": 91.24}",2017-11-28 04:26:38
+335,1005649,session_1005649_419956,ClickProduct,5152824,1343,"{""product_type"": ""book"", ""price"": 26.22}",2017-11-28 04:31:16
+336,1005649,session_1005649_419956,ClickProduct,4811639,1258,"{""product_type"": ""book"", ""price"": 25.32}",2017-11-28 04:32:29
+337,1005649,session_1005649_419956,ClickProduct,4875298,1273,"{""product_type"": ""book"", ""price"": 19.16}",2017-11-28 04:35:47
+338,1005649,session_1005649_419956,PlaceOrder,4875298,1273,"{""order_id"": 10057, ""product_type"": ""book"", ""price"": 19.16, ""quantity"": 1}",2017-11-28 04:38:00
+339,1005649,session_1005649_419956,PlaceOrder,1501733,410,"{""order_id"": 10058, ""product_type"": ""book"", ""price"": 25.28, ""quantity"": 1}",2017-11-28 04:38:00
+340,1005649,session_1005649_419956,PlaceOrder,4692148,1225,"{""order_id"": 10059, ""product_type"": ""cosmetic"", ""price"": 91.24, ""quantity"": 1}",2017-11-28 04:38:00
+341,1001566,session_1001566_419957,PlaceOrder,1299608,349,"{""order_id"": 10060, ""product_type"": ""electronic"", ""price"": 252.55, ""quantity"": 1}",2017-11-28 05:30:18
+342,1001566,session_1001566_419957,ClickProduct,1299608,349,"{""product_type"": ""electronic"", ""price"": 252.55}",2017-11-28 05:38:02
+343,1000228,session_1000228_419957,PlaceOrder,1880571,509,"{""order_id"": 10061, ""product_type"": ""sport_equipment"", ""price"": 45.94, ""quantity"": 1}",2017-11-28 05:48:12
+344,1000349,session_1000349_419958,ClickProduct,2882640,808,"{""product_type"": ""cosmetic"", ""price"": 90.6}",2017-11-28 06:27:54
+345,1004584,session_1004584_419958,PlaceOrder,4695224,1231,"{""order_id"": 10062, ""product_type"": ""sport_equipment"", ""price"": 90.15, ""quantity"": 1}",2017-11-28 06:48:29
+346,1005498,session_1005498_419958,AddToCart,1735206,461,"{""product_type"": ""clothes"", ""price"": 75.78, ""quantity"": 1}",2017-11-28 06:49:24
+347,1003351,session_1003351_419959,ClickProduct,662524,171,"{""product_type"": ""electronic"", ""price"": 323.54}",2017-11-28 07:07:46
+348,1003351,session_1003351_419959,ClickProduct,400851,91,"{""product_type"": ""electronic"", ""price"": 712.86}",2017-11-28 07:21:23
+349,10009,session_10009_419959,ClickProduct,4486458,1175,"{""product_type"": ""electronic"", ""price"": 469.36}",2017-11-28 07:34:59
+350,1005616,session_1005616_419959,ClickProduct,1365115,373,"{""product_type"": ""sport_equipment"", ""price"": 78.17}",2017-11-28 07:36:42
+351,10009,session_10009_419959,ClickProduct,5119588,1332,"{""product_type"": ""shoes"", ""price"": 43.83}",2017-11-28 07:46:24
+352,1001326,session_1001326_419959,ClickProduct,1941452,520,"{""product_type"": ""clothes"", ""price"": 26.64}",2017-11-28 07:48:53
+353,10009,session_10009_419959,ClickProduct,3236416,898,"{""product_type"": ""clothes"", ""price"": 32.66}",2017-11-28 07:55:50
+354,1004584,session_1004584_419959,AddToCart,2526892,690,"{""product_type"": ""toy"", ""price"": 13.76, ""quantity"": 1}",2017-11-28 07:56:13
+355,1003716,session_1003716_419959,PlaceOrder,4416136,1163,"{""order_id"": 10063, ""product_type"": ""sport_equipment"", ""price"": 83.5, ""quantity"": 1}",2017-11-28 07:56:19
+356,1005616,session_1005616_419959,ClickProduct,454408,110,"{""product_type"": ""sport_equipment"", ""price"": 40.15}",2017-11-28 07:57:04
+357,1005074,session_1005074_419960,ClickProduct,1200627,323,"{""product_type"": ""clothes"", ""price"": 69.27}",2017-11-28 08:01:41
+358,1005074,session_1005074_419960,ClickProduct,965798,270,"{""product_type"": ""book"", ""price"": 12.08}",2017-11-28 08:03:11
+359,1005616,session_1005616_419960,ClickProduct,2381943,654,"{""product_type"": ""sport_equipment"", ""price"": 45.97}",2017-11-28 08:07:53
+360,1001566,session_1001566_419960,ClickProduct,3391967,932,"{""product_type"": ""clothes"", ""price"": 47.25}",2017-11-28 08:21:39
+361,1001566,session_1001566_419960,PlaceOrder,2304016,636,"{""order_id"": 10064, ""product_type"": ""electronic"", ""price"": 899.59, ""quantity"": 1}",2017-11-28 08:40:01
+362,1001566,session_1001566_419960,ClickProduct,3355080,922,"{""product_type"": ""toy"", ""price"": 79.26}",2017-11-28 08:42:10
+363,1001915,session_1001915_419960,ClickProduct,2497205,683,"{""product_type"": ""sport_equipment"", ""price"": 50.56}",2017-11-28 08:57:39
+364,1001566,session_1001566_419961,ClickProduct,1697078,446,"{""product_type"": ""food"", ""price"": 47.74}",2017-11-28 09:03:27
+365,1005074,session_1005074_419962,ClickProduct,965798,270,"{""product_type"": ""book"", ""price"": 12.08}",2017-11-28 10:27:06
+366,1004337,session_1004337_419962,ClickProduct,3945615,1047,"{""product_type"": ""cosmetic"", ""price"": 55.06}",2017-11-28 10:43:57
+367,1004584,session_1004584_419963,ClickProduct,845822,232,"{""product_type"": ""clothes"", ""price"": 34.36}",2017-11-28 11:06:14
+368,1003901,session_1003901_419963,PlaceOrder,1347509,363,"{""order_id"": 10065, ""product_type"": ""shoes"", ""price"": 90.1, ""quantity"": 1}",2017-11-28 11:14:03
+369,1004337,session_1004337_419963,ClickProduct,3032611,855,"{""product_type"": ""food"", ""price"": 68.25}",2017-11-28 11:21:07
+370,1003724,session_1003724_419963,ClickProduct,1112818,300,"{""product_type"": ""accessory"", ""price"": 42.57}",2017-11-28 11:21:10
+371,1005832,session_1005832_419964,ClickProduct,1815456,491,"{""product_type"": ""book"", ""price"": 32.89}",2017-11-28 12:00:21
+372,1000636,session_1000636_419964,PlaceOrder,44202,11,"{""order_id"": 10066, ""product_type"": ""furniture"", ""price"": 177.48, ""quantity"": 1}",2017-11-28 12:28:02
+373,1003724,session_1003724_419964,AddToCart,4258357,1124,"{""product_type"": ""cosmetic"", ""price"": 43.42, ""quantity"": 1}",2017-11-28 12:35:21
+374,1003724,session_1003724_419964,AddToCart,4399937,1156,"{""product_type"": ""cosmetic"", ""price"": 23.05, ""quantity"": 1}",2017-11-28 12:36:17
+375,1003724,session_1003724_419964,ClickProduct,641976,160,"{""product_type"": ""clothes"", ""price"": 27.19}",2017-11-28 12:44:36
+376,1000084,session_1000084_419964,ClickProduct,2721889,755,"{""product_type"": ""book"", ""price"": 30.56}",2017-11-28 12:54:53
+377,1000084,session_1000084_419965,ClickProduct,3930186,1039,"{""product_type"": ""book"", ""price"": 31.92}",2017-11-28 13:17:12
+378,1000228,session_1000228_419965,ClickProduct,329628,78,"{""product_type"": ""sport_equipment"", ""price"": 52.9}",2017-11-28 13:26:12
+379,1001629,session_1001629_419965,PlaceOrder,3942025,1045,"{""order_id"": 10067, ""product_type"": ""shoes"", ""price"": 59.33, ""quantity"": 1}",2017-11-28 13:31:59
+380,1004807,session_1004807_419965,AddToCart,981566,276,"{""product_type"": ""accessory"", ""price"": 19.53, ""quantity"": 1}",2017-11-28 13:39:45
+381,1000228,session_1000228_419965,ClickProduct,329628,78,"{""product_type"": ""sport_equipment"", ""price"": 52.9}",2017-11-28 13:43:29
+382,1005498,session_1005498_419966,ClickProduct,1147995,309,"{""product_type"": ""food"", ""price"": 61.98}",2017-11-28 14:03:01
+383,1000228,session_1000228_419966,ClickProduct,1024736,292,"{""product_type"": ""furniture"", ""price"": 226.51}",2017-11-28 14:04:37
+384,1000228,session_1000228_419966,ClickProduct,144409,30,"{""product_type"": ""furniture"", ""price"": 113.02}",2017-11-28 14:06:45
+385,1002909,session_1002909_419966,ClickProduct,4831634,1263,"{""product_type"": ""sport_equipment"", ""price"": 64.75}",2017-11-28 14:08:07
+386,1004096,session_1004096_419966,ClickProduct,3488953,952,"{""product_type"": ""clothes"", ""price"": 48.96}",2017-11-28 14:24:07
+387,1000228,session_1000228_419966,PlaceOrder,329628,78,"{""order_id"": 10068, ""product_type"": ""sport_equipment"", ""price"": 52.9, ""quantity"": 1}",2017-11-28 14:33:21
+388,1002307,session_1002307_419966,ClickProduct,3044282,856,"{""product_type"": ""book"", ""price"": 16.86}",2017-11-28 14:35:13
+389,1000228,session_1000228_419966,ClickProduct,2285833,625,"{""product_type"": ""book"", ""price"": 31.47}",2017-11-28 14:37:15
+390,1000877,session_1000877_419966,AddToCart,305317,69,"{""product_type"": ""toy"", ""price"": 18.13, ""quantity"": 1}",2017-11-28 14:39:47
+391,1000228,session_1000228_419966,ClickProduct,1304452,351,"{""product_type"": ""book"", ""price"": 17.51}",2017-11-28 14:41:40
+392,1000228,session_1000228_419966,ClickProduct,1008152,284,"{""product_type"": ""book"", ""price"": 33.32}",2017-11-28 14:41:47
+393,1000228,session_1000228_419966,ClickProduct,2709813,752,"{""product_type"": ""sport_equipment"", ""price"": 85.78}",2017-11-28 14:42:51
+394,1002307,session_1002307_419966,ClickProduct,1892817,513,"{""product_type"": ""food"", ""price"": 31.22}",2017-11-28 14:42:55
+395,1004096,session_1004096_419966,ClickProduct,947168,265,"{""product_type"": ""sport_equipment"", ""price"": 45.4}",2017-11-28 14:44:42
+396,1002909,session_1002909_419966,ClickProduct,2671601,730,"{""product_type"": ""cosmetic"", ""price"": 41.29}",2017-11-28 14:45:05
+397,1002307,session_1002307_419966,ClickProduct,1007312,283,"{""product_type"": ""cosmetic"", ""price"": 80.41}",2017-11-28 14:52:31
+398,1000228,session_1000228_419966,AddToCart,3768502,1005,"{""product_type"": ""book"", ""price"": 11.09, ""quantity"": 1}",2017-11-28 14:55:07
+399,1000228,session_1000228_419966,ClickProduct,1986707,541,"{""product_type"": ""book"", ""price"": 25.51}",2017-11-28 14:58:04
+400,1000228,session_1000228_419967,ClickProduct,1814314,489,"{""product_type"": ""book"", ""price"": 27.01}",2017-11-28 15:03:17
+401,1004807,session_1004807_419967,ClickProduct,1714664,454,"{""product_type"": ""electronic"", ""price"": 584.94}",2017-11-28 15:07:31
+402,1002307,session_1002307_419967,ClickProduct,2643848,721,"{""product_type"": ""toy"", ""price"": 40.46}",2017-11-28 15:08:48
+403,1003351,session_1003351_419967,ClickProduct,3733357,997,"{""product_type"": ""electronic"", ""price"": 340.44}",2017-11-28 15:10:00
+404,1003351,session_1003351_419967,ClickProduct,4923510,1288,"{""product_type"": ""furniture"", ""price"": 471.08}",2017-11-28 15:16:48
+405,1003351,session_1003351_419967,ClickProduct,3685265,989,"{""product_type"": ""accessory"", ""price"": 39.55}",2017-11-28 15:40:58
+406,1000228,session_1000228_419967,ClickProduct,4109821,1082,"{""product_type"": ""cosmetic"", ""price"": 14.66}",2017-11-28 15:49:19
+407,1000228,session_1000228_419967,ClickProduct,4565112,1194,"{""product_type"": ""shoes"", ""price"": 128.14}",2017-11-28 15:53:12
+408,1002618,session_1002618_419968,ClickProduct,409116,93,"{""product_type"": ""furniture"", ""price"": 394.62}",2017-11-28 16:22:33
+409,10009,session_10009_419969,ClickProduct,2184170,594,"{""product_type"": ""electronic"", ""price"": 648.06}",2017-11-28 17:42:53
+410,1003901,session_1003901_419974,ClickProduct,3670376,987,"{""product_type"": ""furniture"", ""price"": 282.04}",2017-11-28 22:10:27
+411,1003901,session_1003901_419974,ClickProduct,2777840,772,"{""product_type"": ""furniture"", ""price"": 215.91}",2017-11-28 22:17:20
+412,1005616,session_1005616_419974,ClickProduct,3148492,882,"{""product_type"": ""food"", ""price"": 70.47}",2017-11-28 22:38:40
+413,1000349,session_1000349_419975,ClickProduct,3011543,845,"{""product_type"": ""electronic"", ""price"": 873.27}",2017-11-28 23:07:43
+414,1000349,session_1000349_419975,ClickProduct,1545024,419,"{""product_type"": ""sport_equipment"", ""price"": 40.76}",2017-11-28 23:08:46
+415,1004792,session_1004792_419975,PlaceOrder,2955803,821,"{""order_id"": 10069, ""product_type"": ""book"", ""price"": 27.85, ""quantity"": 1}",2017-11-28 23:14:59
+416,1000349,session_1000349_419975,ClickProduct,1545024,419,"{""product_type"": ""sport_equipment"", ""price"": 40.76}",2017-11-28 23:16:34
+417,1004792,session_1004792_419975,PlaceOrder,4219318,1112,"{""order_id"": 10070, ""product_type"": ""sport_equipment"", ""price"": 19.18, ""quantity"": 1}",2017-11-28 23:19:56
+418,1004792,session_1004792_419975,ClickProduct,1893423,514,"{""product_type"": ""electronic"", ""price"": 319.23}",2017-11-28 23:46:46
+419,1000349,session_1000349_419976,ClickProduct,1545024,419,"{""product_type"": ""sport_equipment"", ""price"": 40.76}",2017-11-29 00:28:33
+420,1004792,session_1004792_419977,AddToCart,361294,84,"{""product_type"": ""food"", ""price"": 61.06, ""quantity"": 1}",2017-11-29 01:16:25
+421,1001915,session_1001915_419977,AddToCart,5110323,1330,"{""product_type"": ""book"", ""price"": 29.34, ""quantity"": 1}",2017-11-29 01:21:18
+422,1003656,session_1003656_419977,ClickProduct,1369597,375,"{""product_type"": ""accessory"", ""price"": 53.69}",2017-11-29 01:36:51
+423,10009,session_10009_419977,ClickProduct,2622294,710,"{""product_type"": ""furniture"", ""price"": 191.95}",2017-11-29 01:43:45
+424,1003351,session_1003351_419977,AddToCart,2186668,596,"{""product_type"": ""electronic"", ""price"": 189.21, ""quantity"": 1}",2017-11-29 01:44:15
+425,1001145,session_1001145_419977,ClickProduct,3127410,881,"{""product_type"": ""toy"", ""price"": 68.03}",2017-11-29 01:49:55
+426,1003656,session_1003656_419977,PlaceOrder,3466178,947,"{""order_id"": 10071, ""product_type"": ""accessory"", ""price"": 11.17, ""quantity"": 1}",2017-11-29 01:52:06
+427,1001145,session_1001145_419977,ClickProduct,2793877,779,"{""product_type"": ""toy"", ""price"": 69.09}",2017-11-29 01:57:25
+428,1000228,session_1000228_419978,ClickProduct,2472136,681,"{""product_type"": ""book"", ""price"": 22.14}",2017-11-29 02:06:31
+429,1003716,session_1003716_419978,PlaceOrder,3516903,955,"{""order_id"": 10072, ""product_type"": ""furniture"", ""price"": 121.56, ""quantity"": 1}",2017-11-29 02:29:26
+430,1003716,session_1003716_419978,ClickProduct,3516903,955,"{""product_type"": ""furniture"", ""price"": 121.56}",2017-11-29 02:30:41
+431,1000636,session_1000636_419978,ClickProduct,2129777,581,"{""product_type"": ""shoes"", ""price"": 45.9}",2017-11-29 02:56:19
+432,1001915,session_1001915_419978,ClickProduct,2994257,838,"{""product_type"": ""sport_equipment"", ""price"": 75.18}",2017-11-29 02:59:41
+433,1001326,session_1001326_419979,ClickProduct,1372769,382,"{""product_type"": ""toy"", ""price"": 62.59}",2017-11-29 03:16:13
+434,1003656,session_1003656_419979,AddToCart,654710,167,"{""product_type"": ""food"", ""price"": 68.3, ""quantity"": 1}",2017-11-29 03:35:36
+435,1000349,session_1000349_419979,ClickProduct,1545024,419,"{""product_type"": ""sport_equipment"", ""price"": 40.76}",2017-11-29 03:36:37
+436,1000349,session_1000349_419979,ClickProduct,3011543,845,"{""product_type"": ""electronic"", ""price"": 873.27}",2017-11-29 03:38:45
+437,1000228,session_1000228_419979,ClickProduct,1008330,286,"{""product_type"": ""food"", ""price"": 19.96}",2017-11-29 03:47:09
+438,1003716,session_1003716_419979,ClickProduct,3982661,1054,"{""product_type"": ""food"", ""price"": 48.22}",2017-11-29 03:47:33
+439,10009,session_10009_419979,ClickProduct,37314,8,"{""product_type"": ""shoes"", ""price"": 104.95}",2017-11-29 03:54:56
+440,1003716,session_1003716_419979,ClickProduct,3880607,1030,"{""product_type"": ""food"", ""price"": 15.42}",2017-11-29 03:58:20
+441,1002185,session_1002185_419980,ClickProduct,2692681,741,"{""product_type"": ""clothes"", ""price"": 21.38}",2017-11-29 04:07:15
+442,1000222,session_1000222_419980,ClickProduct,1349892,366,"{""product_type"": ""sport_equipment"", ""price"": 70.46}",2017-11-29 04:11:02
+443,1004096,session_1004096_419980,AddToCart,725452,194,"{""product_type"": ""clothes"", ""price"": 24.91, ""quantity"": 1}",2017-11-29 04:36:30
+444,1000349,session_1000349_419980,AddToCart,4491836,1179,"{""product_type"": ""cosmetic"", ""price"": 62.4, ""quantity"": 1}",2017-11-29 04:37:59
+445,1000349,session_1000349_419980,ClickProduct,1757094,463,"{""product_type"": ""sport_equipment"", ""price"": 83.89}",2017-11-29 04:42:41
+446,1000349,session_1000349_419980,ClickProduct,2383163,657,"{""product_type"": ""toy"", ""price"": 37.71}",2017-11-29 04:47:44
+447,1000349,session_1000349_419980,ClickProduct,4809668,1257,"{""product_type"": ""food"", ""price"": 11.36}",2017-11-29 04:47:48
+448,1003724,session_1003724_419980,ClickProduct,810022,226,"{""product_type"": ""cosmetic"", ""price"": 52.55}",2017-11-29 04:49:39
+449,1005284,session_1005284_419980,ClickProduct,3661621,983,"{""product_type"": ""cosmetic"", ""price"": 61.44}",2017-11-29 04:50:41
+450,1000349,session_1000349_419980,PlaceOrder,906282,249,"{""order_id"": 10073, ""product_type"": ""electronic"", ""price"": 182.98, ""quantity"": 1}",2017-11-29 04:50:54
+451,1005284,session_1005284_419980,ClickProduct,716219,188,"{""product_type"": ""cosmetic"", ""price"": 29.93}",2017-11-29 04:56:32
+452,1000349,session_1000349_419981,PlaceOrder,1545024,419,"{""order_id"": 10074, ""product_type"": ""sport_equipment"", ""price"": 40.76, ""quantity"": 1}",2017-11-29 05:01:06
+453,1001419,session_1001419_419981,ClickProduct,4092373,1076,"{""product_type"": ""toy"", ""price"": 15.72}",2017-11-29 05:15:59
+454,1005284,session_1005284_419981,ClickProduct,1509041,413,"{""product_type"": ""book"", ""price"": 20.68}",2017-11-29 05:36:15
+455,1000723,session_1000723_419981,ClickProduct,575683,146,"{""product_type"": ""cosmetic"", ""price"": 60.31}",2017-11-29 05:43:06
+456,1002589,session_1002589_419981,ClickProduct,905943,247,"{""product_type"": ""clothes"", ""price"": 46.27}",2017-11-29 05:43:40
+457,1005284,session_1005284_419981,PlaceOrder,4975718,1302,"{""order_id"": 10075, ""product_type"": ""accessory"", ""price"": 51.64, ""quantity"": 1}",2017-11-29 05:56:37
+458,1003351,session_1003351_419981,ClickProduct,602202,150,"{""product_type"": ""clothes"", ""price"": 72.95}",2017-11-29 05:58:18
+459,1005284,session_1005284_419981,PlaceOrder,1509041,413,"{""order_id"": 10076, ""product_type"": ""book"", ""price"": 20.68, ""quantity"": 1}",2017-11-29 05:58:45
+460,1005284,session_1005284_419981,PlaceOrder,4020971,1061,"{""order_id"": 10077, ""product_type"": ""cosmetic"", ""price"": 6.96, ""quantity"": 1}",2017-11-29 05:59:06
+461,1005284,session_1005284_419982,PlaceOrder,4693404,1226,"{""order_id"": 10078, ""product_type"": ""cosmetic"", ""price"": 70.43, ""quantity"": 1}",2017-11-29 06:00:01
+462,1005284,session_1005284_419982,PlaceOrder,2139942,586,"{""order_id"": 10079, ""product_type"": ""cosmetic"", ""price"": 61.99, ""quantity"": 1}",2017-11-29 06:00:36
+463,1000222,session_1000222_419982,ClickProduct,4429587,1164,"{""product_type"": ""toy"", ""price"": 8.55}",2017-11-29 06:08:41
+464,1000723,session_1000723_419982,ClickProduct,164553,33,"{""product_type"": ""accessory"", ""price"": 88.23}",2017-11-29 06:10:07
+465,1005712,session_1005712_419982,ClickProduct,869209,237,"{""product_type"": ""shoes"", ""price"": 143.28}",2017-11-29 06:15:16
+466,1002927,session_1002927_419982,PlaceOrder,1762506,464,"{""order_id"": 10080, ""product_type"": ""book"", ""price"": 13.57, ""quantity"": 1}",2017-11-29 06:23:23
+467,1001466,session_1001466_419982,AddToCart,1257002,335,"{""product_type"": ""accessory"", ""price"": 75.32, ""quantity"": 1}",2017-11-29 06:38:56
+468,10009,session_10009_419983,ClickProduct,931229,257,"{""product_type"": ""food"", ""price"": 56.86}",2017-11-29 07:25:45
+469,10009,session_10009_419983,ClickProduct,1533647,417,"{""product_type"": ""accessory"", ""price"": 85.53}",2017-11-29 07:30:22
+470,1000228,session_1000228_419983,PlaceOrder,3815973,1015,"{""order_id"": 10081, ""product_type"": ""book"", ""price"": 26.89, ""quantity"": 1}",2017-11-29 07:31:38
+471,10009,session_10009_419983,AddToCart,1944561,524,"{""product_type"": ""food"", ""price"": 36.99, ""quantity"": 1}",2017-11-29 07:48:36
+472,1005294,session_1005294_419983,PlaceOrder,1905948,518,"{""order_id"": 10082, ""product_type"": ""food"", ""price"": 40.62, ""quantity"": 1}",2017-11-29 07:59:10
+473,1005616,session_1005616_419984,ClickProduct,544000,140,"{""product_type"": ""clothes"", ""price"": 22.74}",2017-11-29 08:13:54
+474,1002185,session_1002185_419984,AddToCart,2673053,732,"{""product_type"": ""shoes"", ""price"": 147.89, ""quantity"": 1}",2017-11-29 08:21:10
+475,1002185,session_1002185_419984,AddToCart,4856750,1269,"{""product_type"": ""shoes"", ""price"": 124.87, ""quantity"": 1}",2017-11-29 08:22:12
+476,1004792,session_1004792_419984,PlaceOrder,427434,99,"{""order_id"": 10083, ""product_type"": ""electronic"", ""price"": 887.39, ""quantity"": 1}",2017-11-29 08:35:51
+477,1001915,session_1001915_419984,ClickProduct,3556340,967,"{""product_type"": ""clothes"", ""price"": 38.96}",2017-11-29 08:55:11
+478,1001915,session_1001915_419984,ClickProduct,2846310,798,"{""product_type"": ""food"", ""price"": 98.94}",2017-11-29 08:56:59
+479,1002185,session_1002185_419985,ClickProduct,4197294,1108,"{""product_type"": ""book"", ""price"": 36.27}",2017-11-29 09:40:26
+480,1003351,session_1003351_419986,ClickProduct,4678243,1222,"{""product_type"": ""clothes"", ""price"": 56.6}",2017-11-29 10:12:00
+481,1001566,session_1001566_419986,ClickProduct,2292668,628,"{""product_type"": ""toy"", ""price"": 16.69}",2017-11-29 10:17:23
+482,1001566,session_1001566_419986,ClickProduct,4510929,1182,"{""product_type"": ""food"", ""price"": 55.2}",2017-11-29 10:18:32
+483,1000222,session_1000222_419986,PlaceOrder,2821630,788,"{""order_id"": 10084, ""product_type"": ""toy"", ""price"": 29.0, ""quantity"": 1}",2017-11-29 10:37:36
+484,1002927,session_1002927_419986,ClickProduct,3008190,843,"{""product_type"": ""clothes"", ""price"": 63.27}",2017-11-29 10:43:35
+485,1002927,session_1002927_419986,ClickProduct,1348316,365,"{""product_type"": ""food"", ""price"": 59.11}",2017-11-29 10:53:59
+486,1002927,session_1002927_419987,ClickProduct,2557785,698,"{""product_type"": ""food"", ""price"": 30.7}",2017-11-29 11:04:52
+487,1001566,session_1001566_419987,PlaceOrder,23239,5,"{""order_id"": 10085, ""product_type"": ""furniture"", ""price"": 122.95, ""quantity"": 1}",2017-11-29 11:09:52
+488,1002927,session_1002927_419987,ClickProduct,4221248,1113,"{""product_type"": ""food"", ""price"": 47.35}",2017-11-29 11:11:45
+489,1005712,session_1005712_419987,ClickProduct,1014296,289,"{""product_type"": ""toy"", ""price"": 85.71}",2017-11-29 11:13:28
+490,1002927,session_1002927_419987,ClickProduct,2695795,743,"{""product_type"": ""book"", ""price"": 9.46}",2017-11-29 11:19:14
+491,1002927,session_1002927_419987,PlaceOrder,4221248,1113,"{""order_id"": 10086, ""product_type"": ""food"", ""price"": 47.35, ""quantity"": 1}",2017-11-29 11:20:39
+492,1005712,session_1005712_419987,ClickProduct,4563074,1192,"{""product_type"": ""accessory"", ""price"": 95.83}",2017-11-29 11:26:09
+493,1004096,session_1004096_419987,AddToCart,4523605,1184,"{""product_type"": ""clothes"", ""price"": 72.85, ""quantity"": 1}",2017-11-29 11:30:48
+494,1004096,session_1004096_419987,ClickProduct,4923282,1287,"{""product_type"": ""cosmetic"", ""price"": 88.26}",2017-11-29 11:33:41
+495,1005712,session_1005712_419987,PlaceOrder,5080819,1323,"{""order_id"": 10087, ""product_type"": ""cosmetic"", ""price"": 12.05, ""quantity"": 1}",2017-11-29 11:53:42
+496,1000335,session_1000335_419987,PlaceOrder,872404,242,"{""order_id"": 10088, ""product_type"": ""toy"", ""price"": 30.6, ""quantity"": 1}",2017-11-29 11:57:26
+497,1005712,session_1005712_419988,PlaceOrder,3092053,866,"{""order_id"": 10089, ""product_type"": ""clothes"", ""price"": 29.17, ""quantity"": 1}",2017-11-29 12:07:10
+498,1002185,session_1002185_419988,ClickProduct,1657754,441,"{""product_type"": ""furniture"", ""price"": 91.36}",2017-11-29 12:32:23
+499,1005498,session_1005498_419989,ClickProduct,2242453,614,"{""product_type"": ""furniture"", ""price"": 368.01}",2017-11-29 13:21:07
+500,1005498,session_1005498_419989,ClickProduct,2825454,790,"{""product_type"": ""furniture"", ""price"": 457.61}",2017-11-29 13:22:18
+501,1005498,session_1005498_419989,PlaceOrder,5049477,1313,"{""order_id"": 10090, ""product_type"": ""toy"", ""price"": 67.13, ""quantity"": 1}",2017-11-29 13:42:27
+502,1005498,session_1005498_419990,ClickProduct,592124,148,"{""product_type"": ""electronic"", ""price"": 152.93}",2017-11-29 14:07:07
+503,1004096,session_1004096_419990,AddToCart,1703317,451,"{""product_type"": ""accessory"", ""price"": 28.71, ""quantity"": 1}",2017-11-29 14:09:33
+504,1005832,session_1005832_419990,ClickProduct,1954667,526,"{""product_type"": ""furniture"", ""price"": 312.88}",2017-11-29 14:09:42
+505,1005832,session_1005832_419990,AddToCart,4856500,1268,"{""product_type"": ""toy"", ""price"": 66.77, ""quantity"": 1}",2017-11-29 14:11:48
+506,1004096,session_1004096_419990,ClickProduct,762383,209,"{""product_type"": ""sport_equipment"", ""price"": 42.95}",2017-11-29 14:12:09
+507,1005498,session_1005498_419990,ClickProduct,143281,29,"{""product_type"": ""sport_equipment"", ""price"": 16.73}",2017-11-29 14:13:29
+508,1005832,session_1005832_419990,AddToCart,2819476,787,"{""product_type"": ""toy"", ""price"": 64.96, ""quantity"": 1}",2017-11-29 14:13:56
+509,1005832,session_1005832_419990,AddToCart,4116854,1084,"{""product_type"": ""toy"", ""price"": 19.37, ""quantity"": 1}",2017-11-29 14:16:47
+510,1005832,session_1005832_419990,ClickProduct,3810457,1014,"{""product_type"": ""sport_equipment"", ""price"": 35.49}",2017-11-29 14:21:21
+511,1001419,session_1001419_419990,PlaceOrder,4252236,1122,"{""order_id"": 10091, ""product_type"": ""furniture"", ""price"": 146.51, ""quantity"": 1}",2017-11-29 14:39:10
+512,1001566,session_1001566_419990,PlaceOrder,2220235,612,"{""order_id"": 10092, ""product_type"": ""book"", ""price"": 34.79, ""quantity"": 1}",2017-11-29 14:41:44
+513,1002927,session_1002927_419990,ClickProduct,2967615,828,"{""product_type"": ""sport_equipment"", ""price"": 17.35}",2017-11-29 14:52:07
+514,1002307,session_1002307_419991,AddToCart,1292323,346,"{""product_type"": ""sport_equipment"", ""price"": 68.51, ""quantity"": 1}",2017-11-29 15:07:21
+515,1003351,session_1003351_419991,ClickProduct,907841,251,"{""product_type"": ""electronic"", ""price"": 845.58}",2017-11-29 15:18:47
+516,1002307,session_1002307_419991,ClickProduct,195056,46,"{""product_type"": ""sport_equipment"", ""price"": 68.0}",2017-11-29 15:26:39
+517,1004807,session_1004807_419991,ClickProduct,2790543,775,"{""product_type"": ""accessory"", ""price"": 45.48}",2017-11-29 15:26:40
+518,10009,session_10009_419991,ClickProduct,1420923,391,"{""product_type"": ""book"", ""price"": 34.2}",2017-11-29 15:36:10
+519,10009,session_10009_419991,ClickProduct,4653155,1217,"{""product_type"": ""sport_equipment"", ""price"": 40.15}",2017-11-29 15:44:55
+520,10009,session_10009_419991,AddToCart,1266437,337,"{""product_type"": ""furniture"", ""price"": 337.9, ""quantity"": 1}",2017-11-29 15:55:12
+521,1000636,session_1000636_419992,PlaceOrder,1559384,423,"{""order_id"": 10093, ""product_type"": ""clothes"", ""price"": 49.45, ""quantity"": 1}",2017-11-29 16:00:36
+522,10009,session_10009_419992,ClickProduct,3924907,1038,"{""product_type"": ""furniture"", ""price"": 476.09}",2017-11-29 16:03:15
+523,1000792,session_1000792_419992,ClickProduct,1802878,484,"{""product_type"": ""electronic"", ""price"": 720.86}",2017-11-29 16:06:14
+524,1002526,session_1002526_419992,PlaceOrder,398593,89,"{""order_id"": 10094, ""product_type"": ""book"", ""price"": 29.41, ""quantity"": 1}",2017-11-29 16:09:02
+525,1002526,session_1002526_419992,PlaceOrder,3200672,891,"{""order_id"": 10095, ""product_type"": ""cosmetic"", ""price"": 25.42, ""quantity"": 1}",2017-11-29 16:13:20
+526,1003716,session_1003716_419992,ClickProduct,1240933,329,"{""product_type"": ""clothes"", ""price"": 33.92}",2017-11-29 16:40:08
+527,100528,session_100528_419993,PlaceOrder,2103782,573,"{""order_id"": 10096, ""product_type"": ""book"", ""price"": 23.36, ""quantity"": 1}",2017-11-29 17:36:58
+528,1002185,session_1002185_419996,AddToCart,743052,201,"{""product_type"": ""book"", ""price"": 23.3, ""quantity"": 1}",2017-11-29 20:52:31
+529,1003901,session_1003901_419998,ClickProduct,2592122,704,"{""product_type"": ""clothes"", ""price"": 47.53}",2017-11-29 22:16:43
+530,1003901,session_1003901_419998,ClickProduct,1959091,530,"{""product_type"": ""furniture"", ""price"": 369.37}",2017-11-29 22:29:25
+531,1003901,session_1003901_419998,AddToCart,474469,118,"{""product_type"": ""clothes"", ""price"": 71.24, ""quantity"": 1}",2017-11-29 22:32:05
+532,1004792,session_1004792_419998,ClickProduct,1443490,399,"{""product_type"": ""sport_equipment"", ""price"": 72.07}",2017-11-29 22:41:18
+533,1002185,session_1002185_420000,PlaceOrder,1727986,457,"{""order_id"": 10097, ""product_type"": ""shoes"", ""price"": 125.94, ""quantity"": 1}",2017-11-30 00:29:52
+534,1003724,session_1003724_420000,ClickProduct,4878108,1275,"{""product_type"": ""clothes"", ""price"": 26.21}",2017-11-30 00:34:44
+535,1002185,session_1002185_420000,ClickProduct,4807503,1255,"{""product_type"": ""book"", ""price"": 24.7}",2017-11-30 00:39:10
+536,1003249,session_1003249_420001,ClickProduct,4329365,1134,"{""product_type"": ""sport_equipment"", ""price"": 12.66}",2017-11-30 01:21:37
+537,1000877,session_1000877_420001,ClickProduct,1783613,474,"{""product_type"": ""toy"", ""price"": 72.53}",2017-11-30 01:36:31
+538,1000877,session_1000877_420001,PlaceOrder,3668317,986,"{""order_id"": 10098, ""product_type"": ""toy"", ""price"": 25.0, ""quantity"": 1}",2017-11-30 01:44:29
+539,1000877,session_1000877_420001,PlaceOrder,1833783,497,"{""order_id"": 10099, ""product_type"": ""accessory"", ""price"": 65.87, ""quantity"": 1}",2017-11-30 01:44:29
+540,1000877,session_1000877_420001,PlaceOrder,3936676,1043,"{""order_id"": 10100, ""product_type"": ""shoes"", ""price"": 94.71, ""quantity"": 1}",2017-11-30 01:44:29
+541,1000877,session_1000877_420001,ClickProduct,2552942,694,"{""product_type"": ""shoes"", ""price"": 94.82}",2017-11-30 01:46:05
+542,1004096,session_1004096_420002,AddToCart,3741352,999,"{""product_type"": ""shoes"", ""price"": 70.06, ""quantity"": 1}",2017-11-30 02:06:56
+543,1001466,session_1001466_420002,ClickProduct,2010880,547,"{""product_type"": ""book"", ""price"": 18.47}",2017-11-30 02:10:19
+544,1004096,session_1004096_420002,PlaceOrder,1898034,516,"{""order_id"": 10101, ""product_type"": ""electronic"", ""price"": 612.29, ""quantity"": 1}",2017-11-30 02:10:40
+545,1001629,session_1001629_420002,PlaceOrder,2075326,566,"{""order_id"": 10102, ""product_type"": ""shoes"", ""price"": 143.85, ""quantity"": 1}",2017-11-30 02:17:16
+546,1001466,session_1001466_420002,AddToCart,4162768,1099,"{""product_type"": ""furniture"", ""price"": 273.47, ""quantity"": 1}",2017-11-30 02:17:37
+547,1001466,session_1001466_420002,ClickProduct,3841346,1021,"{""product_type"": ""electronic"", ""price"": 344.62}",2017-11-30 02:39:19
+548,1001145,session_1001145_420002,ClickProduct,1624837,435,"{""product_type"": ""clothes"", ""price"": 25.56}",2017-11-30 02:50:25
+549,1000349,session_1000349_420002,AddToCart,2438523,671,"{""product_type"": ""shoes"", ""price"": 112.34, ""quantity"": 1}",2017-11-30 02:52:34
+550,1000349,session_1000349_420002,ClickProduct,4056188,1066,"{""product_type"": ""shoes"", ""price"": 88.04}",2017-11-30 02:52:54
+551,1001145,session_1001145_420002,PlaceOrder,731783,197,"{""order_id"": 10103, ""product_type"": ""clothes"", ""price"": 52.07, ""quantity"": 1}",2017-11-30 02:56:32
+552,1000084,session_1000084_420003,ClickProduct,1795031,481,"{""product_type"": ""electronic"", ""price"": 456.59}",2017-11-30 03:01:26
+553,1003351,session_1003351_420003,ClickProduct,768295,214,"{""product_type"": ""furniture"", ""price"": 316.83}",2017-11-30 03:22:58
+554,1003716,session_1003716_420003,ClickProduct,4416136,1163,"{""product_type"": ""sport_equipment"", ""price"": 83.5}",2017-11-30 03:23:29
+555,1004584,session_1004584_420003,ClickProduct,3637528,977,"{""product_type"": ""food"", ""price"": 57.8}",2017-11-30 03:34:50
+556,1000084,session_1000084_420003,AddToCart,3453542,943,"{""product_type"": ""sport_equipment"", ""price"": 71.97, ""quantity"": 1}",2017-11-30 03:41:24
+557,1000636,session_1000636_420004,ClickProduct,1489724,408,"{""product_type"": ""shoes"", ""price"": 85.64}",2017-11-30 04:20:06
+558,1001419,session_1001419_420004,PlaceOrder,4061696,1070,"{""order_id"": 10104, ""product_type"": ""toy"", ""price"": 42.2, ""quantity"": 1}",2017-11-30 04:29:07
+559,1004096,session_1004096_420005,ClickProduct,479367,121,"{""product_type"": ""sport_equipment"", ""price"": 87.53}",2017-11-30 05:04:52
+560,1000349,session_1000349_420005,ClickProduct,1963858,532,"{""product_type"": ""toy"", ""price"": 79.54}",2017-11-30 05:07:38
+561,1004096,session_1004096_420005,PlaceOrder,4907087,1285,"{""order_id"": 10105, ""product_type"": ""food"", ""price"": 8.48, ""quantity"": 1}",2017-11-30 05:23:25
+562,1004096,session_1004096_420005,PlaceOrder,3674544,988,"{""order_id"": 10106, ""product_type"": ""sport_equipment"", ""price"": 37.91, ""quantity"": 1}",2017-11-30 05:26:04
+563,1003724,session_1003724_420005,ClickProduct,1931272,519,"{""product_type"": ""cosmetic"", ""price"": 51.46}",2017-11-30 05:36:06
+564,1003656,session_1003656_420005,ClickProduct,487547,124,"{""product_type"": ""book"", ""price"": 31.98}",2017-11-30 05:43:09
+565,10009,session_10009_420006,ClickProduct,4945859,1294,"{""product_type"": ""food"", ""price"": 31.89}",2017-11-30 06:10:12
+566,1004337,session_1004337_420006,ClickProduct,2528039,691,"{""product_type"": ""toy"", ""price"": 48.38}",2017-11-30 06:15:31
+567,1000723,session_1000723_420006,PlaceOrder,3122135,877,"{""order_id"": 10107, ""product_type"": ""accessory"", ""price"": 88.4, ""quantity"": 1}",2017-11-30 06:27:18
+568,1003656,session_1003656_420006,PlaceOrder,3788016,1011,"{""order_id"": 10108, ""product_type"": ""furniture"", ""price"": 270.08, ""quantity"": 1}",2017-11-30 06:58:09
+569,1003656,session_1003656_420007,PlaceOrder,5059698,1315,"{""order_id"": 10109, ""product_type"": ""clothes"", ""price"": 42.27, ""quantity"": 1}",2017-11-30 07:11:51
+570,1003724,session_1003724_420007,PlaceOrder,4997111,1304,"{""order_id"": 10110, ""product_type"": ""furniture"", ""price"": 233.92, ""quantity"": 1}",2017-11-30 07:38:03
+571,1000335,session_1000335_420007,ClickProduct,1839074,499,"{""product_type"": ""toy"", ""price"": 84.86}",2017-11-30 07:39:39
+572,1004792,session_1004792_420008,AddToCart,1275059,340,"{""product_type"": ""book"", ""price"": 18.12, ""quantity"": 1}",2017-11-30 08:37:18
+573,1004792,session_1004792_420008,AddToCart,2158725,588,"{""product_type"": ""toy"", ""price"": 40.76, ""quantity"": 1}",2017-11-30 08:38:51
+574,1004792,session_1004792_420008,ClickProduct,4665048,1218,"{""product_type"": ""furniture"", ""price"": 496.71}",2017-11-30 08:40:03
+575,1001326,session_1001326_420008,ClickProduct,2210978,608,"{""product_type"": ""electronic"", ""price"": 129.34}",2017-11-30 08:47:29
+576,1003901,session_1003901_420009,AddToCart,2334611,645,"{""product_type"": ""shoes"", ""price"": 130.36, ""quantity"": 1}",2017-11-30 09:23:32
+577,1003351,session_1003351_420009,ClickProduct,296719,62,"{""product_type"": ""toy"", ""price"": 87.38}",2017-11-30 09:27:37
+578,1001419,session_1001419_420009,ClickProduct,3933544,1041,"{""product_type"": ""electronic"", ""price"": 394.98}",2017-11-30 09:47:20
+579,1001419,session_1001419_420009,ClickProduct,1999063,545,"{""product_type"": ""electronic"", ""price"": 208.47}",2017-11-30 09:52:51
+580,1002042,session_1002042_420009,AddToCart,3274284,902,"{""product_type"": ""shoes"", ""price"": 110.59, ""quantity"": 1}",2017-11-30 09:59:57
+581,1003901,session_1003901_420010,AddToCart,1347509,363,"{""product_type"": ""shoes"", ""price"": 90.1, ""quantity"": 1}",2017-11-30 10:01:17
+582,1004337,session_1004337_420010,ClickProduct,2128740,580,"{""product_type"": ""food"", ""price"": 59.24}",2017-11-30 10:04:06
+583,1004337,session_1004337_420010,PlaceOrder,849843,234,"{""order_id"": 10111, ""product_type"": ""food"", ""price"": 54.72, ""quantity"": 1}",2017-11-30 10:05:39
+584,1000335,session_1000335_420012,AddToCart,3446193,940,"{""product_type"": ""electronic"", ""price"": 861.72, ""quantity"": 1}",2017-11-30 12:06:49
+585,1000335,session_1000335_420012,AddToCart,2068780,565,"{""product_type"": ""sport_equipment"", ""price"": 57.02, ""quantity"": 1}",2017-11-30 12:23:34
+586,1002185,session_1002185_420012,AddToCart,2305096,638,"{""product_type"": ""cosmetic"", ""price"": 35.3, ""quantity"": 1}",2017-11-30 12:41:37
+587,1004337,session_1004337_420012,ClickProduct,2251060,617,"{""product_type"": ""toy"", ""price"": 60.44}",2017-11-30 12:42:56
+588,1000636,session_1000636_420013,ClickProduct,705046,185,"{""product_type"": ""furniture"", ""price"": 458.12}",2017-11-30 13:13:28
+589,1001199,session_1001199_420013,AddToCart,4163794,1101,"{""product_type"": ""food"", ""price"": 12.21, ""quantity"": 1}",2017-11-30 13:20:31
+590,1005498,session_1005498_420013,AddToCart,5066294,1317,"{""product_type"": ""furniture"", ""price"": 266.0, ""quantity"": 1}",2017-11-30 13:34:17
+591,1002589,session_1002589_420013,PlaceOrder,126664,22,"{""order_id"": 10112, ""product_type"": ""electronic"", ""price"": 960.53, ""quantity"": 1}",2017-11-30 13:38:24
+592,1005166,session_1005166_420014,AddToCart,4863117,1272,"{""product_type"": ""furniture"", ""price"": 98.58, ""quantity"": 1}",2017-11-30 14:00:08
+593,1003351,session_1003351_420014,ClickProduct,2382901,655,"{""product_type"": ""book"", ""price"": 38.07}",2017-11-30 14:00:21
+594,1003351,session_1003351_420014,ClickProduct,2322529,640,"{""product_type"": ""accessory"", ""price"": 95.42}",2017-11-30 14:08:44
+595,1005712,session_1005712_420014,ClickProduct,3484049,950,"{""product_type"": ""furniture"", ""price"": 309.76}",2017-11-30 14:12:16
+596,10009,session_10009_420014,ClickProduct,2842407,796,"{""product_type"": ""clothes"", ""price"": 69.1}",2017-11-30 14:18:00
+597,1003901,session_1003901_420014,ClickProduct,2334611,645,"{""product_type"": ""shoes"", ""price"": 130.36}",2017-11-30 14:20:26
+598,1001419,session_1001419_420014,AddToCart,3770731,1008,"{""product_type"": ""electronic"", ""price"": 182.49, ""quantity"": 1}",2017-11-30 14:24:34
+599,1003901,session_1003901_420014,PlaceOrder,3233798,896,"{""order_id"": 10113, ""product_type"": ""clothes"", ""price"": 37.96, ""quantity"": 1}",2017-11-30 14:34:51
+600,1002307,session_1002307_420014,ClickProduct,4546465,1189,"{""product_type"": ""clothes"", ""price"": 64.24}",2017-11-30 14:38:12
+601,1001199,session_1001199_420014,AddToCart,838793,230,"{""product_type"": ""accessory"", ""price"": 83.37, ""quantity"": 1}",2017-11-30 14:54:20
+602,1003716,session_1003716_420015,AddToCart,1780583,473,"{""product_type"": ""sport_equipment"", ""price"": 61.95, ""quantity"": 1}",2017-11-30 15:05:13
+603,1002307,session_1002307_420015,AddToCart,4238977,1117,"{""product_type"": ""accessory"", ""price"": 8.68, ""quantity"": 1}",2017-11-30 15:11:36
+604,1002307,session_1002307_420015,AddToCart,3236572,900,"{""product_type"": ""food"", ""price"": 94.21, ""quantity"": 1}",2017-11-30 15:17:48
+605,1000723,session_1000723_420015,ClickProduct,2890224,811,"{""product_type"": ""clothes"", ""price"": 64.65}",2017-11-30 15:26:28
+606,10009,session_10009_420015,ClickProduct,447009,107,"{""product_type"": ""food"", ""price"": 84.12}",2017-11-30 15:35:29
+607,1000723,session_1000723_420015,ClickProduct,303794,67,"{""product_type"": ""shoes"", ""price"": 90.47}",2017-11-30 15:50:25
+608,1000723,session_1000723_420015,ClickProduct,444181,105,"{""product_type"": ""electronic"", ""price"": 882.6}",2017-11-30 15:52:34
+609,1000636,session_1000636_420016,PlaceOrder,1766214,468,"{""order_id"": 10114, ""product_type"": ""accessory"", ""price"": 58.01, ""quantity"": 1}",2017-11-30 16:01:05
+610,1000313,session_1000313_420016,ClickProduct,2740686,763,"{""product_type"": ""electronic"", ""price"": 181.25}",2017-11-30 16:08:29
+611,1000636,session_1000636_420016,ClickProduct,2675011,736,"{""product_type"": ""electronic"", ""price"": 551.56}",2017-11-30 16:12:46
+612,1000228,session_1000228_420017,ClickProduct,735415,199,"{""product_type"": ""food"", ""price"": 10.73}",2017-11-30 17:11:22
+613,1005712,session_1005712_420017,ClickProduct,1960493,531,"{""product_type"": ""toy"", ""price"": 71.91}",2017-11-30 17:57:09
+614,1005712,session_1005712_420018,ClickProduct,3149861,883,"{""product_type"": ""toy"", ""price"": 44.4}",2017-11-30 18:04:01
+615,1005712,session_1005712_420018,AddToCart,4385701,1153,"{""product_type"": ""furniture"", ""price"": 87.64, ""quantity"": 1}",2017-11-30 18:15:57
+616,1005712,session_1005712_420018,ClickProduct,1944257,522,"{""product_type"": ""electronic"", ""price"": 418.99}",2017-11-30 18:17:37
+617,1005712,session_1005712_420018,ClickProduct,4005583,1058,"{""product_type"": ""electronic"", ""price"": 737.84}",2017-11-30 18:34:29
+618,1005712,session_1005712_420018,ClickProduct,1968023,533,"{""product_type"": ""accessory"", ""price"": 32.66}",2017-11-30 18:42:26
+619,1005712,session_1005712_420018,ClickProduct,1127932,304,"{""product_type"": ""sport_equipment"", ""price"": 21.79}",2017-11-30 18:57:09
+620,1005712,session_1005712_420019,ClickProduct,2927287,815,"{""product_type"": ""sport_equipment"", ""price"": 25.59}",2017-11-30 19:03:38
+621,1004792,session_1004792_420023,ClickProduct,49781,12,"{""product_type"": ""clothes"", ""price"": 16.7}",2017-11-30 23:15:19
+622,1004792,session_1004792_420023,ClickProduct,2810705,786,"{""product_type"": ""sport_equipment"", ""price"": 18.45}",2017-11-30 23:22:39
+623,1004792,session_1004792_420023,ClickProduct,4956559,1298,"{""product_type"": ""shoes"", ""price"": 88.06}",2017-11-30 23:24:33
+624,1001629,session_1001629_420023,AddToCart,1957949,528,"{""product_type"": ""toy"", ""price"": 27.69, ""quantity"": 1}",2017-11-30 23:33:18
+625,1000228,session_1000228_420024,ClickProduct,2299965,631,"{""product_type"": ""clothes"", ""price"": 75.33}",2017-12-01 00:48:59
+626,1001326,session_1001326_420025,PlaceOrder,4132140,1093,"{""order_id"": 10115, ""product_type"": ""toy"", ""price"": 35.38, ""quantity"": 1}",2017-12-01 01:15:59
+627,1002042,session_1002042_420025,AddToCart,1370842,380,"{""product_type"": ""book"", ""price"": 26.86, ""quantity"": 1}",2017-12-01 01:19:35
+628,1005616,session_1005616_420025,ClickProduct,1849180,501,"{""product_type"": ""furniture"", ""price"": 346.31}",2017-12-01 01:20:06
+629,1005616,session_1005616_420025,ClickProduct,2688087,740,"{""product_type"": ""furniture"", ""price"": 446.29}",2017-12-01 01:21:45
+630,1005616,session_1005616_420025,ClickProduct,139496,26,"{""product_type"": ""electronic"", ""price"": 642.75}",2017-12-01 01:26:56
+631,1001326,session_1001326_420025,ClickProduct,3300853,908,"{""product_type"": ""electronic"", ""price"": 284.48}",2017-12-01 01:28:52
+632,1005616,session_1005616_420025,ClickProduct,975226,274,"{""product_type"": ""accessory"", ""price"": 96.54}",2017-12-01 01:33:21
+633,1001326,session_1001326_420025,ClickProduct,931499,258,"{""product_type"": ""clothes"", ""price"": 50.9}",2017-12-01 01:35:00
+634,1001326,session_1001326_420025,ClickProduct,4129713,1091,"{""product_type"": ""electronic"", ""price"": 678.05}",2017-12-01 01:35:44
+635,1002618,session_1002618_420025,ClickProduct,1134646,306,"{""product_type"": ""clothes"", ""price"": 42.81}",2017-12-01 01:50:34
+636,1001326,session_1001326_420025,AddToCart,1951985,525,"{""product_type"": ""toy"", ""price"": 70.91, ""quantity"": 1}",2017-12-01 01:51:19
+637,1001145,session_1001145_420025,AddToCart,1338355,356,"{""product_type"": ""clothes"", ""price"": 66.62, ""quantity"": 1}",2017-12-01 01:58:27
+638,1001145,session_1001145_420026,ClickProduct,2740047,761,"{""product_type"": ""clothes"", ""price"": 78.84}",2017-12-01 02:02:11
+639,1005294,session_1005294_420026,PlaceOrder,4937498,1290,"{""order_id"": 10116, ""product_type"": ""electronic"", ""price"": 525.59, ""quantity"": 1}",2017-12-01 02:03:10
+640,1001326,session_1001326_420026,ClickProduct,1551966,420,"{""product_type"": ""electronic"", ""price"": 947.52}",2017-12-01 02:03:42
+641,1001145,session_1001145_420026,ClickProduct,1106837,299,"{""product_type"": ""furniture"", ""price"": 227.13}",2017-12-01 02:04:32
+642,1001326,session_1001326_420026,AddToCart,970425,272,"{""product_type"": ""electronic"", ""price"": 894.84, ""quantity"": 1}",2017-12-01 02:06:49
+643,1002185,session_1002185_420026,ClickProduct,4146414,1096,"{""product_type"": ""cosmetic"", ""price"": 64.35}",2017-12-01 02:31:15
+644,1002185,session_1002185_420026,AddToCart,800445,225,"{""product_type"": ""furniture"", ""price"": 110.7, ""quantity"": 1}",2017-12-01 02:35:00
+645,10009,session_10009_420026,ClickProduct,260779,57,"{""product_type"": ""shoes"", ""price"": 128.56}",2017-12-01 02:43:34
+646,1002185,session_1002185_420026,AddToCart,4856750,1269,"{""product_type"": ""shoes"", ""price"": 124.87, ""quantity"": 1}",2017-12-01 02:51:52
+647,1001326,session_1001326_420026,AddToCart,1773417,470,"{""product_type"": ""food"", ""price"": 48.71, ""quantity"": 1}",2017-12-01 02:52:58
+648,1004792,session_1004792_420026,PlaceOrder,2793823,777,"{""order_id"": 10117, ""product_type"": ""accessory"", ""price"": 54.93, ""quantity"": 1}",2017-12-01 02:55:45
+649,1003716,session_1003716_420027,ClickProduct,4138728,1095,"{""product_type"": ""furniture"", ""price"": 108.61}",2017-12-01 03:00:36
+650,1002618,session_1002618_420027,PlaceOrder,1413966,388,"{""order_id"": 10118, ""product_type"": ""clothes"", ""price"": 62.59, ""quantity"": 1}",2017-12-01 03:02:42
+651,1003716,session_1003716_420027,AddToCart,1115643,303,"{""product_type"": ""furniture"", ""price"": 128.33, ""quantity"": 1}",2017-12-01 03:03:04
+652,1002618,session_1002618_420027,ClickProduct,2888477,809,"{""product_type"": ""clothes"", ""price"": 46.79}",2017-12-01 03:03:46
+653,1002618,session_1002618_420027,ClickProduct,4947400,1295,"{""product_type"": ""clothes"", ""price"": 70.41}",2017-12-01 03:04:06
+654,1003724,session_1003724_420027,ClickProduct,563665,144,"{""product_type"": ""clothes"", ""price"": 52.65}",2017-12-01 03:09:12
+655,1003724,session_1003724_420027,AddToCart,202202,47,"{""product_type"": ""clothes"", ""price"": 74.95, ""quantity"": 1}",2017-12-01 03:10:36
+656,10009,session_10009_420027,ClickProduct,4790721,1250,"{""product_type"": ""book"", ""price"": 27.44}",2017-12-01 03:13:33
+657,10009,session_10009_420027,ClickProduct,4092237,1075,"{""product_type"": ""furniture"", ""price"": 112.0}",2017-12-01 03:20:29
+658,1001326,session_1001326_420027,AddToCart,4594051,1201,"{""product_type"": ""electronic"", ""price"": 739.55, ""quantity"": 1}",2017-12-01 03:38:51
+659,1000228,session_1000228_420027,ClickProduct,3345192,920,"{""product_type"": ""furniture"", ""price"": 126.06}",2017-12-01 03:43:28
+660,1003656,session_1003656_420027,AddToCart,4324807,1132,"{""product_type"": ""accessory"", ""price"": 87.09, ""quantity"": 1}",2017-12-01 03:52:10
+661,1001466,session_1001466_420028,ClickProduct,955365,267,"{""product_type"": ""accessory"", ""price"": 89.5}",2017-12-01 04:08:52
+662,1005074,session_1005074_420028,ClickProduct,3961311,1048,"{""product_type"": ""furniture"", ""price"": 289.61}",2017-12-01 04:11:20
+663,1001466,session_1001466_420028,PlaceOrder,2356958,649,"{""order_id"": 10119, ""product_type"": ""accessory"", ""price"": 49.23, ""quantity"": 1}",2017-12-01 04:22:18
+664,1001466,session_1001466_420028,PlaceOrder,3764250,1003,"{""order_id"": 10120, ""product_type"": ""accessory"", ""price"": 58.23, ""quantity"": 1}",2017-12-01 04:35:40
+665,1000636,session_1000636_420028,ClickProduct,2295206,629,"{""product_type"": ""electronic"", ""price"": 373.38}",2017-12-01 04:46:49
+666,1005166,session_1005166_420029,ClickProduct,3990990,1055,"{""product_type"": ""food"", ""price"": 86.04}",2017-12-01 05:21:35
+667,1000228,session_1000228_420029,ClickProduct,3660992,982,"{""product_type"": ""furniture"", ""price"": 101.56}",2017-12-01 05:27:17
+668,1000228,session_1000228_420029,ClickProduct,5126434,1338,"{""product_type"": ""electronic"", ""price"": 953.57}",2017-12-01 05:36:20
+669,1001466,session_1001466_420029,ClickProduct,1214228,325,"{""product_type"": ""food"", ""price"": 89.6}",2017-12-01 05:37:31
+670,1001566,session_1001566_420029,ClickProduct,687624,176,"{""product_type"": ""shoes"", ""price"": 88.74}",2017-12-01 05:50:11
+671,1001566,session_1001566_420029,AddToCart,1357617,367,"{""product_type"": ""book"", ""price"": 20.99, ""quantity"": 1}",2017-12-01 05:54:13
+672,1001566,session_1001566_420029,ClickProduct,3365312,927,"{""product_type"": ""sport_equipment"", ""price"": 54.45}",2017-12-01 05:58:37
+673,1002185,session_1002185_420030,ClickProduct,177075,37,"{""product_type"": ""accessory"", ""price"": 26.42}",2017-12-01 06:34:01
+674,1001915,session_1001915_420030,ClickProduct,193842,44,"{""product_type"": ""shoes"", ""price"": 80.72}",2017-12-01 06:37:02
+675,1001915,session_1001915_420030,ClickProduct,2453685,678,"{""product_type"": ""sport_equipment"", ""price"": 63.79}",2017-12-01 06:46:56
+676,1001915,session_1001915_420030,ClickProduct,2748554,765,"{""product_type"": ""electronic"", ""price"": 783.57}",2017-12-01 06:48:52
+677,1002927,session_1002927_420031,ClickProduct,4668260,1220,"{""product_type"": ""book"", ""price"": 36.92}",2017-12-01 07:03:05
+678,1002185,session_1002185_420031,PlaceOrder,639339,159,"{""order_id"": 10121, ""product_type"": ""furniture"", ""price"": 408.76, ""quantity"": 1}",2017-12-01 07:03:18
+679,1005712,session_1005712_420031,ClickProduct,1505876,412,"{""product_type"": ""sport_equipment"", ""price"": 10.85}",2017-12-01 07:22:27
+680,1005712,session_1005712_420031,ClickProduct,995550,279,"{""product_type"": ""sport_equipment"", ""price"": 87.85}",2017-12-01 07:24:22
+681,1005074,session_1005074_420031,AddToCart,3116844,876,"{""product_type"": ""toy"", ""price"": 15.92, ""quantity"": 1}",2017-12-01 07:33:39
+682,1005294,session_1005294_420032,ClickProduct,1370770,378,"{""product_type"": ""cosmetic"", ""price"": 47.91}",2017-12-01 08:25:49
+683,1003351,session_1003351_420032,ClickProduct,2832809,793,"{""product_type"": ""toy"", ""price"": 97.84}",2017-12-01 08:32:45
+684,1004584,session_1004584_420033,PlaceOrder,758425,208,"{""order_id"": 10122, ""product_type"": ""furniture"", ""price"": 362.91, ""quantity"": 1}",2017-12-01 09:08:52
+685,1001419,session_1001419_420033,AddToCart,4334292,1136,"{""product_type"": ""shoes"", ""price"": 74.13, ""quantity"": 1}",2017-12-01 09:19:56
+686,1002927,session_1002927_420033,ClickProduct,4102262,1079,"{""product_type"": ""toy"", ""price"": 38.0}",2017-12-01 09:33:09
+687,1002185,session_1002185_420033,ClickProduct,2040621,557,"{""product_type"": ""furniture"", ""price"": 428.87}",2017-12-01 09:34:19
+688,1000228,session_1000228_420033,ClickProduct,2674960,734,"{""product_type"": ""shoes"", ""price"": 146.13}",2017-12-01 09:41:43
+689,10009,session_10009_420033,ClickProduct,4790721,1250,"{""product_type"": ""book"", ""price"": 27.44}",2017-12-01 09:55:59
+690,1005712,session_1005712_420034,ClickProduct,377345,87,"{""product_type"": ""toy"", ""price"": 54.74}",2017-12-01 10:59:41
+691,1001566,session_1001566_420035,ClickProduct,3562796,970,"{""product_type"": ""toy"", ""price"": 11.31}",2017-12-01 11:05:39
+692,1001326,session_1001326_420035,AddToCart,1843392,500,"{""product_type"": ""toy"", ""price"": 14.92, ""quantity"": 1}",2017-12-01 11:09:27
+693,1001326,session_1001326_420035,ClickProduct,28356,6,"{""product_type"": ""book"", ""price"": 35.77}",2017-12-01 11:12:17
+694,1005498,session_1005498_420035,AddToCart,2933451,819,"{""product_type"": ""clothes"", ""price"": 58.57, ""quantity"": 1}",2017-12-01 11:26:39
+695,1005498,session_1005498_420035,ClickProduct,767464,212,"{""product_type"": ""clothes"", ""price"": 41.83}",2017-12-01 11:28:27
+696,1001566,session_1001566_420035,PlaceOrder,4886353,1277,"{""order_id"": 10123, ""product_type"": ""clothes"", ""price"": 44.74, ""quantity"": 1}",2017-12-01 11:29:30
+697,1002185,session_1002185_420035,AddToCart,771853,217,"{""product_type"": ""cosmetic"", ""price"": 67.95, ""quantity"": 1}",2017-12-01 11:36:15
+698,1005498,session_1005498_420035,PlaceOrder,4222164,1114,"{""order_id"": 10124, ""product_type"": ""book"", ""price"": 38.47, ""quantity"": 1}",2017-12-01 11:36:24
+699,1005498,session_1005498_420035,PlaceOrder,1556593,422,"{""order_id"": 10125, ""product_type"": ""toy"", ""price"": 75.83, ""quantity"": 1}",2017-12-01 11:36:24
+700,1005498,session_1005498_420035,PlaceOrder,1254527,333,"{""order_id"": 10126, ""product_type"": ""clothes"", ""price"": 75.18, ""quantity"": 1}",2017-12-01 11:36:24
+701,1001566,session_1001566_420035,ClickProduct,3457845,944,"{""product_type"": ""electronic"", ""price"": 166.07}",2017-12-01 11:41:13
+702,1004096,session_1004096_420036,PlaceOrder,658010,169,"{""order_id"": 10127, ""product_type"": ""shoes"", ""price"": 120.1, ""quantity"": 1}",2017-12-01 12:14:55
+703,1004337,session_1004337_420036,AddToCart,1327049,354,"{""product_type"": ""sport_equipment"", ""price"": 13.78, ""quantity"": 1}",2017-12-01 12:26:05
+704,1004096,session_1004096_420036,PlaceOrder,1885579,510,"{""order_id"": 10128, ""product_type"": ""electronic"", ""price"": 632.63, ""quantity"": 1}",2017-12-01 12:27:34
+705,1004096,session_1004096_420036,ClickProduct,5122024,1334,"{""product_type"": ""clothes"", ""price"": 30.1}",2017-12-01 12:28:48
+706,1001915,session_1001915_420036,AddToCart,2657502,724,"{""product_type"": ""clothes"", ""price"": 30.28, ""quantity"": 1}",2017-12-01 12:31:30
+707,1002927,session_1002927_420036,AddToCart,4932938,1289,"{""product_type"": ""sport_equipment"", ""price"": 42.43, ""quantity"": 1}",2017-12-01 12:36:32
+708,1000723,session_1000723_420036,ClickProduct,5021781,1306,"{""product_type"": ""electronic"", ""price"": 753.65}",2017-12-01 12:47:06
+709,1003351,session_1003351_420036,PlaceOrder,2078526,569,"{""order_id"": 10129, ""product_type"": ""shoes"", ""price"": 51.28, ""quantity"": 1}",2017-12-01 12:51:37
+710,1000723,session_1000723_420036,ClickProduct,687309,175,"{""product_type"": ""cosmetic"", ""price"": 48.49}",2017-12-01 12:56:22
+711,1000723,session_1000723_420037,ClickProduct,4804351,1253,"{""product_type"": ""clothes"", ""price"": 57.52}",2017-12-01 13:02:08
+712,1002927,session_1002927_420037,AddToCart,4133976,1094,"{""product_type"": ""cosmetic"", ""price"": 34.72, ""quantity"": 1}",2017-12-01 13:04:44
+713,1000723,session_1000723_420037,ClickProduct,414825,94,"{""product_type"": ""shoes"", ""price"": 77.42}",2017-12-01 13:11:16
+714,1003901,session_1003901_420037,ClickProduct,122092,21,"{""product_type"": ""furniture"", ""price"": 196.43}",2017-12-01 13:11:54
+715,1000723,session_1000723_420037,ClickProduct,3305461,911,"{""product_type"": ""shoes"", ""price"": 129.44}",2017-12-01 13:28:13
+716,1000723,session_1000723_420037,ClickProduct,1001675,281,"{""product_type"": ""shoes"", ""price"": 126.06}",2017-12-01 13:28:28
+717,1000723,session_1000723_420037,ClickProduct,2075893,568,"{""product_type"": ""sport_equipment"", ""price"": 86.64}",2017-12-01 13:36:16
+718,1002927,session_1002927_420037,ClickProduct,4075754,1071,"{""product_type"": ""book"", ""price"": 31.37}",2017-12-01 13:47:50
+719,1002927,session_1002927_420037,ClickProduct,3052761,860,"{""product_type"": ""book"", ""price"": 12.25}",2017-12-01 13:48:06
+720,1002909,session_1002909_420037,ClickProduct,3285990,905,"{""product_type"": ""sport_equipment"", ""price"": 78.96}",2017-12-01 13:48:54
+721,1002909,session_1002909_420037,ClickProduct,3656335,981,"{""product_type"": ""sport_equipment"", ""price"": 86.6}",2017-12-01 13:53:24
+722,1002909,session_1002909_420037,ClickProduct,785193,221,"{""product_type"": ""sport_equipment"", ""price"": 92.33}",2017-12-01 13:54:24
+723,1001915,session_1001915_420038,PlaceOrder,1728241,459,"{""order_id"": 10130, ""product_type"": ""book"", ""price"": 10.21, ""quantity"": 1}",2017-12-01 14:05:31
+724,1002927,session_1002927_420038,ClickProduct,3158800,885,"{""product_type"": ""book"", ""price"": 28.65}",2017-12-01 14:12:13
+725,1000723,session_1000723_420038,ClickProduct,1699399,447,"{""product_type"": ""accessory"", ""price"": 76.56}",2017-12-01 14:28:08
+726,1000723,session_1000723_420039,ClickProduct,2718833,753,"{""product_type"": ""accessory"", ""price"": 94.69}",2017-12-01 15:00:25
+727,1002589,session_1002589_420039,ClickProduct,4280196,1127,"{""product_type"": ""food"", ""price"": 36.46}",2017-12-01 15:01:26
+728,1002307,session_1002307_420039,ClickProduct,4277622,1126,"{""product_type"": ""food"", ""price"": 79.19}",2017-12-01 15:01:52
+729,1002307,session_1002307_420039,AddToCart,2700020,746,"{""product_type"": ""food"", ""price"": 96.18, ""quantity"": 1}",2017-12-01 15:10:46
+730,1000723,session_1000723_420039,PlaceOrder,2127965,578,"{""order_id"": 10131, ""product_type"": ""accessory"", ""price"": 42.67, ""quantity"": 1}",2017-12-01 15:13:42
+731,1002307,session_1002307_420039,ClickProduct,1958270,529,"{""product_type"": ""toy"", ""price"": 50.93}",2017-12-01 15:15:35
+732,1002307,session_1002307_420039,AddToCart,4600407,1203,"{""product_type"": ""cosmetic"", ""price"": 85.01, ""quantity"": 1}",2017-12-01 15:16:34
+733,1000723,session_1000723_420039,ClickProduct,4058123,1069,"{""product_type"": ""cosmetic"", ""price"": 42.64}",2017-12-01 15:18:34
+734,1002307,session_1002307_420039,AddToCart,2028434,551,"{""product_type"": ""toy"", ""price"": 22.4, ""quantity"": 1}",2017-12-01 15:25:20
+735,1002909,session_1002909_420039,ClickProduct,3645147,978,"{""product_type"": ""book"", ""price"": 12.67}",2017-12-01 15:30:58
+736,1003716,session_1003716_420039,ClickProduct,5149910,1342,"{""product_type"": ""furniture"", ""price"": 235.87}",2017-12-01 15:35:34
+737,1000723,session_1000723_420039,AddToCart,3893803,1034,"{""product_type"": ""accessory"", ""price"": 9.27, ""quantity"": 1}",2017-12-01 15:42:31
+738,1000723,session_1000723_420039,AddToCart,4787441,1248,"{""product_type"": ""accessory"", ""price"": 32.38, ""quantity"": 1}",2017-12-01 15:42:42
+739,1002909,session_1002909_420039,ClickProduct,1370564,377,"{""product_type"": ""sport_equipment"", ""price"": 57.4}",2017-12-01 15:57:27
+740,1002909,session_1002909_420040,ClickProduct,2505118,686,"{""product_type"": ""furniture"", ""price"": 414.91}",2017-12-01 16:07:16
+741,1002909,session_1002909_420040,ClickProduct,467423,116,"{""product_type"": ""shoes"", ""price"": 52.31}",2017-12-01 16:07:20
+742,1002909,session_1002909_420040,ClickProduct,2505118,686,"{""product_type"": ""furniture"", ""price"": 414.91}",2017-12-01 16:23:11
+743,1000313,session_1000313_420040,AddToCart,379371,88,"{""product_type"": ""toy"", ""price"": 85.91, ""quantity"": 1}",2017-12-01 16:23:17
+744,1000313,session_1000313_420040,ClickProduct,4176986,1106,"{""product_type"": ""clothes"", ""price"": 72.34}",2017-12-01 16:25:23
+745,1001145,session_1001145_420040,AddToCart,706065,186,"{""product_type"": ""shoes"", ""price"": 81.69, ""quantity"": 1}",2017-12-01 16:26:09
+746,1001466,session_1001466_420040,ClickProduct,4162768,1099,"{""product_type"": ""furniture"", ""price"": 273.47}",2017-12-01 16:29:40
+747,1000084,session_1000084_420040,ClickProduct,4681225,1224,"{""product_type"": ""food"", ""price"": 17.93}",2017-12-01 16:58:31
+748,1002185,session_1002185_420041,ClickProduct,2823620,789,"{""product_type"": ""furniture"", ""price"": 456.64}",2017-12-01 17:26:19
+749,1001472,session_1001472_420045,AddToCart,3728619,995,"{""product_type"": ""toy"", ""price"": 57.33, ""quantity"": 1}",2017-12-01 21:44:12
+750,1001566,session_1001566_420046,ClickProduct,2773575,770,"{""product_type"": ""electronic"", ""price"": 912.18}",2017-12-01 22:21:22
+751,1000313,session_1000313_420047,PlaceOrder,4960832,1300,"{""order_id"": 10132, ""product_type"": ""toy"", ""price"": 74.87, ""quantity"": 1}",2017-12-01 23:29:49
+752,1001145,session_1001145_420047,ClickProduct,1024622,290,"{""product_type"": ""electronic"", ""price"": 279.42}",2017-12-01 23:41:18
+753,1001145,session_1001145_420047,ClickProduct,1779897,471,"{""product_type"": ""electronic"", ""price"": 789.44}",2017-12-01 23:47:34
+754,1003901,session_1003901_420047,AddToCart,21762,4,"{""product_type"": ""furniture"", ""price"": 173.53, ""quantity"": 1}",2017-12-01 23:59:33
+755,1003901,session_1003901_420048,AddToCart,3897452,1036,"{""product_type"": ""furniture"", ""price"": 492.48, ""quantity"": 1}",2017-12-02 00:18:32
+756,1005498,session_1005498_420048,AddToCart,3341674,917,"{""product_type"": ""toy"", ""price"": 97.83, ""quantity"": 1}",2017-12-02 00:23:19
+757,1005498,session_1005498_420048,ClickProduct,1151537,312,"{""product_type"": ""toy"", ""price"": 22.87}",2017-12-02 00:23:38
+758,1000228,session_1000228_420048,ClickProduct,2335179,647,"{""product_type"": ""book"", ""price"": 10.21}",2017-12-02 00:25:50
+759,1000228,session_1000228_420048,ClickProduct,2874723,804,"{""product_type"": ""book"", ""price"": 20.87}",2017-12-02 00:26:03
+760,1000228,session_1000228_420048,ClickProduct,2963472,826,"{""product_type"": ""clothes"", ""price"": 52.09}",2017-12-02 00:26:50
+761,1000228,session_1000228_420048,ClickProduct,2013888,549,"{""product_type"": ""book"", ""price"": 25.08}",2017-12-02 00:32:37
+762,1000228,session_1000228_420048,ClickProduct,2013888,549,"{""product_type"": ""book"", ""price"": 25.08}",2017-12-02 00:32:57
+763,1005498,session_1005498_420048,ClickProduct,2164892,591,"{""product_type"": ""food"", ""price"": 98.06}",2017-12-02 00:54:38
+764,1005498,session_1005498_420049,ClickProduct,3915717,1037,"{""product_type"": ""sport_equipment"", ""price"": 5.72}",2017-12-02 01:03:23
+765,1005498,session_1005498_420049,AddToCart,4146835,1097,"{""product_type"": ""sport_equipment"", ""price"": 60.59, ""quantity"": 1}",2017-12-02 01:04:45
+766,1005498,session_1005498_420049,ClickProduct,2457004,680,"{""product_type"": ""sport_equipment"", ""price"": 17.32}",2017-12-02 01:08:20
+767,1001326,session_1001326_420049,AddToCart,3470901,949,"{""product_type"": ""toy"", ""price"": 63.69, ""quantity"": 1}",2017-12-02 01:15:40
+768,1004807,session_1004807_420049,AddToCart,2032855,552,"{""product_type"": ""clothes"", ""price"": 62.27, ""quantity"": 1}",2017-12-02 01:18:50
+769,1001629,session_1001629_420049,PlaceOrder,1014292,287,"{""order_id"": 10133, ""product_type"": ""accessory"", ""price"": 15.16, ""quantity"": 1}",2017-12-02 01:32:54
+770,1003901,session_1003901_420049,AddToCart,4054448,1065,"{""product_type"": ""toy"", ""price"": 91.46, ""quantity"": 1}",2017-12-02 01:35:40
+771,1004807,session_1004807_420049,PlaceOrder,3976381,1049,"{""order_id"": 10134, ""product_type"": ""clothes"", ""price"": 66.6, ""quantity"": 1}",2017-12-02 01:45:31
+772,1004807,session_1004807_420049,AddToCart,1764042,466,"{""product_type"": ""accessory"", ""price"": 49.51, ""quantity"": 1}",2017-12-02 01:46:12
+773,1004337,session_1004337_420050,PlaceOrder,1327049,354,"{""order_id"": 10135, ""product_type"": ""sport_equipment"", ""price"": 13.78, ""quantity"": 1}",2017-12-02 02:18:25
+774,1001466,session_1001466_420050,AddToCart,4286624,1128,"{""product_type"": ""sport_equipment"", ""price"": 13.88, ""quantity"": 1}",2017-12-02 02:23:17
+775,1005294,session_1005294_420050,AddToCart,672767,173,"{""product_type"": ""furniture"", ""price"": 304.7, ""quantity"": 1}",2017-12-02 02:39:51
+776,1005074,session_1005074_420050,PlaceOrder,965798,270,"{""order_id"": 10136, ""product_type"": ""book"", ""price"": 12.08, ""quantity"": 1}",2017-12-02 02:50:09
+777,1004807,session_1004807_420051,ClickProduct,3297610,906,"{""product_type"": ""clothes"", ""price"": 78.28}",2017-12-02 03:09:30
+778,1003901,session_1003901_420051,PlaceOrder,3823579,1017,"{""order_id"": 10137, ""product_type"": ""accessory"", ""price"": 19.62, ""quantity"": 1}",2017-12-02 03:26:46
+779,1005832,session_1005832_420051,ClickProduct,4643236,1211,"{""product_type"": ""electronic"", ""price"": 834.22}",2017-12-02 03:47:26
+780,1001419,session_1001419_420051,ClickProduct,2550378,692,"{""product_type"": ""book"", ""price"": 28.43}",2017-12-02 03:53:59
+781,1004584,session_1004584_420052,ClickProduct,2795410,783,"{""product_type"": ""book"", ""price"": 27.59}",2017-12-02 04:03:15
+782,1000723,session_1000723_420052,ClickProduct,627476,155,"{""product_type"": ""cosmetic"", ""price"": 25.14}",2017-12-02 04:07:12
+783,1003249,session_1003249_420052,ClickProduct,420144,98,"{""product_type"": ""toy"", ""price"": 5.31}",2017-12-02 04:20:34
+784,1003724,session_1003724_420053,AddToCart,5039692,1310,"{""product_type"": ""electronic"", ""price"": 590.38, ""quantity"": 1}",2017-12-02 05:10:37
+785,1000349,session_1000349_420053,PlaceOrder,2583697,702,"{""order_id"": 10138, ""product_type"": ""shoes"", ""price"": 82.19, ""quantity"": 1}",2017-12-02 05:16:04
+786,1001199,session_1001199_420053,PlaceOrder,724626,190,"{""order_id"": 10139, ""product_type"": ""book"", ""price"": 37.72, ""quantity"": 1}",2017-12-02 05:17:24
+787,1001419,session_1001419_420053,ClickProduct,4489561,1177,"{""product_type"": ""book"", ""price"": 30.59}",2017-12-02 05:35:40
+788,1001419,session_1001419_420053,ClickProduct,1241301,331,"{""product_type"": ""book"", ""price"": 14.76}",2017-12-02 05:37:43
+789,1002185,session_1002185_420053,ClickProduct,2290512,627,"{""product_type"": ""toy"", ""price"": 91.59}",2017-12-02 05:42:05
+790,1002185,session_1002185_420053,ClickProduct,2405091,664,"{""product_type"": ""toy"", ""price"": 81.48}",2017-12-02 05:42:37
+791,1004792,session_1004792_420053,AddToCart,3999452,1056,"{""product_type"": ""clothes"", ""price"": 42.47, ""quantity"": 1}",2017-12-02 05:47:18
+792,1002185,session_1002185_420054,PlaceOrder,2405091,664,"{""order_id"": 10140, ""product_type"": ""toy"", ""price"": 81.48, ""quantity"": 1}",2017-12-02 06:38:08
+793,1002185,session_1002185_420054,AddToCart,173040,35,"{""product_type"": ""cosmetic"", ""price"": 59.27, ""quantity"": 1}",2017-12-02 06:43:49
+794,1002589,session_1002589_420054,PlaceOrder,1857391,504,"{""order_id"": 10141, ""product_type"": ""sport_equipment"", ""price"": 21.56, ""quantity"": 1}",2017-12-02 06:52:17
+795,1000313,session_1000313_420055,AddToCart,2137013,583,"{""product_type"": ""toy"", ""price"": 81.25, ""quantity"": 1}",2017-12-02 07:02:55
+796,1003901,session_1003901_420055,ClickProduct,939688,263,"{""product_type"": ""accessory"", ""price"": 59.76}",2017-12-02 07:05:49
+797,1003901,session_1003901_420055,ClickProduct,4450718,1168,"{""product_type"": ""sport_equipment"", ""price"": 19.5}",2017-12-02 07:08:41
+798,1003901,session_1003901_420055,ClickProduct,1279406,342,"{""product_type"": ""furniture"", ""price"": 260.12}",2017-12-02 07:08:53
+799,1003901,session_1003901_420055,ClickProduct,1286844,343,"{""product_type"": ""sport_equipment"", ""price"": 62.03}",2017-12-02 07:10:50
+800,1003901,session_1003901_420055,ClickProduct,4436021,1167,"{""product_type"": ""sport_equipment"", ""price"": 17.32}",2017-12-02 07:13:22
+801,1003901,session_1003901_420055,ClickProduct,506837,129,"{""product_type"": ""electronic"", ""price"": 884.32}",2017-12-02 07:19:30
+802,1000877,session_1000877_420055,AddToCart,4532743,1186,"{""product_type"": ""shoes"", ""price"": 80.46, ""quantity"": 1}",2017-12-02 07:31:24
+803,1000877,session_1000877_420055,ClickProduct,3612554,972,"{""product_type"": ""shoes"", ""price"": 121.9}",2017-12-02 07:36:11
+804,1000792,session_1000792_420055,ClickProduct,4203564,1110,"{""product_type"": ""furniture"", ""price"": 353.12}",2017-12-02 07:47:58
+805,1000792,session_1000792_420055,ClickProduct,487347,123,"{""product_type"": ""sport_equipment"", ""price"": 81.71}",2017-12-02 07:48:37
+806,1000228,session_1000228_420055,ClickProduct,1632677,437,"{""product_type"": ""electronic"", ""price"": 926.67}",2017-12-02 07:58:26
+807,1000228,session_1000228_420055,ClickProduct,1701914,449,"{""product_type"": ""electronic"", ""price"": 350.15}",2017-12-02 07:58:34
+808,1001375,session_1001375_420056,ClickProduct,2279108,624,"{""product_type"": ""sport_equipment"", ""price"": 79.51}",2017-12-02 08:17:01
+809,1001375,session_1001375_420056,ClickProduct,2615507,707,"{""product_type"": ""toy"", ""price"": 77.63}",2017-12-02 08:19:54
+810,10009,session_10009_420056,ClickProduct,3557403,969,"{""product_type"": ""furniture"", ""price"": 367.78}",2017-12-02 08:22:45
+811,1001915,session_1001915_420056,PlaceOrder,3419397,934,"{""order_id"": 10142, ""product_type"": ""furniture"", ""price"": 98.17, ""quantity"": 1}",2017-12-02 08:30:43
+812,1005712,session_1005712_420056,ClickProduct,4845655,1267,"{""product_type"": ""cosmetic"", ""price"": 37.41}",2017-12-02 08:56:14
+813,1003901,session_1003901_420057,PlaceOrder,2969676,831,"{""order_id"": 10143, ""product_type"": ""sport_equipment"", ""price"": 21.51, ""quantity"": 1}",2017-12-02 09:21:04
+814,1003901,session_1003901_420057,PlaceOrder,1339786,358,"{""order_id"": 10144, ""product_type"": ""clothes"", ""price"": 16.56, ""quantity"": 1}",2017-12-02 09:21:04
+815,1003901,session_1003901_420057,PlaceOrder,1149771,310,"{""order_id"": 10145, ""product_type"": ""electronic"", ""price"": 203.97, ""quantity"": 1}",2017-12-02 09:21:04
+816,1003901,session_1003901_420057,PlaceOrder,307896,72,"{""order_id"": 10146, ""product_type"": ""electronic"", ""price"": 771.57, ""quantity"": 1}",2017-12-02 09:21:04
+817,1003901,session_1003901_420057,PlaceOrder,3095307,868,"{""order_id"": 10147, ""product_type"": ""sport_equipment"", ""price"": 64.73, ""quantity"": 1}",2017-12-02 09:21:04
+818,1003901,session_1003901_420057,PlaceOrder,2044299,560,"{""order_id"": 10148, ""product_type"": ""sport_equipment"", ""price"": 33.41, ""quantity"": 1}",2017-12-02 09:21:04
+819,1003901,session_1003901_420057,PlaceOrder,1286844,343,"{""order_id"": 10149, ""product_type"": ""sport_equipment"", ""price"": 62.03, ""quantity"": 1}",2017-12-02 09:21:04
+820,1003901,session_1003901_420057,PlaceOrder,3107357,874,"{""order_id"": 10150, ""product_type"": ""clothes"", ""price"": 34.48, ""quantity"": 1}",2017-12-02 09:21:04
+821,1003901,session_1003901_420057,PlaceOrder,689042,178,"{""order_id"": 10151, ""product_type"": ""cosmetic"", ""price"": 14.2, ""quantity"": 1}",2017-12-02 09:21:04
+822,1003901,session_1003901_420057,PlaceOrder,506837,129,"{""order_id"": 10152, ""product_type"": ""electronic"", ""price"": 884.32, ""quantity"": 1}",2017-12-02 09:21:04
+823,1003901,session_1003901_420057,PlaceOrder,2870017,802,"{""order_id"": 10153, ""product_type"": ""toy"", ""price"": 32.81, ""quantity"": 1}",2017-12-02 09:21:04
+824,1003901,session_1003901_420057,PlaceOrder,2040053,556,"{""order_id"": 10154, ""product_type"": ""toy"", ""price"": 61.1, ""quantity"": 1}",2017-12-02 09:23:55
+825,1002618,session_1002618_420057,ClickProduct,4107216,1080,"{""product_type"": ""book"", ""price"": 33.45}",2017-12-02 09:37:32
+826,1002909,session_1002909_420058,ClickProduct,4166159,1102,"{""product_type"": ""book"", ""price"": 27.45}",2017-12-02 10:02:27
+827,1003901,session_1003901_420059,AddToCart,904672,244,"{""product_type"": ""accessory"", ""price"": 24.14, ""quantity"": 1}",2017-12-02 11:02:03
+828,1005712,session_1005712_420059,ClickProduct,5141627,1341,"{""product_type"": ""food"", ""price"": 47.29}",2017-12-02 11:06:06
+829,1005712,session_1005712_420059,AddToCart,321118,74,"{""product_type"": ""electronic"", ""price"": 907.14, ""quantity"": 1}",2017-12-02 11:08:26
+830,1004807,session_1004807_420059,ClickProduct,2407084,665,"{""product_type"": ""cosmetic"", ""price"": 8.45}",2017-12-02 11:14:33
+831,1000723,session_1000723_420059,PlaceOrder,627476,155,"{""order_id"": 10155, ""product_type"": ""cosmetic"", ""price"": 25.14, ""quantity"": 1}",2017-12-02 11:18:07
+832,1003901,session_1003901_420059,AddToCart,5122971,1336,"{""product_type"": ""accessory"", ""price"": 39.43, ""quantity"": 1}",2017-12-02 11:25:09
+833,1003351,session_1003351_420059,ClickProduct,4243843,1119,"{""product_type"": ""shoes"", ""price"": 88.15}",2017-12-02 11:39:17
+834,1002909,session_1002909_420059,PlaceOrder,4435573,1165,"{""order_id"": 10156, ""product_type"": ""book"", ""price"": 35.29, ""quantity"": 1}",2017-12-02 11:42:11
+835,1003351,session_1003351_420059,ClickProduct,2696738,745,"{""product_type"": ""cosmetic"", ""price"": 43.54}",2017-12-02 11:46:18
+836,1003351,session_1003351_420059,ClickProduct,2119408,576,"{""product_type"": ""cosmetic"", ""price"": 28.73}",2017-12-02 11:49:30
+837,1003351,session_1003351_420059,ClickProduct,701097,182,"{""product_type"": ""cosmetic"", ""price"": 20.63}",2017-12-02 11:50:53
+838,1003351,session_1003351_420059,AddToCart,701097,182,"{""product_type"": ""cosmetic"", ""price"": 20.63, ""quantity"": 1}",2017-12-02 11:53:17
+839,1000228,session_1000228_420059,ClickProduct,1366286,374,"{""product_type"": ""furniture"", ""price"": 153.7}",2017-12-02 11:58:42
+840,1000228,session_1000228_420060,ClickProduct,997154,280,"{""product_type"": ""toy"", ""price"": 21.86}",2017-12-02 12:13:31
+841,1000228,session_1000228_420060,ClickProduct,2842032,795,"{""product_type"": ""toy"", ""price"": 69.89}",2017-12-02 12:20:12
+842,1000723,session_1000723_420060,PlaceOrder,729577,196,"{""order_id"": 10157, ""product_type"": ""food"", ""price"": 25.46, ""quantity"": 1}",2017-12-02 12:35:03
+843,1000792,session_1000792_420060,ClickProduct,487347,123,"{""product_type"": ""sport_equipment"", ""price"": 81.71}",2017-12-02 12:47:05
+844,1001466,session_1001466_420061,ClickProduct,4409034,1159,"{""product_type"": ""clothes"", ""price"": 69.04}",2017-12-02 13:09:01
+845,1005284,session_1005284_420061,ClickProduct,4694699,1229,"{""product_type"": ""clothes"", ""price"": 43.71}",2017-12-02 13:13:50
+846,1000723,session_1000723_420061,PlaceOrder,1636223,440,"{""order_id"": 10158, ""product_type"": ""food"", ""price"": 60.64, ""quantity"": 1}",2017-12-02 13:15:38
+847,1001466,session_1001466_420061,ClickProduct,4347450,1141,"{""product_type"": ""clothes"", ""price"": 75.03}",2017-12-02 13:15:51
+848,1000723,session_1000723_420061,PlaceOrder,4804194,1252,"{""order_id"": 10159, ""product_type"": ""toy"", ""price"": 58.64, ""quantity"": 1}",2017-12-02 13:23:27
+849,1000723,session_1000723_420061,ClickProduct,252579,54,"{""product_type"": ""accessory"", ""price"": 69.35}",2017-12-02 13:28:50
+850,1001466,session_1001466_420061,ClickProduct,1818928,493,"{""product_type"": ""food"", ""price"": 78.57}",2017-12-02 13:29:09
+851,1002307,session_1002307_420061,AddToCart,2301519,635,"{""product_type"": ""furniture"", ""price"": 113.71, ""quantity"": 1}",2017-12-02 13:30:41
+852,1002307,session_1002307_420061,ClickProduct,528426,133,"{""product_type"": ""furniture"", ""price"": 396.46}",2017-12-02 13:31:04
+853,1000792,session_1000792_420061,ClickProduct,1169469,318,"{""product_type"": ""furniture"", ""price"": 388.82}",2017-12-02 13:31:19
+854,1005712,session_1005712_420061,AddToCart,610505,152,"{""product_type"": ""food"", ""price"": 11.66, ""quantity"": 1}",2017-12-02 13:31:58
+855,1005712,session_1005712_420061,ClickProduct,2041725,558,"{""product_type"": ""book"", ""price"": 15.82}",2017-12-02 13:42:09
+856,1000723,session_1000723_420061,PlaceOrder,2300846,633,"{""order_id"": 10160, ""product_type"": ""accessory"", ""price"": 55.76, ""quantity"": 1}",2017-12-02 13:44:03
+857,1005166,session_1005166_420061,ClickProduct,3363470,926,"{""product_type"": ""furniture"", ""price"": 133.11}",2017-12-02 13:46:29
+858,1000792,session_1000792_420061,ClickProduct,487347,123,"{""product_type"": ""sport_equipment"", ""price"": 81.71}",2017-12-02 13:47:54
+859,1001915,session_1001915_420061,ClickProduct,4620686,1206,"{""product_type"": ""furniture"", ""price"": 194.3}",2017-12-02 13:54:05
+860,1005284,session_1005284_420062,AddToCart,1892802,512,"{""product_type"": ""sport_equipment"", ""price"": 85.06, ""quantity"": 1}",2017-12-02 14:03:02
+861,1005166,session_1005166_420062,PlaceOrder,4863117,1272,"{""order_id"": 10161, ""product_type"": ""furniture"", ""price"": 98.58, ""quantity"": 1}",2017-12-02 14:04:31
+862,1005166,session_1005166_420062,PlaceOrder,4017832,1060,"{""order_id"": 10162, ""product_type"": ""furniture"", ""price"": 201.31, ""quantity"": 1}",2017-12-02 14:07:37
+863,1001629,session_1001629_420062,PlaceOrder,1723753,456,"{""order_id"": 10163, ""product_type"": ""furniture"", ""price"": 173.95, ""quantity"": 1}",2017-12-02 14:14:57
+864,1002307,session_1002307_420062,ClickProduct,1616429,433,"{""product_type"": ""accessory"", ""price"": 80.03}",2017-12-02 14:26:10
+865,1001566,session_1001566_420063,ClickProduct,2874789,806,"{""product_type"": ""toy"", ""price"": 58.2}",2017-12-02 15:36:11
+866,1001566,session_1001566_420063,ClickProduct,2521933,689,"{""product_type"": ""toy"", ""price"": 6.29}",2017-12-02 15:36:51
+867,1002042,session_1002042_420063,AddToCart,3101480,871,"{""product_type"": ""book"", ""price"": 28.48, ""quantity"": 1}",2017-12-02 15:38:14
+868,1002042,session_1002042_420063,PlaceOrder,2974274,832,"{""order_id"": 10164, ""product_type"": ""book"", ""price"": 32.6, ""quantity"": 1}",2017-12-02 15:41:41
+869,1001566,session_1001566_420063,ClickProduct,2704566,749,"{""product_type"": ""toy"", ""price"": 36.82}",2017-12-02 15:43:58
+870,1001566,session_1001566_420063,ClickProduct,1576207,428,"{""product_type"": ""electronic"", ""price"": 297.26}",2017-12-02 15:48:15
+871,1001566,session_1001566_420063,AddToCart,1185201,319,"{""product_type"": ""toy"", ""price"": 39.24, ""quantity"": 1}",2017-12-02 15:51:07
+872,1005649,session_1005649_420064,ClickProduct,2750969,768,"{""product_type"": ""book"", ""price"": 13.99}",2017-12-02 16:21:43
+873,1005649,session_1005649_420064,AddToCart,1462679,404,"{""product_type"": ""book"", ""price"": 13.15, ""quantity"": 1}",2017-12-02 16:24:05
+874,1005649,session_1005649_420064,ClickProduct,621929,153,"{""product_type"": ""book"", ""price"": 17.35}",2017-12-02 16:27:44
+875,1000313,session_1000313_420064,ClickProduct,2137013,583,"{""product_type"": ""toy"", ""price"": 81.25}",2017-12-02 16:55:12
+876,1000313,session_1000313_420065,PlaceOrder,2190257,600,"{""order_id"": 10165, ""product_type"": ""clothes"", ""price"": 57.27, ""quantity"": 1}",2017-12-02 17:01:51
+877,1000313,session_1000313_420065,PlaceOrder,1413154,387,"{""order_id"": 10166, ""product_type"": ""toy"", ""price"": 46.92, ""quantity"": 1}",2017-12-02 17:01:51
+878,100528,session_100528_420065,AddToCart,703963,183,"{""product_type"": ""book"", ""price"": 23.44, ""quantity"": 1}",2017-12-02 17:34:54
+879,100528,session_100528_420065,PlaceOrder,3420920,935,"{""order_id"": 10167, ""product_type"": ""book"", ""price"": 24.64, ""quantity"": 1}",2017-12-02 17:36:26
+880,1001375,session_1001375_420065,AddToCart,1341755,362,"{""product_type"": ""toy"", ""price"": 84.88, ""quantity"": 1}",2017-12-02 17:51:47
+881,1001419,session_1001419_420065,ClickProduct,2044528,561,"{""product_type"": ""shoes"", ""price"": 98.75}",2017-12-02 17:57:51
+882,1001466,session_1001466_420071,ClickProduct,2140034,587,"{""product_type"": ""furniture"", ""price"": 174.56}",2017-12-02 23:55:54
+883,1000349,session_1000349_420072,ClickProduct,4350284,1144,"{""product_type"": ""electronic"", ""price"": 811.7}",2017-12-03 00:22:09
+884,1005294,session_1005294_420072,AddToCart,3865393,1028,"{""product_type"": ""electronic"", ""price"": 202.32, ""quantity"": 1}",2017-12-03 00:35:20
+885,1005294,session_1005294_420072,ClickProduct,755870,206,"{""product_type"": ""electronic"", ""price"": 161.6}",2017-12-03 00:36:42
+886,1001472,session_1001472_420072,ClickProduct,1855491,502,"{""product_type"": ""electronic"", ""price"": 735.87}",2017-12-03 00:44:52
+887,1005284,session_1005284_420072,AddToCart,4344847,1138,"{""product_type"": ""food"", ""price"": 70.66, ""quantity"": 1}",2017-12-03 00:56:37
+888,1002909,session_1002909_420073,ClickProduct,5073692,1320,"{""product_type"": ""food"", ""price"": 62.8}",2017-12-03 01:01:54
+889,1005284,session_1005284_420073,PlaceOrder,4119899,1085,"{""order_id"": 10168, ""product_type"": ""clothes"", ""price"": 19.82, ""quantity"": 1}",2017-12-03 01:12:02
+890,1002909,session_1002909_420073,ClickProduct,2219674,610,"{""product_type"": ""shoes"", ""price"": 117.77}",2017-12-03 01:15:04
+891,1005166,session_1005166_420074,PlaceOrder,1826559,494,"{""order_id"": 10169, ""product_type"": ""electronic"", ""price"": 578.94, ""quantity"": 1}",2017-12-03 02:00:08
+892,10009,session_10009_420074,PlaceOrder,3557403,969,"{""order_id"": 10170, ""product_type"": ""furniture"", ""price"": 367.78, ""quantity"": 1}",2017-12-03 02:01:33
+893,1000723,session_1000723_420074,ClickProduct,10034,1,"{""product_type"": ""clothes"", ""price"": 55.92}",2017-12-03 02:50:13
+894,1000723,session_1000723_420074,ClickProduct,1791424,479,"{""product_type"": ""clothes"", ""price"": 51.85}",2017-12-03 02:50:24
+895,1002307,session_1002307_420074,ClickProduct,954365,266,"{""product_type"": ""furniture"", ""price"": 209.16}",2017-12-03 02:52:02
+896,1002307,session_1002307_420074,PlaceOrder,2028434,551,"{""order_id"": 10171, ""product_type"": ""toy"", ""price"": 22.4, ""quantity"": 1}",2017-12-03 02:56:17
+897,1002307,session_1002307_420074,PlaceOrder,1164412,314,"{""order_id"": 10172, ""product_type"": ""book"", ""price"": 24.6, ""quantity"": 1}",2017-12-03 02:56:17
+898,1002307,session_1002307_420074,PlaceOrder,4466165,1171,"{""order_id"": 10173, ""product_type"": ""shoes"", ""price"": 128.99, ""quantity"": 1}",2017-12-03 02:56:17
+899,1000723,session_1000723_420075,ClickProduct,2360940,651,"{""product_type"": ""shoes"", ""price"": 88.65}",2017-12-03 03:00:42
+900,1005712,session_1005712_420075,ClickProduct,4705170,1237,"{""product_type"": ""furniture"", ""price"": 126.59}",2017-12-03 03:20:36
+901,1005712,session_1005712_420075,ClickProduct,2982506,835,"{""product_type"": ""cosmetic"", ""price"": 83.06}",2017-12-03 03:21:39
+902,1003901,session_1003901_420075,ClickProduct,1347509,363,"{""product_type"": ""shoes"", ""price"": 90.1}",2017-12-03 03:26:32
+903,1004584,session_1004584_420075,PlaceOrder,3334864,916,"{""order_id"": 10174, ""product_type"": ""toy"", ""price"": 5.27, ""quantity"": 1}",2017-12-03 03:41:57
+904,1002307,session_1002307_420076,PlaceOrder,300124,63,"{""order_id"": 10175, ""product_type"": ""accessory"", ""price"": 24.99, ""quantity"": 1}",2017-12-03 04:02:37
+905,1000084,session_1000084_420076,ClickProduct,3239215,901,"{""product_type"": ""sport_equipment"", ""price"": 13.62}",2017-12-03 04:14:46
+906,1005712,session_1005712_420076,PlaceOrder,610505,152,"{""order_id"": 10176, ""product_type"": ""food"", ""price"": 11.66, ""quantity"": 1}",2017-12-03 04:36:10
+907,1000084,session_1000084_420076,AddToCart,1381037,383,"{""product_type"": ""accessory"", ""price"": 88.85, ""quantity"": 1}",2017-12-03 04:45:30
+908,1000084,session_1000084_420076,ClickProduct,4367881,1149,"{""product_type"": ""accessory"", ""price"": 13.78}",2017-12-03 04:54:43
+909,1000084,session_1000084_420077,PlaceOrder,3891320,1032,"{""order_id"": 10177, ""product_type"": ""clothes"", ""price"": 48.72, ""quantity"": 1}",2017-12-03 05:03:58
+910,1004792,session_1004792_420077,ClickProduct,2955803,821,"{""product_type"": ""book"", ""price"": 27.85}",2017-12-03 05:07:16
+911,1002909,session_1002909_420077,ClickProduct,4708420,1239,"{""product_type"": ""book"", ""price"": 10.43}",2017-12-03 05:16:52
+912,1004337,session_1004337_420077,PlaceOrder,2635552,719,"{""order_id"": 10178, ""product_type"": ""accessory"", ""price"": 36.25, ""quantity"": 1}",2017-12-03 05:18:26
+913,1002909,session_1002909_420077,ClickProduct,3362139,924,"{""product_type"": ""book"", ""price"": 14.23}",2017-12-03 05:25:02
+914,1003716,session_1003716_420077,PlaceOrder,3329070,913,"{""order_id"": 10179, ""product_type"": ""food"", ""price"": 35.88, ""quantity"": 1}",2017-12-03 05:44:58
+915,1004337,session_1004337_420077,ClickProduct,4025544,1062,"{""product_type"": ""cosmetic"", ""price"": 21.16}",2017-12-03 05:54:12
+916,1001199,session_1001199_420077,PlaceOrder,347750,81,"{""order_id"": 10180, ""product_type"": ""furniture"", ""price"": 144.04, ""quantity"": 1}",2017-12-03 05:59:30
+917,1000636,session_1000636_420078,ClickProduct,5050528,1314,"{""product_type"": ""furniture"", ""price"": 266.84}",2017-12-03 06:00:30
+918,1003656,session_1003656_420078,ClickProduct,1785183,475,"{""product_type"": ""book"", ""price"": 37.94}",2017-12-03 06:03:23
+919,1003656,session_1003656_420078,AddToCart,2969304,829,"{""product_type"": ""book"", ""price"": 18.8, ""quantity"": 1}",2017-12-03 06:09:29
+920,1004792,session_1004792_420078,AddToCart,3555246,966,"{""product_type"": ""furniture"", ""price"": 210.95, ""quantity"": 1}",2017-12-03 06:10:51
+921,1003249,session_1003249_420078,ClickProduct,2635102,717,"{""product_type"": ""clothes"", ""price"": 49.47}",2017-12-03 06:38:38
+922,1003249,session_1003249_420079,PlaceOrder,4172446,1104,"{""order_id"": 10181, ""product_type"": ""sport_equipment"", ""price"": 41.14, ""quantity"": 1}",2017-12-03 07:11:06
+923,1000084,session_1000084_420079,PlaceOrder,2425522,669,"{""order_id"": 10182, ""product_type"": ""clothes"", ""price"": 70.35, ""quantity"": 1}",2017-12-03 07:12:14
+924,1003249,session_1003249_420079,PlaceOrder,532145,135,"{""order_id"": 10183, ""product_type"": ""electronic"", ""price"": 458.69, ""quantity"": 1}",2017-12-03 07:27:44
+925,1003249,session_1003249_420079,PlaceOrder,3022799,851,"{""order_id"": 10184, ""product_type"": ""accessory"", ""price"": 6.31, ""quantity"": 1}",2017-12-03 07:27:44
+926,1003249,session_1003249_420079,AddToCart,4234760,1116,"{""product_type"": ""sport_equipment"", ""price"": 52.43, ""quantity"": 1}",2017-12-03 07:31:38
+927,1003716,session_1003716_420079,ClickProduct,2453991,679,"{""product_type"": ""sport_equipment"", ""price"": 24.13}",2017-12-03 07:34:20
+928,1005166,session_1005166_420079,PlaceOrder,2033793,554,"{""order_id"": 10185, ""product_type"": ""book"", ""price"": 30.74, ""quantity"": 1}",2017-12-03 07:38:55
+929,1004807,session_1004807_420079,PlaceOrder,2927238,813,"{""order_id"": 10186, ""product_type"": ""accessory"", ""price"": 62.06, ""quantity"": 1}",2017-12-03 07:46:41
+930,1000877,session_1000877_420079,ClickProduct,212989,51,"{""product_type"": ""sport_equipment"", ""price"": 28.01}",2017-12-03 07:47:13
+931,10009,session_10009_420079,ClickProduct,4790721,1250,"{""product_type"": ""book"", ""price"": 27.44}",2017-12-03 07:48:59
+932,1002042,session_1002042_420079,ClickProduct,3980381,1053,"{""product_type"": ""toy"", ""price"": 8.98}",2017-12-03 07:55:45
+933,1004792,session_1004792_420080,AddToCart,585725,147,"{""product_type"": ""furniture"", ""price"": 109.75, ""quantity"": 1}",2017-12-03 08:06:43
+934,1003716,session_1003716_420080,ClickProduct,4120712,1087,"{""product_type"": ""sport_equipment"", ""price"": 51.45}",2017-12-03 08:10:53
+935,1000084,session_1000084_420080,ClickProduct,2861878,800,"{""product_type"": ""clothes"", ""price"": 51.6}",2017-12-03 08:26:33
+936,1002927,session_1002927_420080,ClickProduct,856297,236,"{""product_type"": ""toy"", ""price"": 92.59}",2017-12-03 08:32:52
+937,1000723,session_1000723_420081,ClickProduct,4365582,1147,"{""product_type"": ""book"", ""price"": 38.91}",2017-12-03 09:07:38
+938,1000877,session_1000877_420081,AddToCart,3422222,939,"{""product_type"": ""toy"", ""price"": 10.72, ""quantity"": 1}",2017-12-03 09:07:49
+939,1001466,session_1001466_420081,PlaceOrder,3828201,1019,"{""order_id"": 10187, ""product_type"": ""electronic"", ""price"": 144.74, ""quantity"": 1}",2017-12-03 09:13:26
+940,1003716,session_1003716_420081,ClickProduct,180342,40,"{""product_type"": ""sport_equipment"", ""price"": 86.45}",2017-12-03 09:27:07
+941,1003351,session_1003351_420081,ClickProduct,2995656,841,"{""product_type"": ""clothes"", ""price"": 76.63}",2017-12-03 09:48:52
+942,1000636,session_1000636_420081,ClickProduct,2087115,571,"{""product_type"": ""shoes"", ""price"": 103.15}",2017-12-03 09:58:12
+943,1002042,session_1002042_420082,ClickProduct,5008017,1305,"{""product_type"": ""toy"", ""price"": 30.07}",2017-12-03 10:04:36
+944,1005712,session_1005712_420082,ClickProduct,3421467,937,"{""product_type"": ""shoes"", ""price"": 110.77}",2017-12-03 10:05:15
+945,1002042,session_1002042_420082,PlaceOrder,4520041,1183,"{""order_id"": 10188, ""product_type"": ""toy"", ""price"": 95.77, ""quantity"": 1}",2017-12-03 10:06:45
+946,1003716,session_1003716_420082,ClickProduct,3541239,963,"{""product_type"": ""sport_equipment"", ""price"": 42.48}",2017-12-03 10:07:39
+947,1005712,session_1005712_420082,AddToCart,2413573,667,"{""product_type"": ""shoes"", ""price"": 52.75, ""quantity"": 1}",2017-12-03 10:07:39
+948,1005712,session_1005712_420082,ClickProduct,4538674,1188,"{""product_type"": ""sport_equipment"", ""price"": 97.54}",2017-12-03 10:11:32
+949,1002927,session_1002927_420082,ClickProduct,5075315,1321,"{""product_type"": ""book"", ""price"": 17.24}",2017-12-03 10:13:25
+950,1005712,session_1005712_420082,ClickProduct,2797533,785,"{""product_type"": ""sport_equipment"", ""price"": 51.78}",2017-12-03 10:14:59
+951,1000084,session_1000084_420082,ClickProduct,4363274,1146,"{""product_type"": ""cosmetic"", ""price"": 67.99}",2017-12-03 10:16:33
+952,1002618,session_1002618_420082,ClickProduct,1808592,488,"{""product_type"": ""toy"", ""price"": 77.61}",2017-12-03 10:20:39
+953,1005498,session_1005498_420082,ClickProduct,4222164,1114,"{""product_type"": ""book"", ""price"": 38.47}",2017-12-03 10:34:00
+954,1005498,session_1005498_420082,ClickProduct,1340397,360,"{""product_type"": ""clothes"", ""price"": 77.97}",2017-12-03 10:36:04
+955,1005498,session_1005498_420082,ClickProduct,3341674,917,"{""product_type"": ""toy"", ""price"": 97.83}",2017-12-03 10:36:31
+956,1005498,session_1005498_420082,ClickProduct,4702450,1234,"{""product_type"": ""toy"", ""price"": 56.59}",2017-12-03 10:37:53
+957,1002927,session_1002927_420083,ClickProduct,418390,96,"{""product_type"": ""shoes"", ""price"": 87.82}",2017-12-03 11:02:20
+958,1001375,session_1001375_420083,PlaceOrder,1096863,297,"{""order_id"": 10189, ""product_type"": ""book"", ""price"": 38.01, ""quantity"": 1}",2017-12-03 11:06:25
+959,1001375,session_1001375_420083,AddToCart,108408,18,"{""product_type"": ""book"", ""price"": 31.76, ""quantity"": 1}",2017-12-03 11:10:35
+960,1002618,session_1002618_420083,ClickProduct,1370806,379,"{""product_type"": ""food"", ""price"": 67.75}",2017-12-03 11:11:46
+961,1001375,session_1001375_420083,ClickProduct,3388153,930,"{""product_type"": ""book"", ""price"": 26.81}",2017-12-03 11:13:50
+962,1001375,session_1001375_420083,AddToCart,5099233,1325,"{""product_type"": ""book"", ""price"": 33.03, ""quantity"": 1}",2017-12-03 11:17:32
+963,1002618,session_1002618_420083,ClickProduct,2308420,639,"{""product_type"": ""food"", ""price"": 7.43}",2017-12-03 11:20:15
+964,1001375,session_1001375_420083,PlaceOrder,2275422,622,"{""order_id"": 10190, ""product_type"": ""book"", ""price"": 11.14, ""quantity"": 1}",2017-12-03 11:21:22
+965,1001375,session_1001375_420083,PlaceOrder,108408,18,"{""order_id"": 10191, ""product_type"": ""book"", ""price"": 31.76, ""quantity"": 1}",2017-12-03 11:25:07
+966,1001375,session_1001375_420083,PlaceOrder,4463332,1169,"{""order_id"": 10192, ""product_type"": ""book"", ""price"": 33.94, ""quantity"": 1}",2017-12-03 11:29:58
+967,1001326,session_1001326_420083,ClickProduct,3083565,864,"{""product_type"": ""electronic"", ""price"": 394.88}",2017-12-03 11:36:07
+968,1001375,session_1001375_420083,PlaceOrder,4404218,1157,"{""order_id"": 10193, ""product_type"": ""book"", ""price"": 13.65, ""quantity"": 1}",2017-12-03 11:36:49
+969,1002618,session_1002618_420083,ClickProduct,1432656,395,"{""product_type"": ""book"", ""price"": 23.54}",2017-12-03 11:42:04
+970,1002618,session_1002618_420083,ClickProduct,2384108,658,"{""product_type"": ""toy"", ""price"": 35.18}",2017-12-03 11:42:15
+971,1001915,session_1001915_420083,AddToCart,91877,17,"{""product_type"": ""sport_equipment"", ""price"": 81.09, ""quantity"": 1}",2017-12-03 11:45:07
+972,1002618,session_1002618_420083,ClickProduct,4945426,1292,"{""product_type"": ""book"", ""price"": 31.6}",2017-12-03 11:45:51
+973,1001915,session_1001915_420083,ClickProduct,3449001,942,"{""product_type"": ""sport_equipment"", ""price"": 69.49}",2017-12-03 11:49:50
+974,100528,session_100528_420083,ClickProduct,905677,246,"{""product_type"": ""cosmetic"", ""price"": 85.17}",2017-12-03 11:57:45
+975,1001915,session_1001915_420083,ClickProduct,3368542,929,"{""product_type"": ""sport_equipment"", ""price"": 78.13}",2017-12-03 11:59:53
+976,1000335,session_1000335_420084,ClickProduct,3536239,961,"{""product_type"": ""toy"", ""price"": 45.43}",2017-12-03 12:01:36
+977,1001915,session_1001915_420084,ClickProduct,2580972,700,"{""product_type"": ""clothes"", ""price"": 44.23}",2017-12-03 12:03:32
+978,1001915,session_1001915_420084,ClickProduct,1447850,402,"{""product_type"": ""clothes"", ""price"": 72.15}",2017-12-03 12:03:51
+979,1001915,session_1001915_420084,ClickProduct,4585679,1197,"{""product_type"": ""clothes"", ""price"": 56.04}",2017-12-03 12:10:43
+980,1002909,session_1002909_420084,AddToCart,3362139,924,"{""product_type"": ""book"", ""price"": 14.23, ""quantity"": 1}",2017-12-03 12:20:21
+981,1001566,session_1001566_420084,ClickProduct,925671,255,"{""product_type"": ""toy"", ""price"": 64.89}",2017-12-03 12:29:23
+982,1000335,session_1000335_420085,ClickProduct,3210567,892,"{""product_type"": ""furniture"", ""price"": 478.28}",2017-12-03 13:00:35
+983,1000335,session_1000335_420085,PlaceOrder,3210567,892,"{""order_id"": 10194, ""product_type"": ""furniture"", ""price"": 478.28, ""quantity"": 1}",2017-12-03 13:27:53
+984,1000335,session_1000335_420085,PlaceOrder,2068780,565,"{""order_id"": 10195, ""product_type"": ""sport_equipment"", ""price"": 57.02, ""quantity"": 1}",2017-12-03 13:32:33
+985,1004096,session_1004096_420085,ClickProduct,2672445,731,"{""product_type"": ""sport_equipment"", ""price"": 79.49}",2017-12-03 13:51:05
+986,1002307,session_1002307_420085,AddToCart,190148,41,"{""product_type"": ""book"", ""price"": 17.34, ""quantity"": 1}",2017-12-03 13:58:26
+987,1002307,session_1002307_420086,ClickProduct,442940,103,"{""product_type"": ""book"", ""price"": 24.23}",2017-12-03 14:02:22
+988,1002307,session_1002307_420086,ClickProduct,4211339,1111,"{""product_type"": ""food"", ""price"": 61.87}",2017-12-03 14:02:58
+989,100528,session_100528_420086,ClickProduct,2618435,708,"{""product_type"": ""book"", ""price"": 19.2}",2017-12-03 14:02:59
+990,100528,session_100528_420086,PlaceOrder,4621425,1207,"{""order_id"": 10196, ""product_type"": ""book"", ""price"": 13.42, ""quantity"": 1}",2017-12-03 14:15:09
+991,100528,session_100528_420086,PlaceOrder,2448944,674,"{""order_id"": 10197, ""product_type"": ""electronic"", ""price"": 268.64, ""quantity"": 1}",2017-12-03 14:15:09
+992,100528,session_100528_420086,PlaceOrder,634999,157,"{""order_id"": 10198, ""product_type"": ""book"", ""price"": 26.29, ""quantity"": 1}",2017-12-03 14:15:09
+993,1002909,session_1002909_420086,AddToCart,3527159,958,"{""product_type"": ""book"", ""price"": 28.53, ""quantity"": 1}",2017-12-03 14:43:38
+994,1003716,session_1003716_420086,AddToCart,4247846,1121,"{""product_type"": ""furniture"", ""price"": 299.58, ""quantity"": 1}",2017-12-03 14:45:27
+995,1002909,session_1002909_420086,ClickProduct,3362139,924,"{""product_type"": ""book"", ""price"": 14.23}",2017-12-03 14:55:04
+996,1001629,session_1001629_420087,PlaceOrder,1685244,445,"{""order_id"": 10199, ""product_type"": ""cosmetic"", ""price"": 40.64, ""quantity"": 1}",2017-12-03 15:00:44
+997,1003716,session_1003716_420087,PlaceOrder,4247846,1121,"{""order_id"": 10200, ""product_type"": ""furniture"", ""price"": 299.58, ""quantity"": 1}",2017-12-03 15:01:26
+998,1002909,session_1002909_420087,ClickProduct,3527159,958,"{""product_type"": ""book"", ""price"": 28.53}",2017-12-03 15:19:21
+999,1001375,session_1001375_420087,ClickProduct,4648650,1213,"{""product_type"": ""book"", ""price"": 36.91}",2017-12-03 15:26:31
+1000,1001375,session_1001375_420087,ClickProduct,2180798,592,"{""product_type"": ""book"", ""price"": 26.06}",2017-12-03 15:30:57
