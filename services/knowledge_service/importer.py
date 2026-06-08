@@ -139,9 +139,13 @@ class KnowledgeImporter:
             return cur.fetchall()
 
     def _fetch_tracking_searches(self, conn):
-        with conn.cursor() as cur:
-            cur.execute("SELECT customer_id, query, timestamp FROM search_history")
-            return cur.fetchall()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT customer_id, query, timestamp FROM search_history")
+                return cur.fetchall()
+        except psycopg2.DatabaseError:
+            conn.rollback()
+            return []
 
     def import_products_from_db(self, db_url):
         if not db_url:
@@ -280,12 +284,37 @@ class KnowledgeImporter:
                     MERGE (u)-[r:SEARCHED {timestamp: $ts}]->(s)
                 """, uid=customer_id, search_query=search_query, ts=ts)
 
+    def import_users_from_db(self, db_url):
+        if not db_url:
+            print("No USER_DATABASE_URL provided, skipping user import.")
+            return
+        conn = self._connect_postgres(db_url)
+        if not conn:
+            print("Failed to connect to user database.")
+            return
+        try:
+            with conn.cursor() as cur:
+                cur.execute('SELECT id, email, full_name FROM "user" WHERE role = \'customer\'')
+                users = cur.fetchall()
+        finally:
+            conn.close()
+
+        with self.driver.session() as session:
+            print(f"Importing {len(users)} users from database to Neo4j...")
+            for uid, email, full_name in users:
+                session.run("""
+                    MERGE (u:User {id: $uid})
+                    SET u.email = $email,
+                        u.full_name = $full_name
+                """, uid=uid, email=email, full_name=full_name)
+
 if __name__ == "__main__":
     uri = os.getenv("NEO4J_URI", "bolt://neo4j:7687")
     importer = KnowledgeImporter(uri, "neo4j", "password123")
     importer.clear_database()
     importer.create_constraints()
-    importer.import_data("/data_user500.csv")
+    # importer.import_data("/data_user500.csv")
+    importer.import_users_from_db(os.getenv("USER_DATABASE_URL"))
     importer.import_products_from_db(os.getenv("PRODUCT_DATABASE_URL"))
     importer.import_vouchers_from_db(os.getenv("VOUCHER_DATABASE_URL"))
     importer.import_tracking_from_db(os.getenv("TRACKING_DATABASE_URL"))

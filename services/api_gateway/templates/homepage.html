@@ -261,7 +261,7 @@
                         </a>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(price)}đ</span>
-                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${price}, '${p.name.replace(/'/g, "\\'")}', '${p.image_url}', ${p.variant_id || p.product_variant_id || 'null'}, '')">
+                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${price}, '${p.name.replace(/'/g, "\\'")}', '${p.image_url}', ${p.variant_id || p.product_variant_id || null}, '')">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>

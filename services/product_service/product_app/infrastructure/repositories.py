@@ -9,7 +9,15 @@ from product_app.models import Attribute, AttributeValue, Product, ProductVarian
 
 class DjangoProductRepository(ProductRepository):
     def list_active(self, category_slug=None, search_query=None):
-        products = Product.objects.filter(is_active=True)
+        products = Product.objects.filter(is_active=True).select_related(
+            'category', 'book', 'clothes', 'laptop', 'phone', 'tablet',
+            'camera', 'headphone', 'watch', 'shoe', 'furniture'
+        ).prefetch_related(
+            'variants',
+            'variants__option_values',
+            'variants__option_values__attribute_value',
+            'variants__option_values__attribute_value__attribute'
+        )
         if category_slug:
             products = products.filter(category__slug=category_slug)
         if search_query:
@@ -17,7 +25,15 @@ class DjangoProductRepository(ProductRepository):
         return products
 
     def get_active(self, product_id: int):
-        return Product.objects.get(pk=product_id, is_active=True)
+        return Product.objects.select_related(
+            'category', 'book', 'clothes', 'laptop', 'phone', 'tablet',
+            'camera', 'headphone', 'watch', 'shoe', 'furniture'
+        ).prefetch_related(
+            'variants',
+            'variants__option_values',
+            'variants__option_values__attribute_value',
+            'variants__option_values__attribute_value__attribute'
+        ).get(pk=product_id, is_active=True)
 
     @transaction.atomic
     def save(self, product_input: ProductInput):

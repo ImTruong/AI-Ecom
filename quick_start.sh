@@ -76,7 +76,8 @@ done
 
 # 3. Seed initial data (Products, Vouchers, Default Users)
 echo -e "${GREEN}Step 3: Seeding data (Products, Vouchers, Default Users)...${NC}"
-$DOCKER_CMD exec -T product-service python seed_products.py || echo -e "${RED}Failed to seed products${NC}"
+$DOCKER_CMD exec -T knowledge-service python db_seeder.py || echo -e "${RED}Failed to seed databases${NC}"
+$DOCKER_CMD exec -T knowledge-service python sync_operational_db.py || echo -e "${RED}Failed to sync operational databases${NC}"
 $DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo -e "${RED}Failed to seed vouchers${NC}"
 $DOCKER_CMD exec -T user-service python seed_roles.py || echo -e "${RED}Failed to seed RBAC roles${NC}"
 $DOCKER_CMD exec -T user-service python seed_users.py || echo -e "${RED}Failed to seed default users${NC}"

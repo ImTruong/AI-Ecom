@@ -496,6 +496,7 @@ services:
       - PRODUCT_DATABASE_URL=postgresql://product_user:product_pass@product_db:5432/product_db
       - VOUCHER_DATABASE_URL=postgresql://voucher_user:voucher_pass@voucher_db:5432/voucher_db
       - TRACKING_DATABASE_URL=postgresql://tracking_user:tracking_pass@tracking_db:5432/tracking_db
+      - USER_DATABASE_URL=postgresql://auth_user:auth_pass@auth_db:5432/auth_db
     ports:
       - "8105:8005"
     depends_on:
@@ -507,6 +508,7 @@ services:
     volumes:
       - ./services/knowledge_service:/app
       - ./data_user500.csv:/data_user500.csv
+      - ./AI/data:/AI/data
 
   # Chatbot Service (AI & RAG)
   chatbot-service:

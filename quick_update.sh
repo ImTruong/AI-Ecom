@@ -50,7 +50,8 @@ echo -e "🌐 Tracking Stats: http://localhost:8000/api/tracking/stats/"
 
 echo -e "${BLUE}🌱 Seeding RBAC Roles, Products, Vouchers & Default Users...${NC}"
 $DOCKER_CMD exec -T user-service python seed_roles.py || echo "RBAC roles seeding failed"
-$DOCKER_CMD exec -T product-service python seed_products.py || echo "Product seeding failed"
+$DOCKER_CMD exec -T knowledge-service python db_seeder.py || echo "Database seeding failed"
+$DOCKER_CMD exec -T knowledge-service python sync_operational_db.py || echo "Operational database sync failed"
 $DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo "Voucher seeding failed"
 $DOCKER_CMD exec -T user-service python seed_users.py || echo "User seeding failed"
 
