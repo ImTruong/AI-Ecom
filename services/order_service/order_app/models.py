@@ -69,6 +69,8 @@ class OrderItem(models.Model):
     product_type = models.CharField(max_length=20) # book, clothes
     product_id = models.IntegerField()
     variant_id = models.IntegerField(null=True, blank=True)
+    variant_name = models.CharField(max_length=255, blank=True)
+    image_url = models.CharField(max_length=500, blank=True)
     product_name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=15, decimal_places=2)
     quantity = models.IntegerField()
@@ -82,6 +84,8 @@ class OrderItem(models.Model):
             'product_type': self.product_type,
             'product_id': self.product_id,
             'variant_id': self.variant_id,
+            'variant_name': self.variant_name,
+            'image_url': self.image_url,
             'product_name': self.product_name,
             'price': float(self.price),
             'quantity': self.quantity,
@@ -92,10 +96,15 @@ class OrderItem(models.Model):
 class ShipmentTracking(models.Model):
     class ShipmentStatus(models.TextChoices):
         CREATED = 'created', 'Created'
+        CONFIRMED = 'confirmed', 'Confirmed'
+        PREPARING = 'preparing', 'Preparing'
+        SHIPPED = 'shipped', 'Shipped'
+        DELIVERING = 'delivering', 'Delivering'
         PICKED_UP = 'picked_up', 'Picked Up'
         IN_TRANSIT = 'in_transit', 'In Transit'
         OUT_FOR_DELIVERY = 'out_for_delivery', 'Out For Delivery'
         DELIVERED = 'delivered', 'Delivered'
+        CANCELLED = 'cancelled', 'Cancelled'
         FAILED = 'failed', 'Failed'
         RETURNED = 'returned', 'Returned'
 

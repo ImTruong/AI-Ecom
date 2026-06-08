@@ -1,0 +1,316 @@
+"""
+===================================================================================
+GRU PURCHASE PREDICTION MODEL - TECHNICAL DOCUMENTATION FOR AI AGENTS
+===================================================================================
+
+Purpose: Predict whether a user will purchase an item based on their last 20 behaviors
+
+-------------------
+1. MODEL ARCHITECTURE
+-------------------
+
+Model Name: GRU (Gated Recurrent Unit)
+Framework: TensorFlow/Keras
+Input: 4 sequences of length 20
+Output: Probability (0-1) that user will buy the target item
+
+Architecture:
+  ├─ Input Layer 1: behaviors [batch_size, 20]
+  │  └─ Embedding(num_behaviors=3, dim=32)
+  │     └─ GRU(64 units)
+  │
+  ├─ Input Layer 2: items [batch_size, 20]
+  │  └─ Embedding(num_items=912, dim=32)
+  │     └─ GRU(64 units)
+  │
+  ├─ Input Layer 3: categories [batch_size, 20]
+  │  └─ Embedding(num_categories=385, dim=32)
+  │     └─ GRU(64 units)
+  │
+  ├─ Input Layer 4: target_item [batch_size, 1]
+  │  └─ Embedding(num_items=912, dim=32)
+  │     └─ Flatten
+  │
+  └─ Concat → Dense(128, relu) → Dropout(0.3) → Dense(64, relu) → Dense(1, sigmoid)
+
+Total Parameters: ~350,000
+
+-------------------
+2. INPUT SPECIFICATION
+-------------------
+
+The model expects 4 inputs (as numpy arrays or lists):
+
+Input 1 - Behavior Sequence:
+  Shape: [batch_size, 20]
+  Type: int (0-indexed)
+  Values: {0, 1, 2} where:
+    0 = pv (page view/click)
+    1 = cart (add to cart)
+    2 = buy (purchase)
+  Description: Last 20 behaviors of the user, padded with 0s if less than 20
+
+Input 2 - Item ID Sequence:
+  Shape: [batch_size, 20]
+  Type: int (1-indexed, range: 1-912)
+  Description: Item IDs corresponding to each behavior
+  Note: Use 0 for padding if behavior history < 20
+
+Input 3 - Category ID Sequence:
+  Shape: [batch_size, 20]
+  Type: int (1-indexed, range: 1-385)
+  Description: Category IDs for each item in the sequence
+
+Input 4 - Target Item ID:
+  Shape: [batch_size, 1]
+  Type: int (1-indexed, range: 1-912)
+  Description: The item ID to predict purchase probability for
+
+Example Input:
+  behaviors = [[0, 0, 1, 1, 2, 0, 0, ..., 0, 1, 2]]  # shape: [1, 20]
+  items = [[0, 0, 5, 5, 10, 0, 0, ..., 0, 15, 20]]   # shape: [1, 20]
+  categories = [[0, 0, 2, 2, 5, 0, 0, ..., 0, 3, 5]]  # shape: [1, 20]
+  target_item = [[25]]                                  # shape: [1, 1]
+
+-------------------
+3. OUTPUT SPECIFICATION
+-------------------
+
+Output: Probability Score
+  Shape: [batch_size, 1]
+  Type: float32
+  Range: [0.0, 1.0]
+  Interpretation:
+    0.0 - 0.5: Model predicts user will NOT buy (negative)
+    0.5 - 1.0: Model predicts user WILL buy (positive)
+
+Example Output:
+  [[0.8234]]  # 82.34% probability user will buy target_item
+  [[0.3125]]  # 31.25% probability user will NOT buy target_item
+
+Decision Threshold: 0.5 (can be adjusted)
+  - If output >= 0.5: Predict "BUY"
+  - If output < 0.5: Predict "NO BUY"
+
+-------------------
+4. ENCODERS (REQUIRED)
+-------------------
+
+File: encoders.pkl (Python pickle file)
+Contains 4 LabelEncoders:
+
+a) user_encoder
+   Purpose: Encode user_id (string → int)
+   NOT USED IN MODEL but saved for reference
+
+b) item_encoder
+   Purpose: Encode item_id
+   Usage: encoded_item_id = item_encoder.transform([raw_item_id]) + 1
+   Note: Add +1 because model uses 1-indexed items
+
+c) category_encoder
+   Purpose: Encode category_id
+   Usage: encoded_cat_id = category_encoder.transform([raw_cat_id]) + 1
+   Note: Add +1 because model uses 1-indexed categories
+
+d) behavior_encoder
+   Purpose: Encode behavior type (string → int)
+   Mapping: {'pv': 0, 'cart': 1, 'buy': 2}
+   Usage: encoded_behavior = behavior_encoder.transform([behavior_type])
+
+Example Usage of Encoders:
+  import pickle
+  with open('encoders.pkl', 'rb') as f:
+      encoders = pickle.load(f)
+  
+  # Encode a raw item ID
+  raw_item_id = 12345
+  encoded_item_id = encoders['item_encoder'].transform([raw_item_id])[0] + 1
+  
+  # Encode behavior type
+  behavior = 'pv'
+  encoded_behavior = encoders['behavior_encoder'].transform([behavior])[0]
+
+-------------------
+5. LOADING & USING THE MODEL
+-------------------
+
+Step 1: Load Model
+  import tensorflow as tf
+  model = tf.keras.models.load_model('GRU_best_model.h5')
+  # Or newer format:
+  model = tf.keras.models.load_model('GRU_best_model.keras')
+
+Step 2: Load Encoders
+  import pickle
+  with open('encoders.pkl', 'rb') as f:
+      encoders = pickle.load(f)
+
+Step 3: Prepare Input Data
+  # Raw data
+  user_behavior_history = [
+      {'item_id': 101, 'category_id': 5, 'behavior': 'pv'},
+      {'item_id': 102, 'category_id': 5, 'behavior': 'pv'},
+      {'item_id': 101, 'category_id': 5, 'behavior': 'cart'},
+      {'item_id': 101, 'category_id': 5, 'behavior': 'buy'},
+  ]
+  target_item_id = 103
+  target_category_id = 5
+  
+  # Encode & Pad to 20 behaviors
+  SEQUENCE_LENGTH = 20
+  
+  encoded_behaviors = [
+      encoders['behavior_encoder'].transform([e['behavior']])[0]
+      for e in user_behavior_history
+  ]
+  encoded_items = [
+      encoders['item_encoder'].transform([e['item_id']])[0] + 1
+      for e in user_behavior_history
+  ]
+  encoded_categories = [
+      encoders['category_encoder'].transform([e['category_id']])[0] + 1
+      for e in user_behavior_history
+  ]
+  
+  # Pad if needed
+  pad_len = SEQUENCE_LENGTH - len(encoded_behaviors)
+  if pad_len > 0:
+      encoded_behaviors = [0] * pad_len + encoded_behaviors
+      encoded_items = [0] * pad_len + encoded_items
+      encoded_categories = [0] * pad_len + encoded_categories
+  
+  # Prepare target item
+  encoded_target_item = encoders['item_encoder'].transform([target_item_id])[0] + 1
+
+Step 4: Make Prediction
+  import numpy as np
+  
+  X = [
+      np.array([encoded_behaviors]),
+      np.array([encoded_items]),
+      np.array([encoded_categories]),
+      np.array([[encoded_target_item]])
+  ]
+  
+  prediction_probability = model.predict(X, verbose=0)[0][0]
+  
+  # Decision
+  if prediction_probability >= 0.5:
+      prediction = "BUY"
+  else:
+      prediction = "NO BUY"
+  
+  print(f"Prediction: {prediction} (Probability: {prediction_probability:.4f})")
+
+-------------------
+6. MODEL PERFORMANCE METRICS
+-------------------
+
+Test Set Performance (190 samples):
+  - AUC: 0.6683
+  - Accuracy: 0.6579
+  - Precision: 0.7193
+  - Recall: 0.7130
+  - F1 Score: 0.7162
+
+Interpretation:
+  - Model correctly predicts purchase 65.79% of the time
+  - When predicting "buy", it's correct 71.93% of the time
+  - It catches 71.30% of actual purchases
+  - F1 balances precision & recall = 0.7162
+
+Limitations:
+  - AUC 0.6683 is moderate (< 0.75 is not excellent)
+  - Model trained on only 1000 records → sparse data
+  - Performance may vary with different user populations
+
+-------------------
+7. BATCH PREDICTION
+-------------------
+
+Predict for multiple users at once:
+
+  batch_size = 32
+  
+  # Prepare batch (shape: [32, 20])
+  batch_behaviors = np.array([...])  # [32, 20]
+  batch_items = np.array([...])      # [32, 20]
+  batch_categories = np.array([...]) # [32, 20]
+  batch_target_items = np.array([...]).reshape(-1, 1)  # [32, 1]
+  
+  # Predict
+  predictions = model.predict(
+      [batch_behaviors, batch_items, batch_categories, batch_target_items],
+      verbose=0
+  )  # Output shape: [32, 1]
+  
+  # Convert to binary predictions (threshold=0.5)
+  binary_predictions = (predictions >= 0.5).astype(int)
+
+-------------------
+8. IMPORTANT NOTES FOR AI AGENTS
+-------------------
+
+⚠️ CRITICAL:
+  1. Always pad sequences to length 20 (pad with 0s)
+  2. Always use +1 offset for item_id and category_id (model is 1-indexed)
+  3. Behaviors are 0-indexed: {0: pv, 1: cart, 2: buy}
+  4. Target item must be in range [1, 912]
+  5. Target category must be in range [1, 385]
+
+✓ ASSUMPTIONS:
+  - User has at least 1 behavior history (pad to 20)
+  - Item IDs are from training set (1-912)
+  - Category IDs are from training set (1-385)
+  - Sequence order matters (last behavior is most recent)
+
+✓ OPTIMIZATION:
+  - Use batch prediction (multiple users) for speed
+  - Disable verbose output for production (verbose=0)
+  - Cache encoders to avoid reloading
+
+-------------------
+9. ERROR HANDLING
+-------------------
+
+Common Errors:
+
+a) ValueError: Input shape mismatch
+   → Ensure all inputs have shape [batch_size, sequence_length]
+   → target_item must be [batch_size, 1]
+
+b) KeyError: Item ID not in encoder
+   → Item ID outside range [1, 912]
+   → Use unknown item ID = 0 (pad value) or map to closest
+
+c) Model returns NaN
+   → Input contains invalid values (negative, None)
+   → Check padding and encoding steps
+
+-------------------
+10. FILE REQUIREMENTS FOR AI AGENT
+-------------------
+
+The AI Agent needs 3 files:
+
+1. GRU_best_model.h5 or GRU_best_model.keras
+   - Trained model weights
+   - Size: ~1.5 MB
+   - Load: tf.keras.models.load_model(filename)
+
+2. encoders.pkl
+   - LabelEncoders for item_id, category_id, behavior_type
+   - Size: ~50 KB
+   - Load: pickle.load(open(filename, 'rb'))
+
+3. model_results.csv
+   - Performance metrics summary (optional reference)
+   - Contains: AUC, Accuracy, Precision, Recall, F1
+
+All files must be in same directory or specify full paths.
+
+===================================================================================
+END OF DOCUMENTATION
+===================================================================================
+"""

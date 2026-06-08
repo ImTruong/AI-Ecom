@@ -15,6 +15,7 @@ class ProductVariantInput:
     stock: int
     sku: str
     image_url: str
+    is_active: bool
     options: dict
     option_values: list[VariantOption]
 
@@ -31,4 +32,3 @@ class ProductInput:
     product_type: str
     attributes: dict
     variants: list[ProductVariantInput]
-

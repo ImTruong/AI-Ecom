@@ -144,6 +144,128 @@
     .customer-email { color: #666; font-size: 13px; font-weight: 500; }
 
     .order-id { font-family: 'Courier New', Courier, monospace; color: #667eea; font-weight: 900; }
+
+    .filter-bar, .status-tabs {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .status-tab {
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #475569;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .status-tab.active {
+        background: #667eea;
+        color: #fff;
+        border-color: #667eea;
+    }
+
+    .filter-input {
+        border: 2px solid #edf0f3;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 700;
+        min-width: 180px;
+    }
+
+    .btn-view {
+        border: 1px solid #dbe3ef;
+        background: white;
+        color: #334155;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .drawer-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: none;
+        justify-content: flex-end;
+        z-index: 3000;
+    }
+
+    .order-drawer {
+        width: min(760px, 100vw);
+        background: #f8fafc;
+        height: 100vh;
+        overflow-y: auto;
+        box-shadow: -20px 0 50px rgba(0,0,0,0.2);
+    }
+
+    .drawer-header {
+        background: #fff;
+        padding: 28px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .drawer-body {
+        padding: 24px;
+        display: grid;
+        gap: 18px;
+    }
+
+    .drawer-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 20px;
+    }
+
+    .timeline-row {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 12px;
+        min-height: 58px;
+    }
+
+    .timeline-dot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        margin: 5px auto 0;
+        background: #94a3b8;
+        position: relative;
+    }
+
+    .timeline-row:not(:last-child) .timeline-dot::after {
+        content: '';
+        position: absolute;
+        top: 18px;
+        left: 6px;
+        width: 2px;
+        height: 44px;
+        background: #e2e8f0;
+    }
+
+    .tracking-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .tracking-form textarea {
+        grid-column: 1 / -1;
+        min-height: 82px;
+    }
+
+    @media (max-width: 760px) {
+        .tracking-form { grid-template-columns: 1fr; }
+    }
 </style>
 {% endblock %}
 
@@ -158,14 +280,28 @@
     </div>
 
     <div class="orders-table-container">
+        <div class="status-tabs" id="statusTabs">
+            <button class="status-tab active" data-status="all" onclick="setStatusTab('all')">Tất cả</button>
+            <button class="status-tab" data-status="pending" onclick="setStatusTab('pending')">Chờ xác nhận</button>
+            <button class="status-tab" data-status="preparing" onclick="setStatusTab('preparing')">Đang chuẩn bị</button>
+            <button class="status-tab" data-status="shipping" onclick="setStatusTab('shipping')">Đang giao</button>
+            <button class="status-tab" data-status="delivered" onclick="setStatusTab('delivered')">Đã giao</button>
+            <button class="status-tab" data-status="cancelled" onclick="setStatusTab('cancelled')">Đã hủy</button>
+        </div>
+        <div class="filter-bar">
+            <input class="filter-input" id="filterKeyword" placeholder="Mã đơn / tên / SĐT" oninput="renderOrders()">
+            <input class="filter-input" id="filterDateFrom" type="date" onchange="renderOrders()">
+            <input class="filter-input" id="filterDateTo" type="date" onchange="renderOrders()">
+        </div>
         <table>
             <thead>
                 <tr>
-                    <th>Order Details</th>
-                    <th>Customer & Shipping</th>
-                    <th>Date & Total</th>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Thanh toán</th>
                     <th>Status</th>
-                    <th>Update Status</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody id="ordersTableBody">
@@ -174,10 +310,49 @@
         </table>
     </div>
 </div>
+
+<div class="drawer-overlay" id="orderDrawer">
+    <div class="order-drawer">
+        <div id="drawerContent"></div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    let allOrders = [];
+    let activeStatus = 'all';
+
+    function money(value) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(value || 0));
+    }
+
+    function trackingLabel(status) {
+        const labels = {
+            created: 'Đơn hàng đã được tạo',
+            confirmed: 'Đã xác nhận đơn hàng',
+            preparing: 'Đang chuẩn bị hàng',
+            shipped: 'Đã bàn giao vận chuyển',
+            delivering: 'Đang giao hàng',
+            picked_up: 'Đã lấy hàng',
+            in_transit: 'Đang vận chuyển',
+            out_for_delivery: 'Đang giao hàng',
+            delivered: 'Giao hàng thành công',
+            cancelled: 'Đã hủy',
+            failed: 'Giao hàng thất bại',
+            returned: 'Trả hàng',
+        };
+        return labels[status] || status;
+    }
+
+    function setStatusTab(status) {
+        activeStatus = status;
+        document.querySelectorAll('.status-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.status === status);
+        });
+        renderOrders();
+    }
+
     async function loadOrders() {
         const userRole = localStorage.getItem('user_role');
         if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
@@ -192,75 +367,159 @@
             const data = await resp.json();
             
             if (data.success) {
-                const tbody = document.getElementById('ordersTableBody');
-                if (!data.data || data.data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 50px; color: #888;">No orders found in the system.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = data.data.map(order => `
-                    <tr id="row-${order.id}">
-                        <td style="vertical-align: top; padding-top: 30px;">
-                            <div class="order-id">#ORD-${order.id}</div>
-                            <div style="margin-top: 15px;">
-                                <div style="font-size: 13px; color: #888; margin-bottom: 8px; font-weight: 800;">ORDERED ITEMS:</div>
-                                <div style="display: flex; flex-direction: column; gap: 8px;">
-                                    ${order.items.map(item => `
-                                        <div style="display: flex; justify-content: space-between; font-size: 14px; background: white; padding: 10px 15px; border-radius: 12px; border: 1px solid #f0f0f0;">
-                                            <span>${item.product_name} <strong>×${item.quantity}</strong></span>
-                                            <span style="color: #667eea;">$${item.subtotal.toFixed(2)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </td>
-                        <td style="vertical-align: top; padding-top: 30px;">
-                            <div class="customer-info" style="gap: 10px;">
-                                <div>
-                                    <div style="font-size: 12px; color: #888; font-weight: 800;">RECIPIENT:</div>
-                                    <div class="customer-name" style="font-size: 18px;">${order.shipping_info ? order.shipping_info.full_name : 'N/A'}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; color: #888; font-weight: 800;">CONTACT:</div>
-                                    <div class="customer-email">📞 ${order.shipping_info ? order.shipping_info.phone : 'N/A'}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; color: #888; font-weight: 800;">ADDRESS:</div>
-                                    <div style="font-size: 14px; color: #555; line-height: 1.5; font-weight: 600;">📍 ${order.shipping_info ? order.shipping_info.address : 'N/A'}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="vertical-align: top; padding-top: 30px;">
-                            <div style="margin-bottom: 20px;">
-                                <div style="font-size: 14px; opacity: 0.8;">${new Date(order.created_at).toLocaleDateString()}</div>
-                                <div style="font-size: 12px; opacity: 0.6;">${new Date(order.created_at).toLocaleTimeString()}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #888; font-weight: 800;">FINAL TOTAL:</div>
-                                <div style="font-weight: 900; color: #111; font-size: 24px;">$${order.final_amount.toFixed(2)}</div>
-                                <div style="font-size: 12px; color: #37b24d; font-weight: 700;">💳 via ${order.payment_method.toUpperCase()}</div>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle;">
-                            <span class="order-pill pill-${order.status}" id="pill-${order.id}">${order.status}</span>
-                        </td>
-                        <td style="vertical-align: middle;">
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <select class="status-select" id="status-${order.id}" style="width: 100%;">
-                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending Approval</option>
-                                    <option value="shipping" ${order.status === 'shipping' ? 'selected' : ''}>Approved - Shipping</option>
-                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Completed - Delivered</option>
-                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                                </select>
-                                <button class="btn-update" onclick="updateStatus(${order.id})" style="width: 100%; margin-left: 0;">Update Status</button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                allOrders = data.data || [];
+                renderOrders();
             }
         } catch (err) {
             console.error('Error loading orders:', err);
             showAlert('Failed to load orders', 'error');
+        }
+    }
+
+    function normalizedStatus(order) {
+        const lastTracking = [...(order.tracking || [])].sort((a, b) => new Date(b.event_time) - new Date(a.event_time))[0];
+        if (lastTracking && ['preparing', 'confirmed'].includes(lastTracking.status)) return lastTracking.status;
+        return order.status;
+    }
+
+    function renderOrders() {
+        const tbody = document.getElementById('ordersTableBody');
+        const keyword = document.getElementById('filterKeyword').value.trim().toLowerCase();
+        const from = document.getElementById('filterDateFrom').value;
+        const to = document.getElementById('filterDateTo').value;
+        const filtered = allOrders.filter(order => {
+            const shipping = order.shipping_info || {};
+            const haystack = `#${order.id} ${shipping.full_name || ''} ${shipping.phone || ''}`.toLowerCase();
+            const createdDate = (order.created_at || '').slice(0, 10);
+            if (activeStatus !== 'all' && normalizedStatus(order) !== activeStatus) return false;
+            if (keyword && !haystack.includes(keyword)) return false;
+            if (from && createdDate < from) return false;
+            if (to && createdDate > to) return false;
+            return true;
+        });
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 50px; color: #888;">Không tìm thấy đơn hàng phù hợp.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(order => `
+            <tr id="row-${order.id}">
+                <td><div class="order-id">#ORD-${order.id}</div><div style="color:#64748b; font-size:13px;">${new Date(order.created_at).toLocaleString()}</div></td>
+                <td>
+                    <div class="customer-name">${order.shipping_info?.full_name || 'N/A'}</div>
+                    <div class="customer-email">${order.shipping_info?.phone || 'N/A'}</div>
+                    <div style="color:#64748b; font-size:13px; max-width:260px;">${order.shipping_info?.address || 'N/A'}</div>
+                </td>
+                <td><strong>${(order.items || []).length}</strong> sản phẩm</td>
+                <td><strong>${money(order.final_amount)}</strong><div style="color:#64748b; font-size:13px;">${(order.payment_method || 'cod').toUpperCase()}</div></td>
+                <td><span class="order-pill pill-${order.status}" id="pill-${order.id}">${order.status}</span></td>
+                <td><button class="btn-view" onclick="openOrderDrawer(${order.id})">Chi tiết</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderTimeline(order) {
+        const events = [...(order.tracking || [])].reverse();
+        if (!events.length) return '<div style="color:#94a3b8; font-weight:700;">Chưa có thông tin vận chuyển.</div>';
+        return events.map(event => `
+            <div class="timeline-row">
+                <div class="timeline-dot"></div>
+                <div>
+                    <div style="font-weight:900;">${trackingLabel(event.status)}</div>
+                    <div style="font-size:13px; color:#64748b;">${new Date(event.event_time || event.created_at).toLocaleString()}</div>
+                    ${event.location ? `<div style="font-size:13px;">${event.location}</div>` : ''}
+                    ${event.note ? `<div style="font-size:13px; color:#475569;">${event.note}</div>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openOrderDrawer(orderId) {
+        const order = allOrders.find(item => Number(item.id) === Number(orderId));
+        if (!order) return;
+        document.getElementById('drawerContent').innerHTML = `
+            <div class="drawer-header">
+                <div>
+                    <h2 style="font-weight:900; margin:0;">#ORD-${order.id}</h2>
+                    <div style="color:#64748b;">${new Date(order.created_at).toLocaleString()}</div>
+                </div>
+                <button class="btn-view" onclick="closeOrderDrawer()">Đóng</button>
+            </div>
+            <div class="drawer-body">
+                <div class="drawer-card">
+                    <h4>Khách hàng & giao hàng</h4>
+                    <div><strong>${order.shipping_info?.full_name || 'N/A'}</strong></div>
+                    <div>${order.shipping_info?.phone || 'N/A'}</div>
+                    <div style="color:#64748b;">${order.shipping_info?.address || 'N/A'}</div>
+                </div>
+                <div class="drawer-card">
+                    <h4>Sản phẩm</h4>
+                    ${(order.items || []).map(item => `
+                        <div style="display:grid; grid-template-columns:56px 1fr auto; gap:12px; align-items:center; padding:12px 0; border-top:1px solid #eef2f7;">
+                            <img src="${item.image_url || 'https://via.placeholder.com/80?text=P'}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;">
+                            <div>
+                                <div style="font-weight:900;">${item.product_name}</div>
+                                <div style="font-size:13px;color:#64748b;">${item.variant_name || (item.variant_id ? `Variant #${item.variant_id}` : 'Mặc định')} · SL ${item.quantity}</div>
+                            </div>
+                            <strong>${money(item.subtotal)}</strong>
+                        </div>
+                    `).join('')}
+                    <div style="text-align:right; font-size:20px; font-weight:900; margin-top:12px;">${money(order.final_amount)}</div>
+                </div>
+                <div class="drawer-card">
+                    <h4>Timeline tracking</h4>
+                    ${renderTimeline(order)}
+                </div>
+                <div class="drawer-card">
+                    <h4>Cập nhật shipping tracking</h4>
+                    <form class="tracking-form" onsubmit="submitTracking(event, ${order.id})">
+                        <select class="filter-input" id="trackingStatus">
+                            <option value="confirmed">Đã xác nhận đơn hàng</option>
+                            <option value="preparing">Đang chuẩn bị hàng</option>
+                            <option value="shipped">Đã bàn giao vận chuyển</option>
+                            <option value="delivering">Đang giao hàng</option>
+                            <option value="delivered">Giao hàng thành công</option>
+                            <option value="cancelled">Đã hủy</option>
+                            <option value="failed">Giao hàng thất bại</option>
+                        </select>
+                        <input class="filter-input" id="trackingLocation" placeholder="Vị trí">
+                        <textarea class="filter-input" id="trackingNote" placeholder="Ghi chú"></textarea>
+                        <button class="btn-update" style="margin-left:0;">Thêm mốc tracking</button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.getElementById('orderDrawer').style.display = 'flex';
+    }
+
+    function closeOrderDrawer() {
+        document.getElementById('orderDrawer').style.display = 'none';
+    }
+
+    async function submitTracking(e, orderId) {
+        e.preventDefault();
+        const payload = {
+            order_id: orderId,
+            status: document.getElementById('trackingStatus').value,
+            location: document.getElementById('trackingLocation').value,
+            note: document.getElementById('trackingNote').value,
+        };
+        const resp = await fetch('/api/orders/staff/shipping/tracking/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showAlert('Đã cập nhật tracking', 'success');
+            await loadOrders();
+            openOrderDrawer(orderId);
+        } else {
+            showAlert(data.error || 'Không cập nhật được tracking', 'error');
         }
     }
 

@@ -21,7 +21,10 @@ def calculate_final_amount(total_amount: Decimal, discount_amount: Decimal) -> D
 def status_from_tracking_status(status: str) -> str | None:
     if status == 'delivered':
         return 'delivered'
-    if status in {'picked_up', 'in_transit', 'out_for_delivery'}:
+    if status == 'cancelled':
+        return 'cancelled'
+    if status in {'confirmed', 'preparing'}:
+        return 'pending'
+    if status in {'shipped', 'delivering', 'picked_up', 'in_transit', 'out_for_delivery'}:
         return 'shipping'
     return None
-

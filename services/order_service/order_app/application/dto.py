@@ -9,6 +9,8 @@ def order_items_from_cart(cart_items: list[dict]) -> list[OrderItemSnapshot]:
             product_type=item['product_type'],
             product_id=int(item['product_id']),
             variant_id=int(item['variant_id']) if item.get('variant_id') not in [None, ''] else None,
+            variant_name=item.get('variant_name') or '',
+            image_url=item.get('image_url') or '',
             product_name=item.get('product_name') or item.get('name') or f"{item['product_type']} #{item['product_id']}",
             price=Decimal(str(item['price'])),
             quantity=int(item['quantity']),
@@ -24,4 +26,3 @@ def address_from_payload(address_id: int, payload: dict) -> ShippingAddressSnaps
         phone=payload['phone'],
         address_line=payload.get('address_line') or payload.get('street_address'),
     )
-

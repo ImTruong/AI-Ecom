@@ -38,6 +38,7 @@ def _variant_input_from_payload(payload: dict) -> ProductVariantInput:
         stock=int(payload.get('stock', 0)),
         sku=payload.get('sku', ''),
         image_url=payload.get('image_url', ''),
+        is_active=payload.get('is_active', True) is not False,
         options=payload.get('options', {}) if isinstance(payload.get('options'), dict) else {},
         option_values=[_option_from_payload(item) for item in payload.get('option_values', [])],
     )
@@ -51,4 +52,3 @@ def _option_from_payload(payload: dict) -> VariantOption:
     if not attribute or not value:
         raise VariantValidationError('Each variant option requires attribute and value')
     return VariantOption(attribute=attribute, value=value)
-

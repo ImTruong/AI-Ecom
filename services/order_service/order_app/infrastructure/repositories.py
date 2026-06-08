@@ -26,6 +26,8 @@ class DjangoOrderRepository(OrderRepository):
                 product_type=item.product_type,
                 product_id=item.product_id,
                 variant_id=item.variant_id,
+                variant_name=item.variant_name,
+                image_url=item.image_url,
                 product_name=item.product_name,
                 price=item.price,
                 quantity=item.quantity,
@@ -70,4 +72,3 @@ class DjangoOrderRepository(OrderRepository):
             order.status = order_status
             order.save(update_fields=['status', 'updated_at'])
         return event
-

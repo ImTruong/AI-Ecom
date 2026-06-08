@@ -1,24 +1,6 @@
 from django.db import models
 from django.utils import timezone
 
-class SearchHistory(models.Model):
-    customer_id = models.IntegerField(null=True, blank=True, db_index=True)
-    query = models.CharField(max_length=500)
-    session_id = models.CharField(max_length=255, null=True, blank=True)
-    timestamp = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = 'search_history'
-        verbose_name_plural = 'search histories'
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'customer_id': self.customer_id,
-            'query': self.query,
-            'timestamp': self.timestamp.isoformat(),
-        }
-
 class ProductView(models.Model):
     customer_id = models.IntegerField(null=True, blank=True, db_index=True)
     product_id = models.IntegerField()

@@ -116,6 +116,7 @@ class Product(models.Model):
                         'stock': v.stock,
                         'sku': v.sku,
                         'image_url': v.image_url,
+                        'is_active': v.is_active,
                         'options': v.options or {},
                         'option_values': [
                             {
@@ -264,6 +265,7 @@ class ProductVariant(models.Model):
     stock = models.IntegerField(default=0)
     sku = models.CharField(max_length=100, blank=True)
     image_url = models.CharField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=True)
     options = models.JSONField(default=dict, blank=True)
 
     class Meta:

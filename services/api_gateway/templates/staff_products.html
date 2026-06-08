@@ -1,136 +1,216 @@
 {% extends 'staff_base.html' %}
 
-{% block title %}Manage Products - Staff Dashboard{% endblock %}
+{% block title %}Product Management - Staff{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <h2 class="mb-0"><i class="fas fa-boxes me-2"></i>Product Management</h2>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <div class="input-group">
-                <span class="input-group-text bg-white"><i class="fa fa-search"></i></span>
-                <input type="text" class="form-control" id="product-search" placeholder="Search products..." oninput="setSearchFilter(this.value)">
+<style>
+    .seller-toolbar {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .product-thumb {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+    }
+    .metric-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        color: #475569;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    .variant-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+        align-items: end;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        margin-bottom: 10px;
+    }
+    .variant-cell-wide { grid-column: span 3; }
+    .variant-cell { grid-column: span 2; }
+    .variant-cell-narrow { grid-column: span 1; }
+    .panel-section {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fff;
+    }
+    @media (max-width: 992px) {
+        .variant-cell-wide,
+        .variant-cell,
+        .variant-cell-narrow { grid-column: span 12; }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <h2 class="mb-1">Product Management</h2>
+            <div class="text-muted">Manage products, suppliers, attributes, and variant stock.</div>
+        </div>
+        <button class="btn btn-primary px-4" onclick="openAddModal()">
+            <i class="fas fa-plus me-2"></i>Add Product
+        </button>
+    </div>
+
+    <div class="seller-toolbar mb-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4">
+                <label class="form-label small text-muted">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                    <input id="product-search" class="form-control" placeholder="Product name, SKU, category" oninput="setSearchFilter(this.value)">
+                </div>
             </div>
-            <button class="btn btn-primary rounded-pill px-4" onclick="openAddModal()">
-                <i class="fas fa-plus me-2"></i>Add New Product
-            </button>
+            <div class="col-lg-3">
+                <label class="form-label small text-muted">Category</label>
+                <select id="category-select-filter" class="form-select" onchange="setCategoryFilter(this.value || null)">
+                    <option value="">All categories</option>
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <label class="form-label small text-muted">Status</label>
+                <select id="status-filter" class="form-select" onchange="renderProducts()">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="out">Out of stock</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="form-label small text-muted">Quick categories</label>
+                <div id="category-filter" class="d-flex flex-wrap gap-2"></div>
+            </div>
         </div>
     </div>
 
-    <div class="mb-4" id="category-filter">
-        <!-- Category nav injected here -->
-    </div>
-
-    <!-- Product List -->
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
+                <thead class="table-light">
                     <tr>
                         <th class="ps-4">Product</th>
                         <th>Category</th>
-                        <th>Type</th>
                         <th>Supplier</th>
                         <th>Price</th>
+                        <th>Variants</th>
+                        <th>Stock</th>
+                        <th>Status</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="product-list">
-                    <!-- Loaded dynamically -->
+                    <tr><td colspan="8" class="text-center text-muted py-5">Loading products...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="productModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow rounded-4">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalTitle">Add Product</h5>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold" id="modalTitle">Add Product</h5>
+                    <div class="text-muted small">Variant rows must pick exactly one value for every selected attribute.</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body bg-light">
                 <form id="productForm">
                     <input type="hidden" id="edit-id">
-                    
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" id="form-name" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Category</label>
-                            <select class="form-select" id="form-category" required onchange="onCategoryChange()">
-                                <!-- Categories loaded here -->
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Supplier</label>
-                            <select class="form-select" id="form-supplier" required>
-                                <!-- Suppliers loaded here -->
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Price (VND)</label>
-                            <input type="number" class="form-control" id="form-price" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Image URL</label>
-                            <input type="text" class="form-control" id="form-image">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" id="form-description" rows="3"></textarea>
-                        </div>
-
-                        <!-- Dynamic Attributes Section -->
-                        <div class="col-12 mt-4">
-                            <div class="card bg-light border-0 p-3 rounded-3">
-                                <h6 class="fw-bold mb-3"><i class="fas fa-tags me-2"></i>Specific Attributes</h6>
-                                <div class="row g-3" id="dynamic-fields">
-                                    <div class="col-12 text-muted small italic">Select a category to see specific fields.</div>
+                        <div class="col-lg-7">
+                            <div class="panel-section h-100">
+                                <h6 class="fw-bold mb-3">Basic Information</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Name</label>
+                                        <input id="form-name" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Base Price</label>
+                                        <input id="form-price" type="number" min="0" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Category</label>
+                                        <select id="form-category" class="form-select" required onchange="onCategoryChange()"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Supplier</label>
+                                        <select id="form-supplier" class="form-select"></select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Image URL</label>
+                                        <input id="form-image" class="form-control">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Description</label>
+                                        <textarea id="form-description" class="form-control" rows="4"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Dynamic Attributes Management -->
-                        <div class="col-12 mt-4">
-                            <div class="card bg-light border-0 p-3 rounded-3">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-bold mb-0"><i class="fas fa-cogs me-2"></i>Variant Attributes</h6>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openAttributeManager()">
-                                        <i class="fas fa-cog me-1"></i>Manage Attributes
+                        <div class="col-lg-5">
+                            <div class="panel-section h-100">
+                                <h6 class="fw-bold mb-3">Product Type Fields</h6>
+                                <div class="row g-3" id="dynamic-fields">
+                                    <div class="col-12 text-muted small">Select a category to show type-specific fields.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="panel-section">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Variant Attributes</h6>
+                                        <div class="text-muted small">Examples: Color, Size, Storage. These define the required variant combination.</div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="openAttributeManager()">
+                                        <i class="fas fa-sliders-h me-1"></i>Manage Attributes
                                     </button>
                                 </div>
-                                <div class="small text-muted mb-2">
-                                    Define attributes (e.g., Size, Color, Material) and their options. Each variant must have exactly one option from each attribute.
-                                </div>
-                                <div id="selected-attributes-display" class="d-flex flex-wrap gap-2 mb-2">
-                                    <!-- Selected attributes will show here -->
-                                </div>
+                                <div id="selected-attributes-display" class="d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
 
-                        <!-- Variants Section -->
-                        <div class="col-12 mt-4">
-                            <div class="card bg-light border-0 p-3 rounded-3">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-bold mb-0"><i class="fas fa-layer-group me-2"></i>Product Variants</h6>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVariant()">
+                        <div class="col-12">
+                            <div class="panel-section">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Product Variants</h6>
+                                        <div class="text-muted small">Each variant owns price, quantity, SKU, image, and active status.</div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="addVariant()">
                                         <i class="fas fa-plus me-1"></i>Add Variant
                                     </button>
                                 </div>
                                 <div id="variants-container">
-                                    <div class="text-muted small italic">No variants. Click Add Variant and select options for each attribute.</div>
+                                    <div class="text-muted small">No variants yet.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-0 pt-0">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary px-4" onclick="saveProduct()">Save Product</button>
             </div>
@@ -142,147 +222,115 @@
     let categories = [];
     let suppliers = [];
     let suppliersById = {};
+    let allProducts = [];
     let currentCategory = null;
     let currentSearch = '';
-    let allAttributes = []; // Store all available attributes
-    let selectedAttributeIds = []; // Attributes selected for this product
+    let allAttributes = [];
+    let selectedAttributeIds = [];
+    let variantCounter = 0;
 
     const CLOTH_ATTRS = [
-        { name: 'color', label: 'Color', type: 'select', options: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow'] },
-        { name: 'size', label: 'Size', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
-        { name: 'material', label: 'Material', type: 'text' }
+        { name: 'brand', label: 'Brand', type: 'text' },
+        { name: 'material', label: 'Material', type: 'text' },
+        { name: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex'] }
     ];
-
     const CATEGORY_ATTRS = {
-        'books': [
-            { name: 'author', label: 'Author', type: 'text' },
-            { name: 'isbn', label: 'ISBN', type: 'text' },
-            { name: 'publisher', label: 'Publisher', type: 'text' },
-            { name: 'page_count', label: 'Pages', type: 'number' }
-        ],
+        'electronic': [{ name: 'brand', label: 'Brand', type: 'text' }, { name: 'warranty_months', label: 'Warranty Months', type: 'number' }],
+        'electronics': [{ name: 'brand', label: 'Brand', type: 'text' }, { name: 'warranty_months', label: 'Warranty Months', type: 'number' }],
         'clothes': CLOTH_ATTRS,
-        't-shirt': CLOTH_ATTRS,
-        'tshirt': CLOTH_ATTRS,
-        'hoodie': CLOTH_ATTRS,
-        'pant': CLOTH_ATTRS,
-        'pants': CLOTH_ATTRS,
-        'laptops': [
-            { name: 'cpu', label: 'CPU', type: 'text' },
-            { name: 'ram', label: 'RAM (GB)', type: 'number' },
-            { name: 'storage', label: 'Storage', type: 'text' },
-            { name: 'gpu', label: 'GPU', type: 'text' }
-        ],
-        'phones': [
-            { name: 'screen_size', label: 'Screen Size', type: 'text' },
-            { name: 'battery', label: 'Battery (mAh)', type: 'number' },
-            { name: 'camera_specs', label: 'Camera Specs', type: 'text' }
-        ],
-        'tablets': [
-            { name: 'screen_size', label: 'Screen Size', type: 'text' },
-            { name: 'os', label: 'OS', type: 'text' },
-            { name: 'is_stylus_supported', label: 'Stylus Supported', type: 'checkbox' }
-        ],
-        'cameras': [
-            { name: 'resolution', label: 'Resolution', type: 'text' },
-            { name: 'sensor_type', label: 'Sensor Type', type: 'text' },
-            { name: 'lens_included', label: 'Lens Included', type: 'text' }
-        ],
-        'headphones': [
-            { name: 'type', label: 'Type', type: 'select', options: ['Over-ear', 'In-ear', 'On-ear'] },
-            { name: 'is_wireless', label: 'Wireless', type: 'checkbox' },
-            { name: 'noise_cancelling', label: 'Noise Cancelling', type: 'checkbox' }
-        ],
-        'watches': [
-            { name: 'style', label: 'Style', type: 'select', options: ['Analog', 'Digital', 'Smart'] },
-            { name: 'water_resistance', label: 'Water', type: 'text' },
-            { name: 'band_material', label: 'Band', type: 'text' }
-        ],
-        'shoes': [
-            { name: 'size_eu', label: 'Size (EU)', type: 'number' },
-            { name: 'material', label: 'Material', type: 'text' },
-            { name: 'shoe_type', label: 'Type', type: 'text' }
-        ],
-        'furniture': [
-            { name: 'material', label: 'Material', type: 'text' },
-            { name: 'dimensions', label: 'Dimensions', type: 'text' },
-            { name: 'weight_capacity', label: 'Weight Cap', type: 'text' }
-        ]
+        'book': [{ name: 'author', label: 'Author', type: 'text' }, { name: 'isbn', label: 'ISBN', type: 'text' }, { name: 'publisher', label: 'Publisher', type: 'text' }, { name: 'page_count', label: 'Pages', type: 'number' }],
+        'books': [{ name: 'author', label: 'Author', type: 'text' }, { name: 'isbn', label: 'ISBN', type: 'text' }, { name: 'publisher', label: 'Publisher', type: 'text' }, { name: 'page_count', label: 'Pages', type: 'number' }],
+        'furniture': [{ name: 'material', label: 'Material', type: 'text' }, { name: 'dimensions', label: 'Dimensions', type: 'text' }],
+        'cosmetic': [{ name: 'skin_type', label: 'Skin Type', type: 'text' }],
+        'food': [{ name: 'expiry_note', label: 'Expiry Note', type: 'text' }],
+        'toy': [{ name: 'age_range', label: 'Age Range', type: 'text' }],
+        'sportequipment': [{ name: 'sport_type', label: 'Sport Type', type: 'text' }],
+        'sport-equipment': [{ name: 'sport_type', label: 'Sport Type', type: 'text' }],
+        'shoes': [{ name: 'material', label: 'Material', type: 'text' }, { name: 'shoe_type', label: 'Type', type: 'text' }],
+        'accessory': [{ name: 'material', label: 'Material', type: 'text' }]
     };
 
-    const CLOTHING_SLUGS = new Set(['clothes', 't-shirt', 'tshirt', 'hoodie', 'pant', 'pants']);
+    const TYPE_BY_SLUG = {
+        electronic: 'electronic',
+        electronics: 'electronic',
+        clothes: 'clothes',
+        book: 'book',
+        books: 'book',
+        furniture: 'furniture',
+        cosmetic: 'cosmetic',
+        food: 'food',
+        toy: 'toy',
+        sportequipment: 'sport_equipment',
+        'sport-equipment': 'sport_equipment',
+        shoes: 'shoes',
+        shoe: 'shoes',
+        accessory: 'accessory'
+    };
+
+    function authHeaders(json = false) {
+        const headers = { 'Authorization': `Bearer ${getToken()}` };
+        if (json) headers['Content-Type'] = 'application/json';
+        return headers;
+    }
+
+    function money(value) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function esc(value) {
+        return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
 
     async function init() {
-        const userRole = localStorage.getItem('user_role');
-        if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
+        const role = localStorage.getItem('user_role');
+        if (!isLoggedIn() || (role !== 'staff' && role !== 'admin')) {
             window.location.href = '/staff/login/';
             return;
         }
+        await loadAttributes();
         await loadSuppliers();
         await loadCategories();
         await loadProducts();
     }
 
     async function loadSuppliers() {
-        try {
-            const resp = await fetch('/api/suppliers/?only_active=true', {
-                headers: { 'Authorization': `Bearer ${getToken()}` }
-            });
-            const res = await resp.json();
-            if (!res.success) {
-                suppliers = [];
-                suppliersById = {};
-                return;
-            }
-            suppliers = res.data || [];
-            suppliersById = {};
-            suppliers.forEach(s => { suppliersById[s.id] = s; });
-
-            const select = document.getElementById('form-supplier');
-            select.innerHTML = suppliers.length
-                ? suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('')
-                : '<option value="">No suppliers available</option>';
-        } catch (e) {
-            console.error(e);
-        }
+        const resp = await fetch('/api/suppliers/?only_active=true', { headers: authHeaders() });
+        const res = await resp.json();
+        suppliers = res.success ? (res.data || []) : [];
+        suppliersById = {};
+        suppliers.forEach(item => { suppliersById[item.id] = item; });
+        document.getElementById('form-supplier').innerHTML = suppliers.length
+            ? suppliers.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')
+            : '<option value="">No supplier</option>';
     }
 
     async function loadCategories() {
         const resp = await fetch('/api/products/categories/');
         categories = await resp.json();
-        const select = document.getElementById('form-category');
-        select.innerHTML = '<option value="">Select Category</option>';
+        const formSelect = document.getElementById('form-category');
+        const filterSelect = document.getElementById('category-select-filter');
+        formSelect.innerHTML = '<option value="">Select Category</option>';
+        filterSelect.innerHTML = '<option value="">All categories</option>';
         categories.forEach(c => {
-            select.innerHTML += `<option value="${c.id}" data-slug="${c.slug}">${c.name}</option>`;
+            formSelect.innerHTML += `<option value="${c.id}" data-slug="${esc(c.slug)}">${esc(c.name)}</option>`;
+            filterSelect.innerHTML += `<option value="${esc(c.slug)}">${esc(c.name)}</option>`;
         });
         renderCategoryNav();
     }
 
     function renderCategoryNav() {
         const nav = document.getElementById('category-filter');
-        nav.innerHTML = '';
-        const wrapper = document.createElement('div');
-        wrapper.className = 'd-inline-flex flex-wrap gap-2';
-
-        const allBtn = document.createElement('button');
-        allBtn.className = `btn btn-sm ${currentCategory ? 'btn-outline-secondary' : 'btn-primary'} rounded-pill px-3`;
-        allBtn.textContent = 'All Categories';
-        allBtn.onclick = () => setCategoryFilter(null);
-        wrapper.appendChild(allBtn);
-
-        categories.forEach(cat => {
-            const btn = document.createElement('button');
-            const active = currentCategory === cat.slug;
-            btn.className = `btn btn-sm ${active ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill px-3`;
-            btn.textContent = cat.name;
-            btn.onclick = () => setCategoryFilter(cat.slug);
-            wrapper.appendChild(btn);
-        });
-
-        nav.appendChild(wrapper);
+        const cats = [{ slug: null, name: 'All' }, ...categories.slice(0, 5)];
+        nav.innerHTML = cats.map(cat => `
+            <button class="btn btn-sm ${currentCategory === cat.slug ? 'btn-primary' : 'btn-outline-secondary'}" onclick="setCategoryFilter(${cat.slug ? `'${esc(cat.slug)}'` : 'null'})">
+                ${esc(cat.name)}
+            </button>
+        `).join('');
     }
 
     function setCategoryFilter(slug) {
         currentCategory = slug;
+        document.getElementById('category-select-filter').value = slug || '';
         renderCategoryNav();
         loadProducts();
     }
@@ -296,296 +344,233 @@
         const params = new URLSearchParams();
         if (currentCategory) params.set('category', currentCategory);
         if (currentSearch) params.set('search', currentSearch);
-        const url = `/api/products/${params.toString() ? `?${params.toString()}` : ''}`;
-        const resp = await fetch(url);
-        const products = await resp.json();
+        const resp = await fetch(`/api/products/${params.toString() ? `?${params.toString()}` : ''}`);
+        allProducts = await resp.json();
+        renderProducts();
+    }
+
+    function productStats(product) {
+        const variants = product.variants || [];
+        const stocks = variants.map(v => Number(v.stock || 0));
+        const prices = variants.map(v => Number(v.price || v.price_override || product.price || 0));
+        return {
+            variantCount: variants.length,
+            stock: stocks.reduce((sum, item) => sum + item, 0),
+            minPrice: prices.length ? Math.min(...prices) : Number(product.price || 0),
+            maxPrice: prices.length ? Math.max(...prices) : Number(product.price || 0)
+        };
+    }
+
+    function renderProducts() {
+        const status = document.getElementById('status-filter').value;
         const list = document.getElementById('product-list');
-        list.innerHTML = '';
-        
-        products.forEach(p => {
+        let rows = [...allProducts];
+        if (status === 'out') rows = rows.filter(p => productStats(p).stock <= 0);
+        if (status === 'active') rows = rows.filter(p => productStats(p).stock > 0);
+
+        if (!rows.length) {
+            list.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-5">No products found.</td></tr>';
+            return;
+        }
+
+        list.innerHTML = rows.map(p => {
+            const stats = productStats(p);
             const supplier = suppliersById[p.supplier_id];
-            const supplierName = supplier ? supplier.name : (p.supplier_id ? `#${p.supplier_id}` : 'Unassigned');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="ps-4">
-                    <div class="d-flex align-items-center">
-                        <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="rounded me-3" width="40" height="40" style="object-fit: contain;">
-                        <div>
-                            <div class="fw-bold">${p.name}</div>
-                            <div class="text-muted small">ID: ${p.id}</div>
+            const priceText = stats.minPrice === stats.maxPrice ? money(stats.minPrice) : `${money(stats.minPrice)} - ${money(stats.maxPrice)}`;
+            return `
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <img class="product-thumb" src="${esc(p.image_url || 'https://via.placeholder.com/80?text=Product')}" alt="">
+                            <div>
+                                <div class="fw-semibold">${esc(p.name)}</div>
+                                <div class="text-muted small">ID ${p.id} · ${esc(p.product_type || 'generic')}</div>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>${p.category}</td>
-                <td><span class="badge bg-light text-dark border">${p.product_type}</span></td>
-                <td>${supplierName}</td>
-                <td class="fw-bold text-primary">${new Intl.NumberFormat('vi-VN').format(p.price)}</td>
-                <td class="text-end pe-4">
-                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal(${p.id})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
-                </td>
+                    </td>
+                    <td>${esc(p.category || 'Uncategorized')}</td>
+                    <td>${esc(supplier ? supplier.name : (p.supplier_id ? `#${p.supplier_id}` : 'Unassigned'))}</td>
+                    <td class="fw-semibold text-primary">${priceText}</td>
+                    <td><span class="metric-pill"><i class="fas fa-layer-group"></i>${stats.variantCount}</span></td>
+                    <td><span class="metric-pill"><i class="fas fa-cubes"></i>${stats.stock}</span></td>
+                    <td>${stats.stock > 0 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-warning text-dark">Out of stock</span>'}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-primary me-1" title="Edit" onclick="openEditModal(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
             `;
-            list.appendChild(tr);
-        });
+        }).join('');
+    }
+
+    function categorySlugFromSelect() {
+        const select = document.getElementById('form-category');
+        return select.selectedIndex >= 0 ? select.options[select.selectedIndex].dataset.slug : '';
     }
 
     function onCategoryChange() {
-        const select = document.getElementById('form-category');
-        const slug = select.options[select.selectedIndex].dataset.slug;
-        renderDynamicFields(slug);
+        renderDynamicFields(categorySlugFromSelect());
     }
 
     function renderDynamicFields(slug, values = {}) {
         const container = document.getElementById('dynamic-fields');
-        container.innerHTML = '';
-        
-        const attrs = CATEGORY_ATTRS[slug];
+        const attrs = CATEGORY_ATTRS[slug] || CATEGORY_ATTRS[(slug || '').replace(/s$/, '')];
         if (!attrs) {
-            container.innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
+            container.innerHTML = '<div class="col-12 text-muted small">No type-specific fields for this category.</div>';
             return;
         }
-
-        attrs.forEach(attr => {
-            const col = document.createElement('div');
-            col.className = 'col-md-6';
-            let inputNode = '';
-            
+        container.innerHTML = attrs.map(attr => {
             if (attr.type === 'select') {
-                inputNode = `<select class="form-select dyn-attr" name="${attr.name}">
-                    ${attr.options.map(opt => `<option value="${opt}" ${values[attr.name] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                </select>`;
-            } else if (attr.type === 'checkbox') {
-                inputNode = `<div class="form-check mt-2">
-                    <input class="form-check-input dyn-attr" type="checkbox" name="${attr.name}" ${values[attr.name] ? 'checked' : ''}>
-                    <label class="form-check-label">Yes</label>
-                </div>`;
-            } else {
-                inputNode = `<input type="${attr.type}" class="form-control dyn-attr" name="${attr.name}" value="${values[attr.name] || ''}">`;
+                return `<div class="col-md-6"><label class="form-label">${esc(attr.label)}</label><select class="form-select dyn-attr" name="${esc(attr.name)}">${attr.options.map(opt => `<option value="${esc(opt)}" ${values[attr.name] === opt ? 'selected' : ''}>${esc(opt)}</option>`).join('')}</select></div>`;
             }
+            if (attr.type === 'checkbox') {
+                return `<div class="col-md-6"><label class="form-label d-block">${esc(attr.label)}</label><input class="form-check-input dyn-attr" type="checkbox" name="${esc(attr.name)}" ${values[attr.name] ? 'checked' : ''}></div>`;
+            }
+            return `<div class="col-md-6"><label class="form-label">${esc(attr.label)}</label><input type="${attr.type}" class="form-control dyn-attr" name="${esc(attr.name)}" value="${esc(values[attr.name] || '')}"></div>`;
+        }).join('');
+    }
 
-            col.innerHTML = `
-                <label class="form-label small">${attr.label}</label>
-                ${inputNode}
-            `;
-            container.appendChild(col);
-        });
+    function resetVariantState() {
+        selectedAttributeIds = [];
+        variantCounter = 0;
+        updateSelectedAttributesDisplay();
+        document.getElementById('variants-container').innerHTML = '<div class="text-muted small">No variants yet.</div>';
     }
 
     function openAddModal() {
         document.getElementById('modalTitle').textContent = 'Add Product';
-        document.getElementById('edit-id').value = '';
         document.getElementById('productForm').reset();
-        document.getElementById('dynamic-fields').innerHTML = '<div class="col-12 text-muted small italic">Select a category to see specific fields.</div>';
-        document.getElementById('variants-container').innerHTML = '<div class="text-muted small italic">No variants. Click Add Variant to create size/color options.</div>';
-        variantCounter = 0;
-        if (suppliers.length > 0) {
-            document.getElementById('form-supplier').value = suppliers[0].id;
-        }
+        document.getElementById('edit-id').value = '';
+        document.getElementById('dynamic-fields').innerHTML = '<div class="col-12 text-muted small">Select a category to show type-specific fields.</div>';
+        if (suppliers.length) document.getElementById('form-supplier').value = suppliers[0].id;
+        resetVariantState();
         new bootstrap.Modal(document.getElementById('productModal')).show();
     }
 
     async function openEditModal(id) {
-        document.getElementById('modalTitle').textContent = 'Edit Product';
         const resp = await fetch(`/api/products/${id}/`);
-        const p = await resp.json();
-        
-        document.getElementById('edit-id').value = p.id;
-        document.getElementById('form-name').value = p.name;
-        document.getElementById('form-description').value = p.description;
-        document.getElementById('form-price').value = p.price;
-        document.getElementById('form-image').value = p.image_url;
-        if (p.supplier_id) {
-            document.getElementById('form-supplier').value = p.supplier_id;
-        }
-        
-        const catSelect = document.getElementById('form-category');
-        catSelect.value = p.category_id;
-        
-        const slug = catSelect.options[catSelect.selectedIndex].dataset.slug;
-        renderDynamicFields(slug, p);
-        
-        // Load existing variants
-        document.getElementById('variants-container').innerHTML = '<div class="text-muted small italic">No variants.</div>';
-        variantCounter = 0;
-        if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
-            document.getElementById('variants-container').innerHTML = '';
-            p.variants.forEach(v => {
-                variantCounter++;
-                const div = document.createElement('div');
-                div.className = 'row g-2 mb-2 variant-row';
-                div.id = `variant-${variantCounter}`;
-                const opts = v.options || {};
-                const colorVal = opts.color || '';
-                const sizeVal = opts.size || '';
-                div.innerHTML = `
-                    <div class="col-md-2">
-                        <label class="form-label small">Color</label>
-                        <select class="form-select form-select-sm variant-color">
-                            <option value="">-</option>
-                            <option value="Black" ${colorVal==='Black'?'selected':''}>Black</option>
-                            <option value="White" ${colorVal==='White'?'selected':''}>White</option>
-                            <option value="Red" ${colorVal==='Red'?'selected':''}>Red</option>
-                            <option value="Blue" ${colorVal==='Blue'?'selected':''}>Blue</option>
-                            <option value="Green" ${colorVal==='Green'?'selected':''}>Green</option>
-                            <option value="Yellow" ${colorVal==='Yellow'?'selected':''}>Yellow</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small">Size</label>
-                        <select class="form-select form-select-sm variant-size">
-                            <option value="">-</option>
-                            <option value="XS" ${sizeVal==='XS'?'selected':''}>XS</option>
-                            <option value="S" ${sizeVal==='S'?'selected':''}>S</option>
-                            <option value="M" ${sizeVal==='M'?'selected':''}>M</option>
-                            <option value="L" ${sizeVal==='L'?'selected':''}>L</option>
-                            <option value="XL" ${sizeVal==='XL'?'selected':''}>XL</option>
-                            <option value="30" ${sizeVal==='30'?'selected':''}>30</option>
-                            <option value="31" ${sizeVal==='31'?'selected':''}>31</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small">Price Override</label>
-                        <input type="number" class="form-control form-control-sm variant-price" value="${v.price_override || ''}" placeholder="Optional">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small">Stock</label>
-                        <input type="number" class="form-control form-control-sm variant-stock" value="${v.stock || 0}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small">SKU</label>
-                        <input type="text" class="form-control form-control-sm variant-sku" value="${v.sku || ''}" placeholder="SKU">
-                    </div>
-                    <div class="col-md-1">
-                        <label class="form-label small">&nbsp;</label>
-                        <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                document.getElementById('variants-container').appendChild(div);
-            });
-        }
-        
+        const product = await resp.json();
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        document.getElementById('edit-id').value = product.id;
+        document.getElementById('form-name').value = product.name || '';
+        document.getElementById('form-price').value = product.price || 0;
+        document.getElementById('form-description').value = product.description || '';
+        document.getElementById('form-image').value = product.image_url || '';
+        document.getElementById('form-category').value = product.category_id || '';
+        document.getElementById('form-supplier').value = product.supplier_id || '';
+        renderDynamicFields(categorySlugFromSelect(), product);
+
+        const variants = product.variants || [];
+        const attrNames = new Set();
+        variants.forEach(v => (v.option_values || []).forEach(opt => attrNames.add(String(opt.attribute).toLowerCase())));
+        selectedAttributeIds = allAttributes
+            .filter(attr => attrNames.has(String(attr.name).toLowerCase()))
+            .map(attr => attr.id);
+        updateSelectedAttributesDisplay();
+        renderExistingVariants(variants);
         new bootstrap.Modal(document.getElementById('productModal')).show();
     }
 
     async function saveProduct() {
-        const id = document.getElementById('edit-id').value;
-        const select = document.getElementById('form-category');
-        const category_id = select.value;
-        const slug = select.options[select.selectedIndex].dataset.slug;
-        const product_type = CLOTHING_SLUGS.has(slug)
-            ? 'clothes'
-            : slug.replace(/s$/, ''); // singularize (laptops -> laptop)
-        const supplierValue = document.getElementById('form-supplier').value;
-        
+        const categoryId = document.getElementById('form-category').value;
+        const slug = categorySlugFromSelect();
+        if (!categoryId) {
+            alert('Please select a category.');
+            return;
+        }
         const payload = {
-            id: id || null,
-            name: document.getElementById('form-name').value,
-            category_id: parseInt(category_id),
-            product_type: product_type === 'clothe' ? 'clothes' : product_type, // Special case for clothes
-            price: parseFloat(document.getElementById('form-price').value),
+            id: document.getElementById('edit-id').value || null,
+            name: document.getElementById('form-name').value.trim(),
+            category_id: Number(categoryId),
+            product_type: TYPE_BY_SLUG[slug] || (slug || 'generic').replace(/s$/, ''),
+            price: Number(document.getElementById('form-price').value || 0),
             description: document.getElementById('form-description').value,
             image_url: document.getElementById('form-image').value,
-            supplier_id: supplierValue ? parseInt(supplierValue) : null
+            supplier_id: document.getElementById('form-supplier').value ? Number(document.getElementById('form-supplier').value) : null,
+            variant_attribute_names: selectedAttributes().map(attr => attr.name),
+            variants: []
         };
-
-        // Add dynamic attributes
         document.querySelectorAll('.dyn-attr').forEach(input => {
-            if (input.type === 'checkbox') {
-                payload[input.name] = input.checked;
-            } else {
-                payload[input.name] = input.value;
-            }
+            payload[input.name] = input.type === 'checkbox' ? input.checked : input.value;
         });
-
-        // Add variants
-        payload.variants = collectVariants();
+        try {
+            payload.variants = collectVariants();
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+        if (selectedAttributeIds.length && payload.variants.length === 0) {
+            alert('Create at least one valid variant for the selected attributes.');
+            return;
+        }
 
         const resp = await fetch('/api/products/manage/', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
-            },
+            headers: authHeaders(true),
             body: JSON.stringify(payload)
         });
-
         const res = await resp.json();
-        if (res.success) {
-            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
-            loadProducts();
-        } else {
-            alert('Error: ' + res.error);
+        if (!res.success) {
+            alert(res.error || 'Cannot save product.');
+            return;
         }
+        bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+        await loadProducts();
     }
 
     async function deleteProduct(id) {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-        const resp = await fetch(`/api/products/manage/${id}/`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${getToken()}` }
-        });
-        if ((await resp.json()).success) loadProducts();
+        if (!confirm('Delete this product?')) return;
+        const resp = await fetch(`/api/products/manage/${id}/`, { method: 'DELETE', headers: authHeaders() });
+        const res = await resp.json();
+        if (res.success) await loadProducts();
+        else alert(res.error || 'Cannot delete product.');
     }
 
-    // Attribute Management Functions
     async function loadAttributes() {
-        try {
-            const resp = await fetch('/api/products/attributes/');
-            const data = await resp.json();
-            if (data.success) {
-                allAttributes = data.attributes;
-                updateSelectedAttributesDisplay();
-            }
-        } catch (e) {
-            console.error('Failed to load attributes:', e);
-        }
+        const resp = await fetch('/api/products/attributes/');
+        const data = await resp.json();
+        allAttributes = data.success ? (data.attributes || []) : [];
+        updateSelectedAttributesDisplay();
     }
 
     function openAttributeManager() {
-        // Create modal for managing attributes
-        let modalHtml = `
+        const existing = document.getElementById('attributeManagerModal');
+        if (existing) existing.remove();
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
             <div class="modal fade" id="attributeManagerModal" tabindex="-1">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Manage Attributes</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Create New Attribute</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="new-attribute-name" placeholder="e.g., Material, Size, Color">
-                                    <button class="btn btn-primary" onclick="createNewAttribute()">Create</button>
-                                </div>
+                            <div class="input-group mb-3">
+                                <input id="new-attribute-name" class="form-control" placeholder="New attribute name">
+                                <button class="btn btn-primary" onclick="createNewAttribute()">Create</button>
                             </div>
-                            <hr>
-                            <h6>Existing Attributes</h6>
-                            <div id="attributes-list" class="list-group">
+                            <div class="list-group">
                                 ${allAttributes.map(attr => `
                                     <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <strong>${attr.name}</strong>
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                             <div>
-                                                <button class="btn btn-sm btn-outline-primary me-1" onclick="toggleAttributeForProduct(${attr.id})">
-                                                    ${selectedAttributeIds.includes(attr.id) ? 'Remove from Product' : 'Add to Product'}
+                                                <strong>${esc(attr.name)}</strong>
+                                                <div class="text-muted small">${(attr.values || []).length} values</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm ${selectedAttributeIds.includes(attr.id) ? 'btn-primary' : 'btn-outline-primary'}" onclick="toggleAttributeForProduct(${attr.id})">
+                                                    ${selectedAttributeIds.includes(attr.id) ? 'Selected' : 'Use for product'}
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteAttribute(${attr.id})">Delete</button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteAttribute(${attr.id})"><i class="fas fa-trash"></i></button>
                                             </div>
                                         </div>
                                         <div class="input-group input-group-sm mb-2">
-                                            <input type="text" class="form-control" id="new-value-${attr.id}" placeholder="New option value">
-                                            <button class="btn btn-outline-secondary" onclick="addAttributeValue(${attr.id})">Add Option</button>
+                                            <input id="new-value-${attr.id}" class="form-control" placeholder="New value">
+                                            <button class="btn btn-outline-secondary" onclick="addAttributeValue(${attr.id})">Add Value</button>
                                         </div>
                                         <div class="d-flex flex-wrap gap-1">
-                                            ${attr.values.map(v => `
-                                                <span class="badge bg-light text-dark border">
-                                                    ${v.value}
-                                                    <button class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="deleteAttributeValue(${v.id})"></button>
-                                                </span>
-                                            `).join('')}
+                                            ${(attr.values || []).map(v => `<span class="badge bg-light text-dark border">${esc(v.value)} <button class="btn-close ms-1" style="font-size:.55rem" onclick="deleteAttributeValue(${v.id})"></button></span>`).join('')}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -593,343 +578,185 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-        
-        // Remove existing modal if any
-        const existingModal = document.getElementById('attributeManagerModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-        
-        // Add modal to body
-        const div = document.createElement('div');
-        div.innerHTML = modalHtml;
-        document.body.appendChild(div);
-        
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('attributeManagerModal'));
-        modal.show();
+            </div>`;
+        document.body.appendChild(wrapper);
+        new bootstrap.Modal(document.getElementById('attributeManagerModal')).show();
     }
 
     async function createNewAttribute() {
         const name = document.getElementById('new-attribute-name').value.trim();
         if (!name) return;
-        
-        try {
-            const resp = await fetch('/api/products/attributes/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
-                body: JSON.stringify({ name })
-            });
-            const data = await resp.json();
-            if (data.success) {
-                allAttributes.push(data.attribute);
-                selectedAttributeIds.push(data.attribute.id);
-                openAttributeManager(); // Refresh modal
-                updateSelectedAttributesDisplay();
-                updateVariantForms();
-            }
-        } catch (e) {
-            console.error('Failed to create attribute:', e);
+        const resp = await fetch('/api/products/attributes/create/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) });
+        const data = await resp.json();
+        if (data.success) {
+            allAttributes.push(data.attribute);
+            selectedAttributeIds.push(data.attribute.id);
+            refreshAttributeManager();
         }
     }
 
     async function addAttributeValue(attributeId) {
-        const value = document.getElementById(`new-value-${attributeId}`).value.trim();
+        const input = document.getElementById(`new-value-${attributeId}`);
+        const value = input.value.trim();
         if (!value) return;
-        
-        try {
-            const resp = await fetch(`/api/products/attributes/${attributeId}/values/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
-                body: JSON.stringify({ value })
-            });
-            const data = await resp.json();
-            if (data.success) {
-                // Update local data
-                const attr = allAttributes.find(a => a.id === attributeId);
-                if (attr) {
-                    attr.values.push(data.value);
-                }
-                openAttributeManager(); // Refresh modal
-                updateVariantForms();
-            }
-        } catch (e) {
-            console.error('Failed to add value:', e);
+        const resp = await fetch(`/api/products/attributes/${attributeId}/values/`, { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ value }) });
+        const data = await resp.json();
+        if (data.success) {
+            const attr = allAttributes.find(item => item.id === attributeId);
+            if (attr) attr.values.push(data.value);
+            refreshAttributeManager();
         }
     }
 
     async function deleteAttribute(attributeId) {
-        if (!confirm('Delete this attribute and all its values?')) return;
-        
-        try {
-            const resp = await fetch(`/api/products/attributes/${attributeId}/delete/`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${getToken()}` }
-            });
-            if ((await resp.json()).success) {
-                allAttributes = allAttributes.filter(a => a.id !== attributeId);
-                selectedAttributeIds = selectedAttributeIds.filter(id => id !== attributeId);
-                openAttributeManager(); // Refresh modal
-                updateSelectedAttributesDisplay();
-                updateVariantForms();
-            }
-        } catch (e) {
-            console.error('Failed to delete attribute:', e);
+        if (!confirm('Delete this attribute and its values?')) return;
+        const resp = await fetch(`/api/products/attributes/${attributeId}/delete/`, { method: 'DELETE', headers: authHeaders() });
+        const data = await resp.json();
+        if (data.success) {
+            allAttributes = allAttributes.filter(item => item.id !== attributeId);
+            selectedAttributeIds = selectedAttributeIds.filter(id => id !== attributeId);
+            refreshAttributeManager();
         }
     }
 
     async function deleteAttributeValue(valueId) {
         if (!confirm('Delete this value?')) return;
-        
-        try {
-            const resp = await fetch(`/api/products/attribute-values/${valueId}/delete/`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${getToken()}` }
-            });
-            if ((await resp.json()).success) {
-                // Update local data
-                allAttributes.forEach(attr => {
-                    attr.values = attr.values.filter(v => v.id !== valueId);
-                });
-                openAttributeManager(); // Refresh modal
-                updateVariantForms();
-            }
-        } catch (e) {
-            console.error('Failed to delete value:', e);
+        const resp = await fetch(`/api/products/attribute-values/${valueId}/delete/`, { method: 'DELETE', headers: authHeaders() });
+        const data = await resp.json();
+        if (data.success) {
+            allAttributes.forEach(attr => { attr.values = (attr.values || []).filter(v => v.id !== valueId); });
+            refreshAttributeManager();
         }
     }
 
     function toggleAttributeForProduct(attributeId) {
-        if (selectedAttributeIds.includes(attributeId)) {
-            selectedAttributeIds = selectedAttributeIds.filter(id => id !== attributeId);
-        } else {
-            selectedAttributeIds.push(attributeId);
-        }
+        selectedAttributeIds = selectedAttributeIds.includes(attributeId)
+            ? selectedAttributeIds.filter(id => id !== attributeId)
+            : [...selectedAttributeIds, attributeId];
+        refreshAttributeManager();
+    }
+
+    function refreshAttributeManager() {
         updateSelectedAttributesDisplay();
         updateVariantForms();
-        openAttributeManager(); // Refresh modal
+        openAttributeManager();
+    }
+
+    function selectedAttributes() {
+        return allAttributes.filter(attr => selectedAttributeIds.includes(attr.id));
     }
 
     function updateSelectedAttributesDisplay() {
         const container = document.getElementById('selected-attributes-display');
         if (!container) return;
-        
-        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
-        if (selectedAttrs.length === 0) {
-            container.innerHTML = '<span class="text-muted small">No attributes selected. Click "Manage Attributes" to add.</span>';
-        } else {
-            container.innerHTML = selectedAttrs.map(attr => `
-                <span class="badge bg-primary">${attr.name}</span>
-            `).join('');
+        const attrs = selectedAttributes();
+        container.innerHTML = attrs.length
+            ? attrs.map(attr => `<span class="badge bg-primary">${esc(attr.name)}</span>`).join('')
+            : '<span class="text-muted small">No variant attributes selected.</span>';
+    }
+
+    function optionSelectHtml(attr, selectedId = '') {
+        return `
+            <label class="form-label small">${esc(attr.name)}</label>
+            <select class="form-select form-select-sm variant-attribute-select" data-attribute-id="${attr.id}" required>
+                <option value="">Select ${esc(attr.name)}</option>
+                ${(attr.values || []).map(v => `<option value="${v.id}" ${String(selectedId) === String(v.id) ? 'selected' : ''}>${esc(v.value)}</option>`).join('')}
+            </select>`;
+    }
+
+    function renderVariantRow(data = {}) {
+        variantCounter++;
+        const selected = data.optionValueIds || {};
+        const attrHtml = selectedAttributes().map(attr => `<div class="variant-cell">${optionSelectHtml(attr, selected[attr.id])}</div>`).join('');
+        return `
+            <div class="variant-grid variant-row" id="variant-${variantCounter}">
+                ${attrHtml}
+                <div class="variant-cell"><label class="form-label small">Price</label><input class="form-control form-control-sm variant-price" type="number" min="0" value="${esc(data.price_override ?? '')}" placeholder="Base"></div>
+                <div class="variant-cell"><label class="form-label small">Quantity</label><input class="form-control form-control-sm variant-stock" type="number" min="0" value="${esc(data.stock ?? 0)}"></div>
+                <div class="variant-cell"><label class="form-label small">SKU</label><input class="form-control form-control-sm variant-sku" value="${esc(data.sku || '')}"></div>
+                <div class="variant-cell-wide"><label class="form-label small">Image</label><input class="form-control form-control-sm variant-image" value="${esc(data.image_url || '')}"></div>
+                <div class="variant-cell"><label class="form-label small">Active</label><select class="form-select form-select-sm variant-active"><option value="true" ${data.is_active === false ? '' : 'selected'}>Active</option><option value="false" ${data.is_active === false ? 'selected' : ''}>Inactive</option></select></div>
+                <div class="variant-cell-narrow"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="document.getElementById('variant-${variantCounter}').remove()"><i class="fas fa-trash"></i></button></div>
+            </div>`;
+    }
+
+    function addVariant() {
+        const container = document.getElementById('variants-container');
+        if (!selectedAttributes().length) {
+            alert('Select at least one variant attribute first.');
+            return;
         }
+        if (container.querySelector('.text-muted')) container.innerHTML = '';
+        container.insertAdjacentHTML('beforeend', renderVariantRow());
+    }
+
+    function renderExistingVariants(variants) {
+        const container = document.getElementById('variants-container');
+        variantCounter = 0;
+        if (!variants.length) {
+            container.innerHTML = '<div class="text-muted small">No variants yet.</div>';
+            return;
+        }
+        container.innerHTML = variants.map(v => {
+            const optionValueIds = {};
+            (v.option_values || []).forEach(opt => {
+                const attr = allAttributes.find(item => String(item.name).toLowerCase() === String(opt.attribute).toLowerCase());
+                if (attr) optionValueIds[attr.id] = opt.id;
+            });
+            return renderVariantRow({ ...v, optionValueIds });
+        }).join('');
     }
 
     function updateVariantForms() {
-        // Update all existing variant rows to show new attribute options
-        document.querySelectorAll('.variant-row').forEach(row => {
-            updateVariantRow(row);
-        });
-    }
-
-    function updateVariantRow(row) {
-        // Clear existing attribute selects
-        const existingSelects = row.querySelectorAll('.variant-attribute-select');
-        existingSelects.forEach(s => {
-            const wrapper = s.closest('.col-md-2');
-            if (wrapper) wrapper.remove();
-        });
-        
-        // Add new selects for selected attributes
-        const firstCol = row.querySelector('.col-md-2');
-        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
-        
-        selectedAttrs.forEach(attr => {
-            const div = document.createElement('div');
-            div.className = 'col-md-2';
-            div.innerHTML = `
-                <label class="form-label small">${attr.name} *</label>
-                <select class="form-select form-select-sm variant-attribute-select" data-attribute-id="${attr.id}" required>
-                    <option value="">Select ${attr.name}</option>
-                    ${attr.values.map(v => `<option value="${v.id}">${v.value}</option>`).join('')}
-                </select>
-            `;
-            if (firstCol) {
-                row.insertBefore(div, firstCol);
-            } else {
-                row.appendChild(div);
-            }
-        });
-    }
-
-    // Variant management functions
-    let variantCounter = 0;
-
-    function addVariant() {
-        variantCounter++;
+        const existing = [...document.querySelectorAll('.variant-row')].map(row => ({
+            price_override: row.querySelector('.variant-price')?.value || '',
+            stock: row.querySelector('.variant-stock')?.value || 0,
+            sku: row.querySelector('.variant-sku')?.value || '',
+            image_url: row.querySelector('.variant-image')?.value || '',
+            is_active: row.querySelector('.variant-active')?.value !== 'false'
+        }));
         const container = document.getElementById('variants-container');
-        // Remove "No variants" message if present
-        if (container.children.length === 1 && container.children[0].classList.contains('text-muted')) {
-            container.innerHTML = '';
-        }
-        
-        // Check if any attributes are selected
-        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
-        
-        const div = document.createElement('div');
-        div.className = 'row g-2 mb-2 variant-row';
-        div.id = `variant-${variantCounter}`;
-        
-        let attributeHtml = '';
-        selectedAttrs.forEach(attr => {
-            attributeHtml += `
-                <div class="col-md-2">
-                    <label class="form-label small">${attr.name} *</label>
-                    <select class="form-select form-select-sm variant-attribute-select" data-attribute-id="${attr.id}" required>
-                        <option value="">Select ${attr.name}</option>
-                        ${attr.values.map(v => `<option value="${v.id}">${v.value}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-        });
-        
-        div.innerHTML = `
-            ${attributeHtml}
-            <div class="col-md-2">
-                <label class="form-label small">Price Override</label>
-                <input type="number" class="form-control form-control-sm variant-price" placeholder="Optional">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Stock *</label>
-                <input type="number" class="form-control form-control-sm variant-stock" value="0" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">SKU</label>
-                <input type="text" class="form-control form-control-sm variant-sku" placeholder="SKU">
-            </div>
-            <div class="col-md-1">
-                <label class="form-label small">&nbsp;</label>
-                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        container.appendChild(div);
+        variantCounter = 0;
+        container.innerHTML = existing.length ? existing.map(item => renderVariantRow(item)).join('') : '<div class="text-muted small">No variants yet.</div>';
     }
 
     function collectVariants() {
+        const attrs = selectedAttributes();
+        const seen = new Set();
         const variants = [];
-        const selectedAttrs = allAttributes.filter(a => selectedAttributeIds.includes(a.id));
-        
-        document.querySelectorAll('.variant-row').forEach(row => {
-            const price = row.querySelector('.variant-price')?.value;
-            const stock = row.querySelector('.variant-stock')?.value || 0;
-            const sku = row.querySelector('.variant-sku')?.value || '';
-
-            // Collect attribute selections
+        document.querySelectorAll('.variant-row').forEach((row, index) => {
+            const optionValues = [];
             const options = {};
-            const option_values = [];
-            let variantNameParts = [];
-            let hasAllAttributes = true;
-            
-            row.querySelectorAll('.variant-attribute-select').forEach(select => {
-                const valueId = select.value;
-                const attributeId = select.dataset.attributeId;
-                
-                if (!valueId) {
-                    hasAllAttributes = false;
+            let complete = true;
+            attrs.forEach(attr => {
+                const select = row.querySelector(`.variant-attribute-select[data-attribute-id="${attr.id}"]`);
+                const valueId = select?.value;
+                const value = (attr.values || []).find(v => String(v.id) === String(valueId));
+                if (!valueId || !value) {
+                    complete = false;
                     return;
                 }
-                
-                const attr = allAttributes.find(a => a.id == attributeId);
-                const val = attr?.values.find(v => v.id == valueId);
-                
-                if (attr && val) {
-                    options[attr.name.toLowerCase()] = val.value;
-                    option_values.push({
-                        attribute: attr.name,
-                        value: val.value
-                    });
-                    variantNameParts.push(val.value);
-                }
+                options[attr.name.toLowerCase()] = value.value;
+                optionValues.push({ attribute: attr.name, value: value.value });
             });
-            
-            // Only add variant if it has all required attributes
-            if (hasAllAttributes && selectedAttrs.length > 0) {
-                variants.push({
-                    name: variantNameParts.join(' / ') || 'Default',
-                    price_override: price ? parseFloat(price) : null,
-                    stock: parseInt(stock) || 0,
-                    sku: sku,
-                    options: options,
-                    option_values: option_values
-                });
-            }
+            if (!complete) throw new Error(`Variant #${index + 1} is missing an attribute value.`);
+            const key = optionValues.map(item => `${item.attribute}:${item.value}`).sort().join('|');
+            if (seen.has(key)) throw new Error(`Duplicate variant combination: ${key}`);
+            seen.add(key);
+            variants.push({
+                name: optionValues.map(item => item.value).join(' / ') || 'Default',
+                price_override: row.querySelector('.variant-price')?.value ? Number(row.querySelector('.variant-price').value) : null,
+                stock: Number(row.querySelector('.variant-stock')?.value || 0),
+                sku: row.querySelector('.variant-sku')?.value || '',
+                image_url: row.querySelector('.variant-image')?.value || '',
+                is_active: row.querySelector('.variant-active')?.value !== 'false',
+                options,
+                option_values: optionValues
+            });
         });
         return variants;
     }
 
-    // Initialize
-    async function init() {
-        const userRole = localStorage.getItem('user_role');
-        if (!isLoggedIn() || (userRole !== 'staff' && userRole !== 'admin')) {
-            window.location.href = '/staff/login/';
-            return;
-        }
-        
-        // Load attributes first
-        await loadAttributes();
-        
-        await loadSuppliers();
-        await loadCategories();
-        await loadProducts();
-    }
-
-    // Ensure auth functions are available before running init
-    if (typeof isLoggedIn !== 'function') {
-        function isLoggedIn() { return !!localStorage.getItem('access_token'); }
-        function getToken() { return localStorage.getItem('access_token'); }
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-</script>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="30">30</option>
-                    <option value="31">31</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Price Override</label>
-                <input type="number" class="form-control form-control-sm variant-price" placeholder="Optional">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Stock</label>
-                <input type="number" class="form-control form-control-sm variant-stock" value="0">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">SKU</label>
-                <input type="text" class="form-control form-control-sm variant-sku" placeholder="SKU">
-            </div>
-            <div class="col-md-1">
-                <label class="form-label small">&nbsp;</label>
-                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('variant-${variantCounter}').remove()">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        container.appendChild(div);
-    }
-
-    // Ensure auth functions are available before running init
     if (typeof isLoggedIn !== 'function') {
         function isLoggedIn() { return !!localStorage.getItem('access_token'); }
         function getToken() { return localStorage.getItem('access_token'); }

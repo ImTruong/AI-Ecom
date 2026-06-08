@@ -3,14 +3,12 @@ from .views import (
     LogCartActionView,
     LogProductView,
     LogPurchaseView,
-    LogSearchView,
     LogTrackingEventView,
     GetStatsView,
     GetUserHistoryView,
 )
 
 urlpatterns = [
-    path('log-search/', LogSearchView.as_view(), name='log-search'),
     path('log-view/', LogProductView.as_view(), name='log-view'),
     path('click-product/', LogProductView.as_view(), name='click-product'),
     path('log-cart/', LogCartActionView.as_view(), name='log-cart'),

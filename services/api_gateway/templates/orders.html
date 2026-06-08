@@ -241,6 +241,128 @@
         resize: none;
     }
 
+    .btn-detail {
+        border: 1px solid #dde2e8;
+        background: #fff;
+        color: #334155;
+        padding: 9px 14px;
+        border-radius: 10px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .detail-modal-content {
+        max-width: 980px;
+        max-height: 88vh;
+        overflow-y: auto;
+        text-align: left;
+        padding: 0;
+    }
+
+    .detail-header {
+        padding: 28px 32px;
+        border-bottom: 1px solid #edf0f3;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .detail-body {
+        padding: 28px 32px 36px;
+        display: grid;
+        gap: 22px;
+    }
+
+    .detail-block {
+        border: 1px solid #edf0f3;
+        border-radius: 16px;
+        padding: 22px;
+        background: #fff;
+    }
+
+    .detail-block h3 {
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 16px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .detail-field span {
+        display: block;
+        color: #8b95a1;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .detail-item {
+        display: grid;
+        grid-template-columns: 72px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 0;
+        border-top: 1px solid #f1f3f5;
+    }
+
+    .detail-item:first-child { border-top: none; }
+
+    .detail-img {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        border: 1px solid #edf0f3;
+        object-fit: cover;
+        background: #f8fafc;
+    }
+
+    .timeline {
+        display: grid;
+        gap: 0;
+    }
+
+    .timeline-row {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 14px;
+        min-height: 64px;
+    }
+
+    .timeline-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin: 5px auto 0;
+        background: #cbd5e1;
+        position: relative;
+    }
+
+    .timeline-row:not(:last-child) .timeline-dot::after {
+        content: '';
+        position: absolute;
+        top: 18px;
+        left: 6px;
+        width: 2px;
+        height: 48px;
+        background: #e2e8f0;
+    }
+
+    .timeline-row.done .timeline-dot { background: #22c55e; }
+    .timeline-row.active .timeline-dot { background: #3b82f6; }
+    .timeline-row.cancelled .timeline-dot { background: #ef4444; }
+
+    @media (max-width: 720px) {
+        .detail-grid { grid-template-columns: 1fr; }
+        .detail-item { grid-template-columns: 56px 1fr; }
+        .detail-item > div:last-child { grid-column: 2; text-align: left !important; }
+    }
+
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
 </style>
@@ -265,6 +387,12 @@
         </div>
     </div>
 </div>
+
+<div class="rating-modal-overlay" id="orderDetailModal">
+    <div class="rating-modal-content detail-modal-content">
+        <div id="orderDetailContent"></div>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -282,6 +410,119 @@
 
 {% block extra_js %}
 <script>
+    let loadedOrders = [];
+
+    function formatMoney(value) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(value || 0));
+    }
+
+    function safeText(value, fallback = 'N/A') {
+        return value === null || value === undefined || value === '' ? fallback : value;
+    }
+
+    function trackingLabel(status) {
+        const labels = {
+            created: 'Đơn hàng đã được tạo',
+            confirmed: 'Đã xác nhận đơn hàng',
+            preparing: 'Đang chuẩn bị hàng',
+            shipped: 'Đã bàn giao cho đơn vị vận chuyển',
+            delivering: 'Đang giao hàng',
+            picked_up: 'Đã lấy hàng',
+            in_transit: 'Đang vận chuyển',
+            out_for_delivery: 'Đang giao hàng',
+            delivered: 'Giao hàng thành công',
+            cancelled: 'Đã hủy',
+            failed: 'Giao hàng thất bại',
+            returned: 'Trả hàng',
+        };
+        return labels[status] || status;
+    }
+
+    function renderTimeline(order) {
+        const events = [...(order.tracking || [])].reverse();
+        if (!events.length) {
+            return '<div style="color:#94a3b8; font-weight:700; padding: 12px 0;">Đơn hàng chưa có thông tin vận chuyển.</div>';
+        }
+        const lastIndex = events.length - 1;
+        return `<div class="timeline">${events.map((event, index) => {
+            const rowClass = ['cancelled', 'failed', 'returned'].includes(event.status)
+                ? 'cancelled'
+                : (index === lastIndex ? 'active' : 'done');
+            return `
+                <div class="timeline-row ${rowClass}">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <div style="font-weight:900; color:#111827;">${trackingLabel(event.status)}</div>
+                        <div style="font-size:13px; color:#64748b; margin-top:3px;">${new Date(event.event_time || event.created_at).toLocaleString()}</div>
+                        ${event.location ? `<div style="font-size:13px; color:#475569; margin-top:5px;">${event.location}</div>` : ''}
+                        ${event.note ? `<div style="font-size:13px; color:#475569; margin-top:5px;">${event.note}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('')}</div>`;
+    }
+
+    function openOrderDetail(orderId) {
+        const order = loadedOrders.find(item => Number(item.id) === Number(orderId));
+        if (!order) return;
+        const shipping = order.shipping_info || {};
+        const shippingFee = Number(order.shipping_fee || 0);
+        document.getElementById('orderDetailContent').innerHTML = `
+            <div class="detail-header">
+                <div>
+                    <button class="btn-detail" onclick="closeOrderDetail()" style="margin-bottom:14px;">← Quay lại danh sách</button>
+                    <h2 style="font-weight:900; margin:0;">Order #${order.id}</h2>
+                    <div style="color:#64748b; margin-top:6px;">${new Date(order.created_at).toLocaleString()}</div>
+                </div>
+                <span class="order-status status-${order.status}">${order.status}</span>
+            </div>
+            <div class="detail-body">
+                <div class="detail-block">
+                    <h3>Thông tin giao hàng</h3>
+                    <div class="detail-grid">
+                        <div class="detail-field"><span>Người nhận</span>${safeText(shipping.full_name)}</div>
+                        <div class="detail-field"><span>Số điện thoại</span>${safeText(shipping.phone)}</div>
+                        <div class="detail-field" style="grid-column:1/-1;"><span>Địa chỉ</span>${safeText(shipping.address)}</div>
+                    </div>
+                </div>
+                <div class="detail-block">
+                    <h3>Theo dõi đơn hàng</h3>
+                    ${renderTimeline(order)}
+                </div>
+                <div class="detail-block">
+                    <h3>Sản phẩm trong đơn</h3>
+                    ${(order.items || []).map(item => `
+                        <div class="detail-item">
+                            <img class="detail-img" src="${item.image_url || 'https://via.placeholder.com/120?text=Product'}" alt="${item.product_name}">
+                            <div>
+                                <div style="font-weight:900;">${item.product_name}</div>
+                                <div style="font-size:13px; color:#64748b; margin-top:4px;">${item.variant_name || (item.variant_id ? `Variant #${item.variant_id}` : 'Phân loại: mặc định')}</div>
+                                <div style="font-size:13px; color:#64748b; margin-top:4px;">SL: ${item.quantity} × ${formatMoney(item.price)}</div>
+                            </div>
+                            <div style="font-weight:900; text-align:right;">${formatMoney(item.subtotal)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="detail-block">
+                    <h3>Thanh toán</h3>
+                    <div class="detail-grid">
+                        <div class="detail-field"><span>Phương thức</span>${safeText(order.payment_method, 'COD').toUpperCase()}</div>
+                        <div class="detail-field"><span>Trạng thái thanh toán</span>${safeText(order.payment_status, order.payment_method === 'cod' ? 'pending' : 'N/A')}</div>
+                        <div class="detail-field"><span>Tạm tính</span>${formatMoney(order.total_amount)}</div>
+                        <div class="detail-field"><span>Phí vận chuyển</span>${formatMoney(shippingFee)}</div>
+                        <div class="detail-field"><span>Giảm giá</span>${formatMoney(order.discount_amount)}</div>
+                        <div class="detail-field"><span>Tổng thanh toán</span><strong>${formatMoney(order.final_amount + shippingFee)}</strong></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('orderDetailModal').style.display = 'flex';
+    }
+
+    function closeOrderDetail() {
+        document.getElementById('orderDetailModal').style.display = 'none';
+    }
+
     async function loadOrders() {
         if (!isLoggedIn()) {
             window.location.href = '/login/';
@@ -302,6 +543,7 @@
             const container = document.getElementById('ordersList');
             
             if (data.success && data.data.length > 0) {
+                loadedOrders = data.data;
                 // Fetch existing ratings to mark as "Rated"
                 let ratedItems = [];
 
@@ -339,9 +581,12 @@
                             <div style="color: #888; font-size: 14px;">
                                 💳 Method: <strong>${order.payment_method.toUpperCase()}</strong>
                             </div>
-                            <div class="order-total-group">
-                                <span class="order-total-label">Final Amount</span>
-                                <span class="order-total">$${order.final_amount.toFixed(2)}</span>
+                            <div style="display:flex; align-items:flex-end; gap:14px;">
+                                <button class="btn-detail" onclick="openOrderDetail(${order.id})">Xem chi tiết</button>
+                                <div class="order-total-group">
+                                    <span class="order-total-label">Final Amount</span>
+                                    <span class="order-total">${formatMoney(order.final_amount)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

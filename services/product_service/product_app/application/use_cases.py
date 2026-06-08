@@ -15,7 +15,10 @@ class ProductUseCases:
 
     def save_product(self, payload: dict):
         product_input = product_input_from_payload(payload)
-        validate_variant_combinations(product_input.variants)
+        required_attributes = product_input.attributes.get('variant_attribute_names')
+        if not isinstance(required_attributes, list):
+            required_attributes = None
+        validate_variant_combinations(product_input.variants, required_attributes)
         return self.repository.save(product_input)
 
     def delete_product(self, product_id: int):
@@ -23,4 +26,3 @@ class ProductUseCases:
 
     def update_stock(self, variant_id: int, quantity_delta: int):
         return self.repository.update_variant_stock(variant_id, quantity_delta)
-

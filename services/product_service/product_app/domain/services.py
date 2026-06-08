@@ -2,11 +2,17 @@ from .entities import ProductVariantInput, VariantOption
 from .exceptions import VariantValidationError
 
 
-def validate_variant_combinations(variants: list[ProductVariantInput]) -> list[str]:
+def validate_variant_combinations(
+    variants: list[ProductVariantInput],
+    required_attributes: list[str] | None = None,
+) -> list[str]:
+    required_attributes = [attr for attr in (required_attributes or []) if attr]
     if not variants:
+        if required_attributes:
+            raise VariantValidationError('Product variants are required for selected attributes')
         return []
 
-    required_attributes = _required_attributes(variants)
+    required_attributes = required_attributes or _required_attributes(variants)
     if not required_attributes:
         raise VariantValidationError('Variants require option_values with product attributes')
 
@@ -52,4 +58,3 @@ def _required_attributes(variants: list[ProductVariantInput]) -> list[str]:
 
 def effective_variant_price(variant):
     return variant.price_override if variant.price_override is not None else variant.product.price
-

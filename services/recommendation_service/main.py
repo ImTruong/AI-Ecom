@@ -124,11 +124,6 @@ def build_context_text(history, payload_map):
         text = payload_to_text(payload_map.get(pid, {})) or f"Product ID {pid}"
         lines.extend([f"Purchased: {text}"] * ACTION_WEIGHTS['purchase'])
 
-    for s in history.get('searches', []):
-        query = s.get('query')
-        if query:
-            lines.append(f"Search: {query}")
-
     return " ".join(lines).strip()
 
 @app.get("/api/recommendations/search")
@@ -182,8 +177,6 @@ async def get_user_recommendations(user_id: int, limit: int = 6):
     views = history.get('views', [])
     carts = history.get('carts', [])
     purchases = history.get('purchases', [])
-    searches = history.get('searches', [])
-    
     actions = []
     for v in views:
         actions.append(int(v['product_id']))
@@ -196,7 +189,7 @@ async def get_user_recommendations(user_id: int, limit: int = 6):
 
     print(f"📊 Total user actions: {len(actions)}")
 
-    if not actions and not searches:
+    if not actions:
         return await get_fallback_products(limit)
 
     # 2. Fetch payloads for these products from Qdrant
@@ -252,7 +245,7 @@ async def get_user_recommendations(user_id: int, limit: int = 6):
         "success": True,
         "user_id": user_id,
         "recommendations": recommendations[:limit],
-        "history_count": len(actions) + len(searches)
+        "history_count": len(actions)
     }
 
 async def get_fallback_products(limit, search=None):

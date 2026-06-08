@@ -41,6 +41,7 @@ class DjangoProductRepository(ProductRepository):
                 stock=variant.stock,
                 sku=variant.sku,
                 image_url=variant.image_url,
+                is_active=variant.is_active,
                 options=variant.options,
             )
             for option in variant.option_values:
