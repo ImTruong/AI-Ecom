@@ -18,6 +18,7 @@ urlpatterns = [
     path('staff/products/', views.staff_products, name='staff_products'),
     path('staff/suppliers/', views.staff_suppliers, name='staff_suppliers'),
     path('staff/users/', views.staff_users, name='staff_users'),
+    path('staff/knowledge/', views.staff_knowledge, name='staff_knowledge'),
     path('product/detail/<int:product_id>/', views.product_detail, name='product_detail'),
     path('search/', views.search_page, name='search_page'),
 ]

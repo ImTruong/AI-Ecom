@@ -248,6 +248,8 @@
 
 {% block extra_js %}
 <script>
+    let cartRecommendationsLoading = false;
+
     let cartData = null;
 
     async function loadCart() {
@@ -373,6 +375,7 @@
                 body: JSON.stringify({
                     product_type: productType,
                     product_id: productId,
+                    variant_id: variantId,
                     quantity: newQuantity
                 })
             });
@@ -392,11 +395,11 @@
         }
     }
 
-    async function removeItem(productType, productId) {
+    async function removeItem(productType, productId, variantId = null) {
         if (!confirm('Remove this item from cart?')) return;
 
         try {
-            const response = await fetch(`/api/cart/remove/${productType}/${productId}/`, {
+            const response = await fetch(`/api/cart/remove/${productType}/${productId}/?variant_id=${variantId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${getToken()}`
@@ -451,17 +454,25 @@
     }
 
     async function loadCartRecommendations() {
+        if (cartRecommendationsLoading) return;
+        cartRecommendationsLoading = true;
         const userId = localStorage.getItem('user_id');
         const root = document.getElementById('cartRecommendations');
         const grid = document.getElementById('cart-recommendation-grid');
 
         if (!userId) {
             root.style.display = 'none';
+            cartRecommendationsLoading = false;
             return;
         }
 
         try {
-            const res = await fetch(`/api/recommendations/${userId}?limit=4`);
+            const token = getToken();
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const res = await fetch(`/api/recommendations/${userId}?limit=10&_=${Date.now()}`, {
+                headers,
+                cache: 'no-store'
+            });
             const data = await res.json();
             if (data.success && data.recommendations && data.recommendations.length > 0) {
                 root.style.display = 'block';
@@ -472,6 +483,8 @@
         } catch (e) {
             console.error('Recommendations error:', e);
             root.style.display = 'none';
+        } finally {
+            cartRecommendationsLoading = false;
         }
     }
 
@@ -481,6 +494,16 @@
             const p = r.payload || {};
             const trueId = p.id || r.id;
             const price = p.price || 0;
+            const firstVariant = (p.variants || []).find(v => v.is_active !== false && (v.stock ?? 1) > 0) || (p.variants || [])[0] || {};
+            const variantId = firstVariant.id || null;
+            const variantName = (firstVariant.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || firstVariant.name || '';
+            const displayPrice = firstVariant.price || price;
+            const isSemantic = r.source === 'qdrant_context';
+            const scoreDisplay = isSemantic
+                ? 'Semantic'
+                : (r.score !== null && r.score !== undefined ? `${Math.round(r.score * 100)}% Buy` : 'Popular');
+            const scoreBadgeClass = isSemantic ? 'bg-success' : 'bg-primary';
+            const reason = r.reason || 'Recommended from shopping behavior';
             const col = document.createElement('div');
             col.className = 'col-6 col-lg-3';
             col.innerHTML = `
@@ -495,13 +518,17 @@
                             <img src="${p.image_url || 'https://via.placeholder.com/200'}" class="img-fluid h-100" style="object-fit: contain;">
                         </div>
                     </a>
+                    <div class="position-absolute top-0 end-0 m-2 z-1">
+                        <span class="badge ${scoreBadgeClass} text-white rounded-pill">${scoreDisplay}</span>
+                    </div>
                     <div class="p-3 border-top">
                         <a href="/product/detail/${trueId}/" class="text-decoration-none">
                             <h6 class="fw-bold text-dark text-truncate mb-1">${p.name || 'Product'}</h6>
                         </a>
+                        <div class="text-muted small text-truncate mb-2" title="${reason.replace(/"/g, '&quot;')}">${reason}</div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(price)}đ</span>
-                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCartFromRec('${p.product_type}', ${trueId}, ${price}, '${(p.name || '').replace(/'/g, "\\'")}', '${p.image_url || ''}')">
+                            <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(displayPrice)}đ</span>
+                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCartFromRec('${p.product_type}', ${trueId}, ${displayPrice}, '${(p.name || '').replace(/'/g, "\\'")}', '${p.image_url || ''}', ${variantId}, '${variantName.replace(/'/g, "\\'")}')">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>
@@ -512,11 +539,16 @@
         });
     }
 
-    async function addToCartFromRec(type, id, price, name, img) {
+    async function addToCartFromRec(type, id, price, name, img, variantId = null, variantName = '') {
+        const safeType = normalizeProductType(type, { name });
         const token = getToken();
         if (!token) {
             showAlert('Please login to add to cart', 'warning');
             window.location.href = '/login/';
+            return;
+        }
+        if (!variantId) {
+            showAlert('Please open product detail and choose a variant', 'warning');
             return;
         }
 
@@ -528,11 +560,13 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    product_type: type,
+                    product_type: safeType,
                     product_id: id,
+                    variant_id: variantId,
                     quantity: 1,
                     price: price,
                     product_name: name,
+                    variant_name: variantName,
                     image_url: img
                 })
             });
@@ -543,7 +577,8 @@
                 updateCartBadge();
                 await logTracking('log-cart', {
                     product_id: id,
-                    product_type: type,
+                    product_variant_id: variantId,
+                    product_type: safeType,
                     action_type: 'add',
                     price: price,
                     quantity: 1

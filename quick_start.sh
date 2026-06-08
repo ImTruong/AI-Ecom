@@ -82,15 +82,30 @@ $DOCKER_CMD exec -T voucher-service python seed_vouchers.py || echo -e "${RED}Fa
 $DOCKER_CMD exec -T user-service python seed_roles.py || echo -e "${RED}Failed to seed RBAC roles${NC}"
 $DOCKER_CMD exec -T user-service python seed_users.py || echo -e "${RED}Failed to seed default users${NC}"
 
-# 4. Vector Index (Qdrant)
-echo -e "${GREEN}Step 4: Building vector index for products...${NC}"
-$DOCKER_CMD --profile manual run --rm --build vector-service || echo -e "${RED}Failed to build vector index${NC}"
+# 4. Qdrant Search Index
+echo -e "${GREEN}Step 4: Building Qdrant product search index...${NC}"
+$DOCKER_CMD --profile manual run --rm --build vector-service || echo -e "${RED}Failed to build Qdrant search index${NC}"
+$DOCKER_CMD --profile manual up -d recommendation-search-service || echo -e "${RED}Failed to start semantic search service${NC}"
 
 # 5. Knowledge Graph Population (Neo4j)
 echo -e "${GREEN}Step 5: Populating Neo4j Knowledge Graph (KB)...${NC}"
 $DOCKER_CMD exec -T knowledge-service python importer.py || echo -e "${RED}Failed to populate knowledge graph${NC}"
 
-# 6. Final Summary
+# 6. Recommendation AI Health Check
+echo -e "${GREEN}Step 6: Checking GRU recommendation service...${NC}"
+for i in {1..12}; do
+    if curl -sf http://localhost:8101/health > /tmp/recommendation_health.json 2>/dev/null; then
+        echo -e "${GREEN}Recommendation service is ready: $(cat /tmp/recommendation_health.json)${NC}"
+        break
+    fi
+    echo "  Attempt $i/12 - waiting for recommendation-service..."
+    sleep 5
+done
+curl -sf "http://localhost:8101/api/recommendations/0?limit=10" > /tmp/recommendation_sample.json 2>/dev/null \
+    && echo -e "${GREEN}Sample recommendations returned successfully.${NC}" \
+    || echo -e "${RED}Recommendation sample request failed${NC}"
+
+# 7. Final Summary
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}🎉 ALL SYSTEMS ONLINE & AI READY!${NC}"
@@ -103,7 +118,8 @@ echo ""
 echo -e "${YELLOW}🗄️  DATABASES & SERVICES${NC}"
 echo -e "   📊 Neo4j Browser:  http://localhost:7474/browser/"
 echo -e "                      (No auth required - click 'Connect')"
-echo -e "   🔍 Qdrant API:     http://localhost:6333/"
+echo -e "   🤖 Recommender:    http://localhost:8101/health"
+echo -e "   🔍 Qdrant API:     http://localhost:6333/ (legacy vector service)"
 echo -e "   📮 RabbitMQ Mgmt: http://localhost:15672/ (admin/admin123)"
 echo ""
 echo -e "${YELLOW}👥 DEFAULT ACCOUNTS${NC}"
@@ -113,7 +129,8 @@ echo -e "   🛡️  Admin:          admin@example.com / admin123"
 echo ""
 echo -e "${YELLOW}⚠️  IMPORTANT NOTES${NC}"
 echo -e "   • Neo4j: Wait 10-15s after opening, then click 'Connect'"
-echo -e "   • Qdrant: Use API endpoint http://localhost:6333/collections"
+echo -e "   • Recommendation uses Neo4j + GRU model assets from AI/new"
+echo -e "   • Search uses the Qdrant product index"
 echo -e "   • All services need ~60s to fully start"
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

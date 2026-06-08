@@ -73,7 +73,7 @@
             document.getElementById('price').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pData.price);
             document.getElementById('product-img').src = pData.image_url || 'https://via.placeholder.com/600x600?text=' + pData.name;
             document.getElementById('breadcrumb-cat').textContent = pData.category;
-            document.getElementById('type-badge').textContent = pData.product_type.toUpperCase();
+            document.getElementById('type-badge').textContent = normalizeProductType(pData.product_type, pData).toUpperCase();
 
             const specs = document.getElementById('specs');
             Object.keys(pData).forEach(k => {
@@ -88,10 +88,8 @@
             renderVariants(pData.variants || []);
 
             // AI tracking: log-view
-            logTracking('log-view', { product_id: pId, product_type: pData.product_type });
+            logTracking('log-view', { product_id: pId, product_type: normalizeProductType(pData.product_type, pData) });
             
-            // Trigger AI Chatbot (Silently record to Graph)
-            triggerAI('view', '', pId);
 
         } catch (e) {
             showAlert("Error loading product", "danger");
@@ -101,7 +99,9 @@
 
     function renderVariants(variants) {
         if (!variants.length) return;
-        selectedVariant = variants[0];
+        selectedVariant = selectedVariant
+            ? variants.find(v => Number(v.id) === Number(selectedVariant.id)) || variants[0]
+            : variants[0];
         const panel = document.getElementById('variantPanel');
         const options = document.getElementById('variantOptions');
         panel.style.display = 'block';
@@ -109,9 +109,9 @@
             const label = (v.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || v.name;
             const stockLabel = Number(v.stock || 0) > 0 ? `${v.stock} available` : 'Out of stock';
             return `
-                <label class="d-flex align-items-center justify-content-between border rounded-3 p-3 ${v.id === selectedVariant.id ? 'border-primary' : ''}" style="cursor:pointer;">
+                <label class="d-flex align-items-center justify-content-between border rounded-3 p-3 ${Number(v.id) === Number(selectedVariant.id) ? 'border-primary bg-primary-subtle' : ''}" style="cursor:pointer;">
                     <span>
-                        <input type="radio" name="variant" value="${v.id}" ${v.id === selectedVariant.id ? 'checked' : ''} onchange="selectVariant(${v.id})">
+                        <input type="radio" name="variant" value="${v.id}" ${Number(v.id) === Number(selectedVariant.id) ? 'checked' : ''} onchange="selectVariant(${v.id})">
                         <span class="ms-2 fw-bold">${label}</span>
                     </span>
                     <span class="text-muted small">${stockLabel}</span>
@@ -174,7 +174,7 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ 
-                    product_type: pData.product_type, 
+                    product_type: normalizeProductType(pData.product_type, pData), 
                     product_id: pId, 
                     variant_id: selectedVariant.id,
                     quantity: qty,
@@ -189,14 +189,11 @@
                 showAlert(`Successfully added ${qty} item(s) to cart!`, "success");
                 refreshCartBadge();
                 
-                // Trigger AI Chatbot with product context
-                triggerAI('cart', '', pId);
-
                 // AI tracking: log-cart
                 logTracking('log-cart', {
                     product_id: pId,
                     product_variant_id: selectedVariant.id,
-                    product_type: pData.product_type,
+                    product_type: normalizeProductType(pData.product_type, pData),
                     action_type: 'add',
                     price: selectedVariant.price || pData.price,
                     quantity: qty

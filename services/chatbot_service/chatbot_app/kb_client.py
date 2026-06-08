@@ -26,7 +26,7 @@ class KBClient:
             WHERE type(r) CONTAINS 'VIEW' OR type(r) CONTAINS 'CART' OR type(r) CONTAINS 'SEARCH'
             OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category)
             RETURN p.id as product_id, p.name as name, type(r) as action, 
-                   COALESCE(c.name, 'Chưa phân loại') as category
+                   COALESCE(c.name, 'Chưa phân loại') as category, c.id as category_id
             ORDER BY r.timestamp DESC LIMIT 10
             """
             result = session.run(query, user_id=user_id)

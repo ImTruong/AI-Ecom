@@ -7,6 +7,7 @@ COPY services/recommendation_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY services/recommendation_service/ .
+COPY AI/new /app/AI/new
 
 EXPOSE 8001
 

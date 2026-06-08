@@ -1,8 +1,10 @@
 fastapi
 uvicorn
 requests
-qdrant-client
 numpy
-sentence-transformers
+neo4j>=5.0
+tensorflow-cpu==2.20.0
+scikit-learn
+h5py
 python-jose[cryptography]
 python-multipart

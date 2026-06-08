@@ -57,6 +57,10 @@ class RoutingMiddleware:
             'service': 'user-service',
             'url': os.getenv('USER_SERVICE_URL', 'http://user-service:8000'),
         },
+        '/api/recommendations/search': {
+            'service': 'recommendation-search-service',
+            'url': os.getenv('RECOMMENDATION_SEARCH_SERVICE_URL', 'http://recommendation-search-service:8002'),
+        },
         '/api/recommendations/': {
             'service': 'recommendation-service',
             'url': os.getenv('RECOMMENDATION_SERVICE_URL', 'http://recommendation-service:8001'),

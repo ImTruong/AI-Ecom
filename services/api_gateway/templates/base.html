@@ -182,6 +182,51 @@
             'headphone': 'headphones'
         };
 
+        function normalizeProductType(type, product = {}) {
+            const raw = String(type || '').trim().toLowerCase();
+            const aliases = {
+                books: 'book',
+                clothing: 'clothes',
+                clothes: 'clothes',
+                shoe: 'shoes',
+                shoes: 'shoes',
+                sports: 'sport_equipment',
+                sportequipment: 'sport_equipment',
+                electronics: 'electronic',
+                jewelry: 'accessory',
+                accessories: 'accessory',
+                cosmetics: 'cosmetic',
+                toys: 'toy',
+                games: 'toy',
+            };
+            const valid = new Set([
+                'electronic', 'clothes', 'book', 'furniture', 'cosmetic', 'food', 'toy',
+                'sport_equipment', 'shoes', 'accessory', 'laptop', 'phone', 'watch',
+                'camera', 'tablet', 'headphone'
+            ]);
+            const direct = aliases[raw] || raw;
+            if (valid.has(direct)) return direct;
+
+            const text = [
+                product.category,
+                product.name,
+                product.description,
+                product.product_type,
+            ].filter(Boolean).join(' ').toLowerCase();
+
+            if (/(book|novel|python|programming)/.test(text)) return 'book';
+            if (/(clothing|hoodie|jeans|t-shirt|shirt|cotton|denim)/.test(text)) return 'clothes';
+            if (/(shoe|sneaker|boot)/.test(text)) return 'shoes';
+            if (/(furniture|sofa|desk|chair|table)/.test(text)) return 'furniture';
+            if (/(cosmetic|serum|cleansing|foam|cream)/.test(text)) return 'cosmetic';
+            if (/(toy|puzzle|game)/.test(text)) return 'toy';
+            if (/(sport|fitness)/.test(text)) return 'sport_equipment';
+            if (/(jewelry|necklace|ring|wallet|sunglasses|accessor)/.test(text)) return 'accessory';
+            if (/(laptop|phone|electronics|smartwatch|camera|headphone)/.test(text)) return 'electronic';
+            if (/(food|snack|drink)/.test(text)) return 'food';
+            return 'accessory';
+        }
+
         function showAlert(msg, type='success') {
             const wrapper = document.getElementById('alertPlaceholder');
             wrapper.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show rounded-4 shadow-sm" role="alert">

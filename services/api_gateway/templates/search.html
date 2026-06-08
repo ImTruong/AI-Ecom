@@ -95,6 +95,7 @@
     }
 
     async function addToCart(type, id, price, name, img, variantId = null, variantName = '') {
+        const safeType = normalizeProductType(type, { name });
         const token = localStorage.getItem('access_token');
         if (!token) {
             showAlert('Please login to add to cart', 'warning');
@@ -112,7 +113,7 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ 
-                    product_type: type, 
+                    product_type: safeType, 
                     product_id: id, 
                     variant_id: variantId,
                     price: price,
@@ -129,7 +130,7 @@
                 await logTracking('log-cart', {
                     product_id: id,
                     product_variant_id: variantId,
-                    product_type: type,
+                    product_type: safeType,
                     action_type: 'add',
                     price: price,
                     quantity: 1

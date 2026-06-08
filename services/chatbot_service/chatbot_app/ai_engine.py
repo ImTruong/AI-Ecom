@@ -1,94 +1,126 @@
-import tensorflow as tf
-import pandas as pd
-import numpy as np
 import os
-import keras
+import pickle
+import numpy as np
+from typing import Any, Optional, List, Dict
 
-# CRITICAL FIX for Keras 3: Allow Lambda deserialization
-# The user's model uses Lambda layers which are blocked by default in new Keras versions.
 try:
+    import tensorflow as tf
+    import keras
+    # CRITICAL FIX for Keras 3: Allow Lambda deserialization
     if hasattr(keras, 'config'):
         keras.config.enable_unsafe_deserialization()
     elif hasattr(tf.keras, 'config'):
         tf.keras.config.enable_unsafe_deserialization()
 except Exception as e:
-    print(f">>> Warning: Could not enable unsafe deserialization: {e}")
+    tf = None
+    print(f">>> Warning: Could not import TensorFlow or configure deserialization: {e}")
 
 class AIEngine:
     def __init__(self):
-        self.model_path = "/app/ai_model/best_model.h5"
-        self.csv_path = "/data_user500.csv"
+        self.model_path = "/app/AI/new/GRU_best_model.h5"
+        self.encoder_path = "/app/AI/new/encoders.pkl"
         self.model = None
-        self.action_encoder = None
-        self.product_encoder = None
-        self.max_seq_len = 16
-
-        if os.path.exists(self.model_path) and os.path.exists(self.csv_path):
-            self._initialize()
-        else:
-            print(f">>> AI Engine: Files missing. Model: {os.path.exists(self.model_path)}, CSV: {os.path.exists(self.csv_path)}")
+        self.encoders = {}
+        self.max_seq_len = 20
+        self._initialize()
 
     def _initialize(self):
+        if tf is None:
+            print(">>> AIEngine: TensorFlow is not available, prediction disabled.")
+            return
         try:
-            print(f">>> Initializing Encoders from {self.csv_path}")
-            df = pd.read_csv(self.csv_path)
-            
-            # Simple Label Encoding based on the CSV used for training
-            actions = df['action'].unique().tolist()
-            products = df['product_id'].unique().tolist()
-            
-            self.action_to_idx = {a: i for i, a in enumerate(actions)}
-            self.product_to_idx = {p: i for i, p in enumerate(products)}
-            self.idx_to_product = {i: p for p, i in self.product_to_idx.items()}
-            
-            print(f">>> Max Sequence Length: {self.max_seq_len}")
-            print(f">>> Loading Model from {self.model_path}")
-            
-            # Load the model with safe_mode=False as a fallback
-            self.model = tf.keras.models.load_model(self.model_path, compile=False)
-            print(">>> Model loaded successfully!")
+            if os.path.exists(self.model_path) and os.path.exists(self.encoder_path):
+                self.model = tf.keras.models.load_model(self.model_path)
+                with open(self.encoder_path, "rb") as f:
+                    self.encoders = pickle.load(f)
+                print(f">>> AIEngine: GRU Model loaded successfully from {self.model_path}")
+            else:
+                print(f">>> AIEngine: Files missing. Model: {os.path.exists(self.model_path)}, Encoders: {os.path.exists(self.encoder_path)}")
         except Exception as e:
-            print(f">>> Error loading model: {e}")
+            print(f">>> Error loading GRU model in chatbot: {e}")
+
+    @property
+    def ready(self) -> bool:
+        return self.model is not None and bool(self.encoders)
+
+    def _encode(self, encoder_name: str, raw_value: Any, offset: int = 0) -> Optional[int]:
+        if raw_value is None:
+            return None
+        encoder = self.encoders.get(encoder_name)
+        if encoder is None:
+            return None
+        try:
+            return int(encoder.transform([raw_value])[0]) + offset
+        except Exception:
+            try:
+                return int(encoder.transform([str(raw_value)])[0]) + offset
+            except Exception:
+                return None
 
     def _normalize_action(self, action):
         a = str(action).strip().lower()
-        if 'view' in a:
-            return 'view'
+        if 'view' in a or 'pv' in a:
+            return 'pv'
         if 'add_to_cart' in a or 'cart' in a:
-            return 'add_to_cart'
-        if 'search' in a:
-            return 'search'
-        if 'click' in a:
-            return 'click'
-        if 'purchase' in a or 'bought' in a:
-            return 'purchase'
-        return a
+            return 'cart'
+        if 'purchase' in a or 'buy' in a or 'bought' in a:
+            return 'buy'
+        return 'pv'
 
-    def predict_next_product(self, action_history, product_history):
-        if not self.model: return None
-        
-        # Preprocessing
-        act_seq = [self.action_to_idx.get(self._normalize_action(a), 0) for i, a in enumerate(action_history)]
-        prod_seq = [self.product_to_idx.get(int(p), 0) for i, p in enumerate(product_history)]
-        
-        # Pad sequences
-        act_seq = (act_seq + [0] * self.max_seq_len)[:self.max_seq_len]
-        prod_seq = (prod_seq + [0] * self.max_seq_len)[:self.max_seq_len]
-        
-        # Predict
+    def predict_purchase_probability(self, history: list, target_id: int, products_info: dict) -> Optional[float]:
+        """
+        Predict purchase probability of target_id based on user history.
+        history: list of dicts, each having 'action', 'product_id', 'category_id'.
+        """
+        if not self.ready:
+            return None
+
+        target_encoded = self._encode("item_encoder", target_id, offset=1)
+        if target_encoded is None:
+            return None
+
+        # Build chronological sequences (history is sorted oldest first)
+        encoded_behaviors = []
+        encoded_items = []
+        encoded_categories = []
+
+        for h in history[-self.max_seq_len:]:
+            pid = h.get('product_id')
+            action = self._normalize_action(h.get('action') or h.get('behavior'))
+            
+            # Fetch category ID either from history item, or from products_info
+            cat_id = h.get('category_id')
+            if cat_id is None and products_info and pid in products_info:
+                cat_id = products_info[pid].get('category_id')
+
+            behavior = self._encode("behavior_encoder", action)
+            item = self._encode("item_encoder", pid, offset=1)
+            category = self._encode("category_encoder", cat_id, offset=1)
+
+            if behavior is None or item is None or category is None:
+                continue
+
+            encoded_behaviors.append(behavior)
+            encoded_items.append(item)
+            encoded_categories.append(category)
+
+        # Pad sequences (pre-padding with 0s)
+        pad_len = self.max_seq_len - len(encoded_behaviors)
+        if pad_len > 0:
+            encoded_behaviors = [0] * pad_len + encoded_behaviors
+            encoded_items = [0] * pad_len + encoded_items
+            encoded_categories = [0] * pad_len + encoded_categories
+
         try:
-            preds = self.model.predict([np.array([act_seq]), np.array([prod_seq])], verbose=0)
-            
-            # Get top 3 product indices
-            top_3_idx = np.argsort(preds[0])[-3:][::-1]
-            top_3_products = [int(self.idx_to_product.get(idx, 0)) for idx in top_3_idx if idx in self.idx_to_product]
-            
-            return {
-                "top_1": top_3_products[0] if len(top_3_products) > 0 else None,
-                "top_3": top_3_products
-            }
+            inputs = [
+                np.array([encoded_behaviors], dtype=np.int32),
+                np.array([encoded_items], dtype=np.int32),
+                np.array([encoded_categories], dtype=np.int32),
+                np.array([[target_encoded]], dtype=np.int32),
+            ]
+            return float(self.model.predict(inputs, verbose=0)[0][0])
         except Exception as e:
-            print(f"Prediction Error: {e}")
+            print(f"AIEngine prediction error for target {target_id}: {e}")
             return None
 
 # Singleton

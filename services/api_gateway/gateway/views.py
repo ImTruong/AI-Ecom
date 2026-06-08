@@ -64,6 +64,10 @@ def staff_users(request):
     """Staff User management page"""
     return render(request, 'staff_users.html')
 
+def staff_knowledge(request):
+    """Staff Knowledge Base management page"""
+    return render(request, 'staff_knowledge.html')
+
 def product_detail(request, product_id):
     """Product detail page"""
     return render(request, 'product_detail.html', {

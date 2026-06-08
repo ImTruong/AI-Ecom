@@ -21,14 +21,17 @@
     </div>
 
     <!-- AI Recommendation Section -->
-    <div id="ai-recommendations" class="mb-5" style="display: none;">
+    <div id="ai-recommendations" class="col-12 w-100 mb-5">
         <div class="d-flex align-items-center mb-4">
             <h2 class="fw-bold text-dark mb-0 me-3"><i class="fa fa-wand-magic-sparkles text-primary me-2"></i>Recommended For You</h2>
             <div class="flex-grow-1 border-bottom" style="height: 1px; opacity: 0.1;"></div>
             <span class="badge bg-primary-subtle text-primary ms-3 rounded-pill px-3">AI Powered</span>
         </div>
         <div class="row g-4" id="recommendation-grid">
-            <!-- Dynamic AI content -->
+            <div class="col-12 text-center py-4 text-muted" id="recommendation-loading">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3 mb-0 fw-bold">Loading recommendations...</p>
+            </div>
         </div>
     </div>
 </div>
@@ -52,6 +55,8 @@
 </div>
 
 <script>
+    let recommendationsLoading = false;
+
     async function loadCategories() {
         try {
             const res = await fetch('/api/products/categories/');
@@ -144,6 +149,7 @@
     }
 
     async function addToCart(type, id, price, name, img, variantId = null, variantName = '') {
+        const safeType = normalizeProductType(type, { name });
         const token = localStorage.getItem('access_token');
         if (!token) {
             showAlert('Please login to add to cart', 'warning');
@@ -163,7 +169,7 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ 
-                    product_type: type, 
+                    product_type: safeType, 
                     product_id: id, 
                     variant_id: variantId,
                     quantity: 1,
@@ -180,7 +186,7 @@
                 await logTracking('log-cart', {
                     product_id: id,
                     product_variant_id: variantId,
-                    product_type: type,
+                    product_type: safeType,
                     action_type: 'add',
                     price: price,
                     quantity: 1
@@ -212,6 +218,8 @@
     }
 
     async function loadRecommendations() {
+        if (recommendationsLoading) return;
+        recommendationsLoading = true;
         const root = document.getElementById('ai-recommendations');
         const grid = document.getElementById('recommendation-grid');
         
@@ -219,36 +227,50 @@
         const token = localStorage.getItem('access_token');
         
         try {
-            // Fetch recommendations for the actual logged in user
-            const res = await fetch(`/api/recommendations/${userId}`); 
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const res = await fetch(`/api/recommendations/${userId}?limit=10&_=${Date.now()}`, {
+                headers,
+                cache: 'no-store'
+            }); 
             const data = await res.json();
             if(data.success && data.recommendations && data.recommendations.length > 0) {
                 root.style.display = 'block';
                 renderRecs(data.recommendations, grid);
             } else {
-                root.style.display = 'none';
+                grid.innerHTML = `<div class="col-12 text-muted">No recommendations available right now.</div>`;
             }
         } catch(e) { 
             console.error("Recs error:", e);
-            root.style.display = 'none';
+            grid.innerHTML = `<div class="col-12 text-muted">Recommendations are temporarily unavailable.</div>`;
+        } finally {
+            recommendationsLoading = false;
         }
     }
 
     function renderRecs(recs, container) {
         container.innerHTML = '';
         recs.forEach(r => {
-            const p = r.payload;
-            // Use r.id as fallback if p.id is missing (Qdrant point ID = Product ID)
+            const p = r.payload || {};
+            // Use r.id as fallback if the product payload is partial.
             const trueId = p.id || r.id; 
             const price = p.price || 0;
-            const scoreDisplay = r.score ? `${Math.round(r.score * 100)}% Match` : 'Pinned';
+            const firstVariant = (p.variants || []).find(v => v.is_active !== false && (v.stock ?? 1) > 0) || (p.variants || [])[0] || {};
+            const variantId = firstVariant.id || null;
+            const variantName = (firstVariant.option_values || []).map(o => `${o.attribute}: ${o.value}`).join(' / ') || firstVariant.name || '';
+            const displayPrice = firstVariant.price || price;
+            const isSemantic = r.source === 'qdrant_context';
+            const scoreDisplay = isSemantic
+                ? 'Semantic'
+                : (r.score !== null && r.score !== undefined ? `${Math.round(r.score * 100)}% Buy` : 'Popular');
+            const scoreBadgeClass = isSemantic ? 'bg-success' : (r.score ? 'bg-primary' : 'bg-secondary');
+            const reason = r.reason || 'Recommended from shopping behavior';
             
             const col = document.createElement('div');
             col.className = 'col-6 col-lg-3';
             col.innerHTML = `
                 <div class="glass-card h-100 p-0 overflow-hidden border-0 bg-white shadow-sm hover-lift position-relative">
                     <div class="position-absolute top-0 end-0 m-2 z-1">
-                        <span class="badge ${r.score ? 'bg-primary' : 'bg-secondary'} text-white rounded-pill">${scoreDisplay}</span>
+                        <span class="badge ${scoreBadgeClass} text-white rounded-pill">${scoreDisplay}</span>
                     </div>
                     <a href="/product/detail/${trueId}/" class="text-decoration-none">
                         <div class="p-3 text-center" style="height: 150px;">
@@ -257,11 +279,12 @@
                     </a>
                     <div class="p-3 border-top">
                         <a href="/product/detail/${trueId}/" class="text-decoration-none">
-                            <h6 class="fw-bold text-dark text-truncate mb-1">${p.name}</h6>
+                            <h6 class="fw-bold text-dark text-truncate mb-1">${p.name || 'Product'}</h6>
                         </a>
+                        <div class="text-muted small text-truncate mb-2" title="${reason.replace(/"/g, '&quot;')}">${reason}</div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(price)}đ</span>
-                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${price}, '${p.name.replace(/'/g, "\\'")}', '${p.image_url}', ${p.variant_id || p.product_variant_id || null}, '')">
+                            <span class="text-primary fw-bold small">${new Intl.NumberFormat('vi-VN').format(displayPrice)}đ</span>
+                            <button class="btn btn-sm btn-vibrant rounded-circle" onclick="addToCart('${p.product_type}', ${trueId}, ${displayPrice}, '${(p.name || '').replace(/'/g, "\\'")}', '${p.image_url || ''}', ${variantId}, '${variantName.replace(/'/g, "\\'")}')">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>
