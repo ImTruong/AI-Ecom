@@ -558,8 +558,8 @@ services:
   vector-service:
     profiles: ["manual"]
     build:
-      context: .
-      dockerfile: services/vector_service/Dockerfile
+      context: ./services/vector_service
+      dockerfile: Dockerfile
     container_name: vector-service
     environment:
       - PRODUCT_SERVICE_URL=http://product-service:8000/api/products/
